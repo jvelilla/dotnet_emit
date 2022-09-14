@@ -16,6 +16,7 @@ feature -- Access
 			signature_rep: METHOD_SIGNATURE
 			signature_m: METHOD_SIGNATURE
 			start: METHOD
+			op: OPERAND
 		do
 			create lib_entry.make ("test1", {PE_LIB}.bits32)
 			working := lib_entry.working_assembly
@@ -31,6 +32,8 @@ feature -- Access
 			create start.make (signature_m, create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.Static | {METHOD_ATTRIBUTES}.hidebysig | {METHOD_ATTRIBUTES}.Cil | {METHOD_ATTRIBUTES}.managed), True)
 
 			working.add_code_container (start)
+
+			op := {OPERAND_FACTORY}.character_operand ('A', {OPERAND_SIZE}.i32)
 
 		end
 end
