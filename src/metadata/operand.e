@@ -103,4 +103,7 @@ feature -- Element change
 			property_assigned: property = a_property
 		end
 
+
+feature --Access
+
 end

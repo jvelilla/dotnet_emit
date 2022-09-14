@@ -63,5 +63,115 @@ feature -- Change Element
 			pinvoke_type := a_type
 		end
 
+	add_instruction (a_instruction: INSTRUCTION)
+			-- Add an instruction `a_instruction` to the listo of instructions.
+		do
+			instructions.force (a_instruction)
+		end
+
+
+feature -- Operations
+
+	optimize (a_pe: PE_LIB)
+		do
+			calculate_live
+			calculate_max_stack
+			optimize_locals (a_pe)
+			optimize_code (a_pe)
+		end
+
+
+
+feature {NONE} -- Implementation
+
+	calculate_live
+		local
+			labels_reached: ARRAYED_LIST [STRING_32]
+			done, skipping: BOOLEAN
+		do
+			from
+			until
+				done
+			loop
+				done := True
+				across instructions as ic loop
+					if ic.opcode = {CIL_OPCODES}.i_SEH and then ic.seh_begin then
+						ic.set_live(True)
+						skipping := False
+					elseif not skipping then
+						ic.set_live (True)
+						if ic.is_branch then
+							-- TODO implement
+						elseif
+							ic.opcode = {CIL_OPCODES}.i_switch
+						then
+							if not ic.switches.is_empty then
+								-- TODO implement
+							end
+						end
+					elseif ic.opcode = {CIL_OPCODES}.i_label then
+						-- TODO implement
+					end
+				end
+
+			end
+		end
+
+	calculate_max_stack
+		local
+			l_labels: STRING_TABLE [INTEGER]
+			n, m: INTEGER
+			last_branch: BOOLEAN
+			skipping: BOOLEAN
+
+		do
+			max_stack := 0
+			across instructions as ins loop
+
+				if ins.live then
+					m := ins.stack_usage
+					if m = -127 then
+						n := 0
+					else
+						n := n + m;
+					end
+					if n > max_stack then
+						max_stack := n
+					end
+					if n < 0 then
+							-- TODO reimplement.
+						(create {EXCEPTION}.make_with_tag_and_trace(generator + "calculate_max_stack", "Stack Under Flow")).raise
+					end
+					if ins.is_branch then
+						-- TODO implement.
+					elseif ins.opcode = {CIL_OPCODES}.i_switch then
+						-- TODO implement
+					elseif ins.opcode = {CIL_OPCODES}.i_label then
+						-- TODO implement
+					elseif ins.opcode = {CIL_OPCODES}.i_comment then
+						-- Placeholder.
+					else
+						last_branch := False
+					end
+				end
+			end
+			if n /= 0 then
+				if n /= 1 or else attached prototype.return_type as l_return_type and then l_return_type.is_void then
+					-- TODO reimplement.
+					(create {EXCEPTION}.make_with_tag_and_trace(generator + "calculate_max_stack", "Stack Not Empty at the end of function")).raise
+				end
+			end
+
+		end
+
+	optimize_locals (a_pe: PE_LIB)
+		do
+
+		end
+
+	optimize_code(a_pe: PE_LIB)
+		do
+			-- Call CodeContainer::Optimize
+		end
 
 end

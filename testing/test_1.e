@@ -17,6 +17,8 @@ feature -- Access
 			signature_m: METHOD_SIGNATURE
 			start: METHOD
 			op: OPERAND
+			ins: INSTRUCTION
+			method_name: METHOD_NAME
 		do
 			create lib_entry.make ("test1", {PE_LIB}.bits32)
 			working := lib_entry.working_assembly
@@ -34,6 +36,20 @@ feature -- Access
 			working.add_code_container (start)
 
 			op := {OPERAND_FACTORY}.character_operand ('A', {OPERAND_SIZE}.i32)
+			create ins.make ({CIL_OPCODES}.i_ldc_i4, op)
+			start.add_instruction(ins)
+
+			create method_name.make (signature_rep)
+
+			op := {OPERAND_FACTORY}.complex_operand (method_name)
+			create ins.make ({CIL_OPCODES}.i_call, op)
+			start.add_instruction (ins)
+
+			create ins.make ({CIL_OPCODES}.i_ret, Void)
+			start.add_instruction (ins)
+
+
+			start.optimize(lib_entry)
 
 		end
 end

@@ -143,7 +143,7 @@ feature -- Operations
 		do
 				-- TODO double check if we really need this feature.
 				-- since we can create it directly.
-				-- In C++ it's in this class since the class it's responsible to Manage the Memory
+				-- In C++ it's needed since the class it's responsible to Manage the Memory
 			create Result.make (a_method_sig, a_flags, a_entry)
 		end
 end

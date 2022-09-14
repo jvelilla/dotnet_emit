@@ -48,274 +48,278 @@ create
 
 feature {NONE} -- Creation
 
-	i_unknown once end
-	i_label once end
-	i_comment once end
-	i_SEH once end
+	i_unknown once index := 0 end
+	i_label once index := 1 end
+	i_comment once index := 2 end
+	i_SEH once index := 3 end
 
 		--actual CIL instructions start here
-	i_add once end
-	i_add_ovf once end
-	i_add_ovf_un once end
+	i_add once index := 4 end
+	i_add_ovf once index := 5 end
+	i_add_ovf_un once index := 6 end
 
-	i_and once end
+	i_and once index := 7 end
 
-	i_arglist once end
+	i_arglist once index := 8 end
 
-	i_beq once end
-	i_beq_s once end
+	i_beq once index := 9 end
+	i_beq_s once index := 10 end
 
-	i_bge once end
-	i_bge_s once end
-	i_bge_un once end
-	i_bge_un_s once end
+	i_bge once index := 11 end
+	i_bge_s once index := 12 end
+	i_bge_un once index := 13 end
+	i_bge_un_s once index := 14 end
 
-	i_bgt once end
-	i_bgt_s once end
-	i_bgt_un once end
-	i_bgt_un_s once end
+	i_bgt once index := 15 end
+	i_bgt_s once index := 16 end
+	i_bgt_un once index := 17 end
+	i_bgt_un_s once index := 18 end
 
-	i_ble once end
-	i_ble_s once end
-	i_ble_un once end
-	i_ble_un_s once end
+	i_ble once index := 19 end
+	i_ble_s once index := 20 end
+	i_ble_un once index := 21 end
+	i_ble_un_s once index := 22 end
 
-	i_blt once end
-	i_blt_s once end
-	i_blt_un once end
-	i_blt_un_s once end
+	i_blt once index := 23 end
+	i_blt_s once index := 24 end
+	i_blt_un once index := 25 end
+	i_blt_un_s once index := 26 end
 
-	i_bne_un once end
-	i_bne_un_s once end
+	i_bne_un once index := 27 end
+	i_bne_un_s once index := 28 end
 
-	i_box once end
+	i_box once index := 29 end
 
-	i_br once end
-	i_br_s once end
+	i_br once index := 30 end
+	i_br_s once index := 31 end
 
-	i_break once end
+	i_break once index := 32 end
 
-	i_brfalse once end
-	i_brfalse_s once end
+	i_brfalse once index := 33 end
+	i_brfalse_s once index := 34 end
 
-	i_brinst once end
-	i_brinst_s once end
+	i_brinst once index := 35 end
+	i_brinst_s once index := 36 end
 
-	i_brnull once end
-	i_brnull_s once end
+	i_brnull once index := 37 end
+	i_brnull_s once index := 38 end
 
-	i_brtrue once end
-	i_brtrue_s once end
+	i_brtrue once index := 39 end
+	i_brtrue_s once index := 40 end
 
-	i_brzero once end
-	i_brzero_s once end
+	i_brzero once index := 41 end
+	i_brzero_s once index := 42 end
 
-	i_call once end
-	i_calli once end
-	i_callvirt once end
+	i_call once index := 43 end
+	i_calli once index := 44 end
+	i_callvirt once index := 45 end
 
-	i_castclass once end
+	i_castclass once index := 46 end
 
-	i_ceq once end
+	i_ceq once index := 47 end
 
-	i_cgt once end
-	i_cgt_un once end
+	i_cgt once index := 48 end
+	i_cgt_un once index := 49 end
 
-	i_ckfinite once end
+	i_ckfinite once index := 50 end
 
-	i_clt once end
-	i_clt_un once end
+	i_clt once index := 51 end
+	i_clt_un once index := 52 end
 
-	i_constrained_ once end
+	i_constrained_ once index := 53 end
 
-	i_conv_i once end
-	i_conv_i1 once end
-	i_conv_i2 once end
-	i_conv_i4 once end
-	i_conv_i8 once end
+	i_conv_i once index := 54 end
+	i_conv_i1 once index := 55 end
+	i_conv_i2 once index := 56 end
+	i_conv_i4 once index := 57 end
+	i_conv_i8 once index := 58 end
 
-	i_conv_ovf_i once end
-	i_conv_ovf_i_un once end
-	i_conv_ovf_i1 once end
-	i_conv_ovf_i1_un once end
-	i_conv_ovf_i2 once end
-	i_conv_ovf_i2_un once end
-	i_conv_ovf_i4 once end
-	i_conv_ovf_i4_un once end
-	i_conv_ovf_i8 once end
-	i_conv_ovf_i8_un once end
+	i_conv_ovf_i once index := 59 end
+	i_conv_ovf_i_un once index := 60 end
+	i_conv_ovf_i1 once index := 61 end
+	i_conv_ovf_i1_un once index := 62 end
+	i_conv_ovf_i2 once index := 63 end
+	i_conv_ovf_i2_un once index := 64 end
+	i_conv_ovf_i4 once index := 65 end
+	i_conv_ovf_i4_un once index := 66 end
+	i_conv_ovf_i8 once index := 67 end
+	i_conv_ovf_i8_un once index := 68 end
 
-	i_conv_ovf_u once end
-	i_conv_ovf_u_un once end
-	i_conv_ovf_u1 once end
-	i_conv_ovf_u1_un once end
-	i_conv_ovf_u2 once end
-	i_conv_ovf_u2_un once end
-	i_conv_ovf_u4 once end
-	i_conv_ovf_u4_un once end
-	i_conv_ovf_u8 once end
-	i_conv_ovf_u8_un once end
+	i_conv_ovf_u once index := 69 end
+	i_conv_ovf_u_un once index := 70 end
+	i_conv_ovf_u1 once index := 71 end
+	i_conv_ovf_u1_un once index := 72 end
+	i_conv_ovf_u2 once index := 73 end
+	i_conv_ovf_u2_un once index := 74 end
+	i_conv_ovf_u4 once index := 75 end
+	i_conv_ovf_u4_un once index := 76 end
+	i_conv_ovf_u8 once index := 77 end
+	i_conv_ovf_u8_un once index := 78 end
 
-	i_conv_r_un once end
-	i_conv_r4 once end
-	i_conv_r8 once end
+	i_conv_r_un once index := 79 end
+	i_conv_r4 once index := 80 end
+	i_conv_r8 once index := 81 end
 
-	i_conv_u once end
-	i_conv_u1 once end
-	i_conv_u2 once end
-	i_conv_u4 once end
-	i_conv_u8 once end
+	i_conv_u once index := 82 end
+	i_conv_u1 once index := 83 end
+	i_conv_u2 once index := 84 end
+	i_conv_u4 once index := 85 end
+	i_conv_u8 once index := 86 end
 
-	i_cpblk once end
+	i_cpblk once index := 87 end
 
-	i_cpobj once end
+	i_cpobj once index := 88 end
 
-	i_div once end
-	i_div_un once end
+	i_div once index := 89 end
+	i_div_un once index := 90 end
 
-	i_dup once end
+	i_dup once index := 91 end
 
-	i_endfault once end
+	i_endfault once index := 92 end
 
-	i_endfilter once end
-	i_endfinally once end
-	i_initblk once end
-	i_initobj once end
-	i_isinst once end
-	i_jmp once end
-	i_ldarg once end
-	i_ldarg_0 once end
-	i_ldarg_1 once end
-	i_ldarg_2 once end
-	i_ldarg_3 once end
-	i_ldarg_s once end
-	i_ldarga once end
-	i_ldarga_s once end
-	i_ldc_i4 once end
-	i_ldc_i4_0 once end
-	i_ldc_i4_1 once end
-	i_ldc_i4_2 once end
-	i_ldc_i4_3 once end
-	i_ldc_i4_4 once end
-	i_ldc_i4_5 once end
-	i_ldc_i4_6 once end
-	i_ldc_i4_7 once end
-	i_ldc_i4_8 once end
-	i_ldc_i4_m1 once end
-	i_ldc_i4_M1_ once end
-	i_ldc_i4_s once end
-	i_ldc_i8 once end
-	i_ldc_r4 once end
-	i_ldc_r8 once end
-	i_ldelem once end
-	i_ldelem_i once end
-	i_ldelem_i1 once end
-	i_ldelem_i2 once end
-	i_ldelem_i4 once end
-	i_ldelem_i8 once end
-	i_ldelem_r4 once end
-	i_ldelem_r8 once end
-	i_ldelem_ref once end
-	i_ldelem_u1 once end
-	i_ldelem_u2 once end
-	i_ldelem_u4 once end
-	i_ldelem_u8 once end
-	i_ldelema once end
-	i_ldfld once end
-	i_ldflda once end
-	i_ldftn once end
-	i_ldind_i once end
-	i_ldind_i1 once end
-	i_ldind_i2 once end
-	i_ldind_i4 once end
-	i_ldind_i8 once end
-	i_ldind_r4 once end
-	i_ldind_r8 once end
-	i_ldind_ref once end
-	i_ldind_u1 once end
-	i_ldind_u2 once end
-	i_ldind_u4 once end
-	i_ldind_u8 once end
-	i_ldlen once end
-	i_ldloc once end
-	i_ldloc_0 once end
-	i_ldloc_1 once end
-	i_ldloc_2 once end
-	i_ldloc_3 once end
-	i_ldloc_s once end
-	i_ldloca once end
-	i_ldloca_s once end
-	i_ldnull once end
-	i_ldobj once end
-	i_ldsfld once end
-	i_ldsflda once end
-	i_ldstr once end
-	i_ldtoken once end
-	i_ldvirtftn once end
-	i_leave once end
-	i_leave_s once end
-	i_localloc once end
-	i_mkrefany once end
-	i_mul once end
-	i_mul_ovf once end
-	i_mul_ovf_un once end
-	i_neg once end
-	i_newarr once end
-	i_newobj once end
-	i_no_ once end
-	i_nop once end
-	i_not once end
-	i_or once end
-	i_pop once end
-	i_readonly_ once end
-	i_refanytype once end
-	i_refanyval once end
-	i_rem once end
-	i_rem_un once end
-	i_ret once end
-	i_rethrow once end
-	i_shl once end
-	i_shr once end
-	i_shr_un once end
-	i_sizeof once end
-	i_starg once end
-	i_starg_s once end
-	i_stelem once end
-	i_stelem_i once end
-	i_stelem_i1 once end
-	i_stelem_i2 once end
-	i_stelem_i4 once end
-	i_stelem_i8 once end
-	i_stelem_r4 once end
-	i_stelem_r8 once end
-	i_stelem_ref once end
-	i_stfld once end
-	i_stind_i once end
-	i_stind_i1 once end
-	i_stind_i2 once end
-	i_stind_i4 once end
-	i_stind_i8 once end
-	i_stind_r4 once end
-	i_stind_r8 once end
-	i_stind_ref once end
-	i_stloc once end
-	i_stloc_0 once end
-	i_stloc_1 once end
-	i_stloc_2 once end
-	i_stloc_3 once end
-	i_stloc_s once end
-	i_stobj once end
-	i_stsfld once end
-	i_sub once end
-	i_sub_ovf once end
-	i_sub_ovf_un once end
-	i_switch once end
-	i_tail_ once end
-	i_throw once end
-	i_unaligned_ once end
-	i_unbox once end
-	i_unbox_any once end
-	i_volatile_ once end
-	i_xor once end
+	i_endfilter once index := 93 end
+	i_endfinally once index := 94 end
+	i_initblk once index := 95 end
+	i_initobj once index := 96 end
+	i_isinst once index := 97 end
+	i_jmp once index := 98 end
+	i_ldarg once index := 99 end
+	i_ldarg_0 once index := 100 end
+	i_ldarg_1 once index := 101 end
+	i_ldarg_2 once index := 102 end
+	i_ldarg_3 once index := 103 end
+	i_ldarg_s once index := 104 end
+	i_ldarga once index := 105 end
+	i_ldarga_s once index := 106 end
+	i_ldc_i4 once index := 107 end
+	i_ldc_i4_0 once index := 108 end
+	i_ldc_i4_1 once index :=109 end
+	i_ldc_i4_2 once index := 110 end
+	i_ldc_i4_3 once index := 111 end
+	i_ldc_i4_4 once index := 112 end
+	i_ldc_i4_5 once index := 113 end
+	i_ldc_i4_6 once index := 114 end
+	i_ldc_i4_7 once index := 115 end
+	i_ldc_i4_8 once index := 116 end
+	i_ldc_i4_m1 once index := 117 end
+	i_ldc_i4_M1_ once index := 118 end
+	i_ldc_i4_s once index := 119 end
+	i_ldc_i8 once index := 120 end
+	i_ldc_r4 once index := 121 end
+	i_ldc_r8 once index := 122 end
+	i_ldelem once index := 123 end
+	i_ldelem_i once index := 124 end
+	i_ldelem_i1 once index := 125 end
+	i_ldelem_i2 once index := 126 end
+	i_ldelem_i4 once index := 127 end
+	i_ldelem_i8 once index := 128 end
+	i_ldelem_r4 once index := 129 end
+	i_ldelem_r8 once index := 130 end
+	i_ldelem_ref once index := 131 end
+	i_ldelem_u1 once index := 132 end
+	i_ldelem_u2 once index := 133 end
+	i_ldelem_u4 once index := 134 end
+	i_ldelem_u8 once index := 135 end
+	i_ldelema once index := 136 end
+	i_ldfld once index := 137 end
+	i_ldflda once index := 138 end
+	i_ldftn once index := 139 end
+	i_ldind_i once index := 140 end
+	i_ldind_i1 once index := 141 end
+	i_ldind_i2 once index := 142 end
+	i_ldind_i4 once index := 143 end
+	i_ldind_i8 once index := 144 end
+	i_ldind_r4 once index := 145 end
+	i_ldind_r8 once index := 146 end
+	i_ldind_ref once index := 147 end
+	i_ldind_u1 once index := 148 end
+	i_ldind_u2 once index := 149 end
+	i_ldind_u4 once index := 150 end
+	i_ldind_u8 once index := 151 end
+	i_ldlen once index := 152 end
+	i_ldloc once index := 153 end
+	i_ldloc_0 once index := 154 end
+	i_ldloc_1 once index := 155 end
+	i_ldloc_2 once index := 156 end
+	i_ldloc_3 once index := 157 end
+	i_ldloc_s once index := 158 end
+	i_ldloca once index := 159 end
+	i_ldloca_s once index := 160 end
+	i_ldnull once index := 161 end
+	i_ldobj once index := 162 end
+	i_ldsfld once index := 163 end
+	i_ldsflda once index := 164 end
+	i_ldstr once index := 165 end
+	i_ldtoken once index := 166 end
+	i_ldvirtftn once index := 167 end
+	i_leave once index := 168 end
+	i_leave_s once index := 169 end
+	i_localloc once index := 170 end
+	i_mkrefany once index := 171 end
+	i_mul once index := 172 end
+	i_mul_ovf once index := 173 end
+	i_mul_ovf_un once index := 174 end
+	i_neg once index := 175 end
+	i_newarr once index := 176 end
+	i_newobj once index := 177 end
+	i_no_ once index := 178 end
+	i_nop once index := 179 end
+	i_not once index := 180 end
+	i_or once index := 181 end
+	i_pop once index := 182 end
+	i_readonly_ once index := 183 end
+	i_refanytype once index := 184 end
+	i_refanyval once index := 185 end
+	i_rem once index := 186 end
+	i_rem_un once index := 187 end
+	i_ret once index := 188 end
+	i_rethrow once index := 189 end
+	i_shl once index := 190 end
+	i_shr once index := 191 end
+	i_shr_un once index := 192 end
+	i_sizeof once index := 193 end
+	i_starg once index := 194 end
+	i_starg_s once index := 195 end
+	i_stelem once index := 196 end
+	i_stelem_i once index := 197 end
+	i_stelem_i1 once index := 198 end
+	i_stelem_i2 once index := 199 end
+	i_stelem_i4 once index := 200 end
+	i_stelem_i8 once index := 201 end
+	i_stelem_r4 once index := 202 end
+	i_stelem_r8 once index := 203 end
+	i_stelem_ref once index := 204 end
+	i_stfld once index := 205 end
+	i_stind_i once index := 206 end
+	i_stind_i1 once index := 207 end
+	i_stind_i2 once index := 208 end
+	i_stind_i4 once index := 209 end
+	i_stind_i8 once index := 210 end
+	i_stind_r4 once index := 211 end
+	i_stind_r8 once index := 212 end
+	i_stind_ref once index := 213 end
+	i_stloc once index := 214 end
+	i_stloc_0 once index := 215 end
+	i_stloc_1 once index := 216 end
+	i_stloc_2 once index := 217 end
+	i_stloc_3 once index := 218 end
+	i_stloc_s once index := 219 end
+	i_stobj once index := 220 end
+	i_stsfld once index := 221 end
+	i_sub once index := 222 end
+	i_sub_ovf once index := 223 end
+	i_sub_ovf_un once index := 224 end
+	i_switch once index := 225 end
+	i_tail_ once index := 226 end
+	i_throw once index := 227 end
+	i_unaligned_ once index := 228 end
+	i_unbox once index := 229 end
+	i_unbox_any once index := 230 end
+	i_volatile_ once index := 231 end
+	i_xor once index := 232 end
 
+feature -- Access
+
+	index: NATURAL_8
+		-- Index of the element.
 end

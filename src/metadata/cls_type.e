@@ -47,6 +47,13 @@ feature -- Access
 	show_type: BOOLEAN
 
 
+feature -- Status Report
+
+	is_void: BOOLEAN
+		do
+			Result := tp = {BASIC_TYPE}.Void_ and then pointer_level = 0
+		end
+
 feature --Access Instance Free
 
 	type_names: ARRAYED_LIST[STRING]

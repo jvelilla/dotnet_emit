@@ -15,7 +15,7 @@ create
 
 feature {NONE} --Initialization
 
-	make (a_name: STRING_32; a_type: CLS_TYPE)
+	make (a_name: STRING_32; a_type: detachable CLS_TYPE)
 		do
 			name := a_name
 			type := a_type
@@ -25,8 +25,9 @@ feature -- Access
 
 	name: STRING_32
 
-	type: CLS_TYPE
+	type: detachable CLS_TYPE
 		-- type of value.
+		-- TODO check if it's better to use NULL pattern.
 
 feature -- Change Element
 

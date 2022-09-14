@@ -8,7 +8,7 @@
 			<exclude>/\.git$</exclude>
 			<exclude>/\.svn$</exclude>
 		</file_rule>
-		<option warning="warning" is_obsolete_iteration="true" manifest_array_type="mismatch_warning">
+		<option warning="warning" manifest_array_type="mismatch_warning">
 			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
 		</option>
 		<setting name="console_application" value="true"/>
@@ -23,8 +23,6 @@
 			</option>
 		</library>
 		<cluster name="src" location=".\src\" recursive="true">
-			<option is_obsolete_iteration="true">
-			</option>
 		</cluster>
 	</target>
 </system>
