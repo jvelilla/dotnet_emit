@@ -39,7 +39,7 @@ feature -- Access
 	opcode: CIL_OPCODES assign set_opcode
 			-- Current cil opcode.
 
-	offset: INTEGER
+	offset: INTEGER assign set_offset
 
 	seh_type: INTEGER
 
@@ -63,14 +63,14 @@ feature -- Status Report
 	is_rel4: BOOLEAN
 			-- Is a branch with a 4 byte relative offset
 		do
-			Result := instructions.at (opcode.index).operand_type = {IOPERAND}.o_rel4.index
+			Result := instructions.at (opcode.index + 1).operand_type = {IOPERAND}.o_rel4.index
 		end
 
 	is_rel1: BOOLEAN
 			-- Is a branch with a 1 byte relative offset
 		do
 				-- TODO check if it's better to use IOPERAND as the type of operand_type instead of NATURAL_8.
-			Result := instructions.at (opcode.index).operand_type = {IOPERAND}.o_rel1.index
+			Result := instructions.at (opcode.index + 1).operand_type = {IOPERAND}.o_rel1.index
 		end
 
 	is_branch: BOOLEAN
@@ -103,7 +103,17 @@ feature -- Status Report
         		end
 
 			else
-				Result := instructions.at (opcode.index).stack_usage
+				Result := instructions.at (opcode.index + 1).stack_usage
+			end
+		end
+
+	instruction_size: INTEGER
+			-- Calculate length of instruction	
+		do
+			if opcode = {CIL_OPCODES}.i_switch then
+				Result := 1 + 4 + if switches.is_empty then 0 else	switches.count * 4 end
+			else
+				Result := instructions.at (opcode.index + 1).bytes
 			end
 		end
 
@@ -141,6 +151,14 @@ feature -- Element change
 			opcode := a_opcode
 		ensure
 			opcode_set: opcode = a_opcode
+		end
+
+	set_offset (a_val: INTEGER)
+			-- Assign `offset` with `a_val`
+		do
+			offset := a_val
+		ensure
+			offet_set: offset = a_val
 		end
 
 feature -- Static

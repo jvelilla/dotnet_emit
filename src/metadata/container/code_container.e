@@ -26,6 +26,10 @@ feature {NONE} --Initialization
 feature -- Access
 
 	labels: STRING_TABLE [INSTRUCTION]
+		-- TODO
+		-- C++ map is implemented as a red black tree.
+		-- https://en.cppreference.com/w/cpp/container/map
+		-- Gobo has red black tree implementation.
 
 	instructions: LIST[INSTRUCTION]
 
@@ -290,13 +294,31 @@ feature {NONE} -- Implementation
 		end
 
 	calculate_offsets
+		local
+			l_ofs: INTEGER
 		do
-			-- TODO implement	
+			l_ofs := 0
+			across instructions as  ins loop
+				ins.offset := l_ofs
+				l_ofs := l_ofs + ins.instruction_size
+			end
 		end
 
 	modify_branches: BOOLEAN
+		local
+			rv: BOOLEAN
+			l_offset: INTEGER
 		do
-			-- TODO implement	
+			rv := True
+			across instructions as ins loop
+				if ins.is_rel4 then
+					l_offset := ins.offset
+					-- TODO implement.
+
+
+
+				end
+			end
 		end
 
 	validate_instructions
