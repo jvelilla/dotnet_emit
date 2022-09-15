@@ -74,6 +74,7 @@ feature {NONE} -- Implementation
 
 
 	optimize_ldc (a_pe: PE_LIB)
+			-- Optimize load constants instructions.
 		local
 			done: BOOLEAN
 			n: INTEGER_64
@@ -91,8 +92,38 @@ feature {NONE} -- Implementation
 				then
 					if attached ins.operand as l_op and then l_op.type = {OPERAND_TYPE}.t_int  then
 						done := True
+						n := l_op.int_value
+						inspect n
+						when 0,1,2,3,4,5,6,7,8, 9 then
+							ins.set_opcode (ops[(n+1).to_integer_32])
+						else
+							done := False
+							if n < 128 and then n>= -128 then
+								ins.set_opcode({CIL_OPCODES}.i_ldc_i4_s)
+							end
+						end
+						if done then
+							ins.set_operand({OPERAND_FACTORY}.default_operand)
+						end
+					end
+				else
+					-- do nothing.
+				end
+			end
+		end
 
-
+	optimize_ldloc (a_pe: PE_LIB)
+			-- Optimize load local variable onto the stack.
+		local
+			v: VALUE
+		do
+			across instructions as  ins loop
+				inspect ins.opcode
+				when {CIL_OPCODES}.i_ldarg, {CIL_OPCODES}.i_ldarga, {CIL_OPCODES}.i_starg then
+					if attached ins.operand as l_op then
+						if attached {VALUE} l_op.value then
+							-- TODO implement
+						end
 					end
 				else
 
@@ -100,12 +131,8 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	optimize_ldloc (a_pe: PE_LIB)
-		do
-			-- TODO implement
-		end
-
 	optimize_ldarg (a_pe: PE_LIB)
+			-- Optimize load argument on the stack.
 		do
 			-- TODO implement
 		end

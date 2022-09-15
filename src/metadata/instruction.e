@@ -36,7 +36,7 @@ feature -- Access
 	switches: LIST [STRING_32]
 			-- Get the set of case labels.
 
-	opcode: CIL_OPCODES
+	opcode: CIL_OPCODES assign set_opcode
 			-- Current cil opcode.
 
 	offset: INTEGER
@@ -133,6 +133,14 @@ feature -- Element change
 			seh_catch_type := a_seh_catch_type
 		ensure
 			seh_catch_type_assigned: seh_catch_type = a_seh_catch_type
+		end
+
+	set_opcode (a_opcode: CIL_OPCODES)
+			-- Assign `opcode' with `a_opcode`.
+		do
+			opcode := a_opcode
+		ensure
+			opcode_set: opcode = a_opcode
 		end
 
 feature -- Static
