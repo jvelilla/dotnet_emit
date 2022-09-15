@@ -34,6 +34,7 @@ feature -- Access
 	parent: detachable DATA_CONTAINER
 
 	has_seh: BOOLEAN
+			-- has Structured Exception Handling?
 
 feature -- Element Change
 
@@ -119,6 +120,10 @@ feature {NONE} -- Implementation
 			ldlocs: ARRAY [CIL_OPCODES]
 			stlocs: ARRAY [CIL_OPCODES]
 		do
+			-- TODO double check what's the best way to representt these arrays.
+			-- Potential issue: indexes
+			-- Memory issue, maybe we can create it iff we need it.
+
 
 			ldlocs := <<{CIL_OPCODES}.i_ldloc_0, {CIL_OPCODES}.i_ldloc_1,
 						{CIL_OPCODES}.i_ldloc_2, {CIL_OPCODES}.i_ldloc_3>>
@@ -178,11 +183,12 @@ feature {NONE} -- Implementation
 			l_index: INTEGER
 			ldargs: ARRAY [CIL_OPCODES]
 		do
+				-- TODO double check what's the best way to represent this array.
+				-- Potential issue: indexes
+				-- Memory issue, maybe we can create it iff we need it.
 
 			ldargs := <<{CIL_OPCODES}.i_ldarg_0, {CIL_OPCODES}.i_ldarg_1,
 						{CIL_OPCODES}.i_ldarg_2, {CIL_OPCODES}.i_ldarg_3>>
-
-
 
 			across instructions as  ins loop
 				inspect ins.opcode
@@ -199,20 +205,6 @@ feature {NONE} -- Implementation
 
 									ins.set_opcode(ldargs[l_index])
 									ins.set_operand({OPERAND_FACTORY}.default_operand)
-								elseif l_index < 128 and then l_index >= -128 then
-									ins.set_opcode({CIL_OPCODES}.i_ldloc_s)
-								end
-							when {CIL_OPCODES}.i_ldloca then
-								if l_index < 128 and then l_index >= -128 then
-									ins.set_opcode({CIL_OPCODES}.i_ldloca_s)
-								end
-							when {CIL_OPCODES}.i_stloc then
-								if l_index < 4 then
-										-- TODO check the l_index, since
-										-- the C++ code use a 0 based to access ldlocs.	
-
-									ins.set_opcode(ldargs[l_index])
-									ins.set_operand({OPERAND_FACTORY}.default_operand)
 								else
 									if l_index < 128 and then l_index >= -128 then
 										ins.set_opcode({CIL_OPCODES}.i_ldarg_s)
@@ -226,6 +218,31 @@ feature {NONE} -- Implementation
 										ins.set_operand({OPERAND_FACTORY}.integer_operand (l_index, {OPERAND_SIZE}.i32))
 									end
 								end
+							when {CIL_OPCODES}.i_ldarga then
+								if l_index < 128 and then l_index >= -128 then
+									ins.set_opcode({CIL_OPCODES}.i_ldarga_s)
+								end
+								if attached ins.operand as l_operand and then
+									l_operand.type = {OPERAND_TYPE}.t_value and then
+									attached l_op.value as l_val and then
+									attached l_val.type as l_type  and then
+									l_type.tp = {BASIC_TYPE}.mvar
+								then
+									ins.set_operand({OPERAND_FACTORY}.integer_operand (l_index, {OPERAND_SIZE}.i32))
+								end
+							when {CIL_OPCODES}.i_starg then
+								if l_index < 128 and then l_index >= -128 then
+									ins.set_opcode({CIL_OPCODES}.i_starg_s)
+								end
+								if attached ins.operand as l_operand and then
+									l_operand.type = {OPERAND_TYPE}.t_value and then
+									attached l_op.value as l_val and then
+									attached l_val.type as l_type  and then
+									l_type.tp = {BASIC_TYPE}.mvar
+								then
+									ins.set_operand({OPERAND_FACTORY}.integer_operand (l_index, {OPERAND_SIZE}.i32))
+								end
+
 							else
 								-- do nothing.
 							end
@@ -238,9 +255,68 @@ feature {NONE} -- Implementation
 		end
 
 	optimize_branch (a_pe: PE_LIB)
+		local
+			done: BOOLEAN
+		do
+			from
+				validate_seh
+			until
+				done
+			loop
+				calculate_offsets
+				done := modify_branches
+			end
+			validate_instructions
+		end
+
+
+	validate_seh
+			-- validate Structured Exception Handling.
+		local
+			l_tags: ARRAYED_LIST [INSTRUCTION]
+		do
+			create l_tags.make (0)
+			across instructions as ins loop
+				if ins.opcode = {CIL_OPCODES}.i_SEH then
+					l_tags.force (ins)
+				end
+			end
+			if not l_tags.is_empty then
+				has_seh := True
+				validate_seh_tags (l_tags, 0)
+				validate_seh_filters(l_tags)
+				validate_seh_epilogues
+			end
+		end
+
+	calculate_offsets
+		do
+			-- TODO implement	
+		end
+
+	modify_branches: BOOLEAN
+		do
+			-- TODO implement	
+		end
+
+	validate_instructions
+		do
+			-- TODO implement	
+		end
+
+	validate_seh_tags(tags: LIST [INSTRUCTION]; a_offset: INTEGER)
 		do
 			-- TODO implement
 		end
 
+	validate_seh_filters(tags: LIST [INSTRUCTION])
+		do
+			-- TODO implement
+		end
+
+	validate_seh_epilogues
+		do
+			-- TODO implement
+		end
 
 end
