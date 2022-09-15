@@ -48,6 +48,16 @@ feature -- Access
 
 	text: STRING_32
 
+	label: STRING
+			-- Label name associated with the instruction.
+		do
+			Result := "";
+			if attached operand as l_operand then
+				Result := l_operand.string_value
+			end
+
+		end
+
 feature -- Status Report
 
 	is_rel4: BOOLEAN

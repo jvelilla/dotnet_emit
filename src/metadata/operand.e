@@ -25,7 +25,7 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	type: OPERAND_TYPE assign set_type
-			-- `type'
+			-- The `type' of operand.
 
 	size: OPERAND_SIZE assign set_size
 			-- `size'
