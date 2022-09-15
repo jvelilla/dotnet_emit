@@ -166,7 +166,13 @@ feature {NONE} -- Implementation
 
 	optimize_locals (a_pe: PE_LIB)
 		do
+			across instructions as ins loop
+				if attached {OPERAND} ins.operand as l_op then
+					if attached {CLS_LOCAL} l_op.value as l_val then
 
+					end
+				end
+			end
 		end
 
 	optimize_code(a_pe: PE_LIB)

@@ -28,7 +28,7 @@ feature -- Access
 		-- used as a union `operand` and `seh_catch_type`.
 
 	operand: detachable OPERAND assign set_operand
-			-- `operand'
+			-- the `operand` (CIL instructions have either zero or 1 operands)
 
 	seh_catch_type: detachable CLS_TYPE assign set_seh_catch_type
 			-- the catch type.

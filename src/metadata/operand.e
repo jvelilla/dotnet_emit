@@ -106,4 +106,12 @@ feature -- Element change
 
 feature --Access
 
+	value: detachable VALUE
+			-- Return value when the opererand is a complex value.
+		do
+			if type = {OPERAND_TYPE}.t_value then
+				Result := ref_value
+			end
+		end
+
 end
