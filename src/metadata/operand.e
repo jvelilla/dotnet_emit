@@ -82,7 +82,7 @@ feature -- Element change
 	set_int_value (an_int_value: like int_value)
 			-- Assign `int_value' with `an_int_value'.
 		do
-			int_value := an_int_value
+			 int_value := an_int_value
 		ensure
 			int_value_assigned: int_value = an_int_value
 		end

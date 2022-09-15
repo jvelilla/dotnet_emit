@@ -37,6 +37,7 @@ feature -- Access
 	array_level: INTEGER
 
 	tp: BASIC_TYPE
+		--The type of the CLS_TYPE object
 
 	type_ref: detachable DATA_CONTAINER
 

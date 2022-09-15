@@ -115,26 +115,126 @@ feature {NONE} -- Implementation
 	optimize_ldloc (a_pe: PE_LIB)
 			-- Optimize load local variable onto the stack.
 		local
-			v: VALUE
+			l_index: INTEGER
+			ldlocs: ARRAY [CIL_OPCODES]
+			stlocs: ARRAY [CIL_OPCODES]
 		do
+
+			ldlocs := <<{CIL_OPCODES}.i_ldloc_0, {CIL_OPCODES}.i_ldloc_1,
+						{CIL_OPCODES}.i_ldloc_2, {CIL_OPCODES}.i_ldloc_3>>
+
+
+			stlocs := <<{CIL_OPCODES}.i_stloc_0, {CIL_OPCODES}.i_stloc_1,
+						{CIL_OPCODES}.i_stloc_2, {CIL_OPCODES}.i_stloc_3>>
+
+
 			across instructions as  ins loop
 				inspect ins.opcode
-				when {CIL_OPCODES}.i_ldarg, {CIL_OPCODES}.i_ldarga, {CIL_OPCODES}.i_starg then
+				when {CIL_OPCODES}.i_ldloc, {CIL_OPCODES}.i_ldloca, {CIL_OPCODES}.i_stloc then
 					if attached ins.operand as l_op then
-						if attached {VALUE} l_op.value then
+						if attached {CLS_LOCAL} l_op.value as l_loc then
 							-- TODO implement
+							l_index := l_loc.index
+							inspect ins.opcode
+							when {CIL_OPCODES}.i_ldloc then
+								if l_index < 4 then
+										-- TODO check the l_index, since
+										-- the C++ code use a 0 based to access ldlocs.
+
+									ins.set_opcode(ldlocs[l_index])
+									ins.set_operand({OPERAND_FACTORY}.default_operand)
+								elseif l_index < 128 and then l_index >= -128 then
+									ins.set_opcode({CIL_OPCODES}.i_ldloc_s)
+								end
+							when {CIL_OPCODES}.i_ldloca then
+								if l_index < 128 and then l_index >= -128 then
+									ins.set_opcode({CIL_OPCODES}.i_ldloca_s)
+								end
+							when {CIL_OPCODES}.i_stloc then
+								if l_index < 4 then
+										-- TODO check the l_index, since
+										-- the C++ code use a 0 based to access ldlocs.	
+
+									ins.set_opcode(stlocs[l_index])
+									ins.set_operand({OPERAND_FACTORY}.default_operand)
+								elseif l_index < 128 and then l_index >= -128 then
+									ins.set_opcode({CIL_OPCODES}.i_stloc_s)
+								end
+							else
+								-- do nothing.
+							end
 						end
 					end
 				else
-
+					-- do nothing.
 				end
 			end
 		end
 
 	optimize_ldarg (a_pe: PE_LIB)
 			-- Optimize load argument on the stack.
+		local
+			v: VALUE
+			l_index: INTEGER
+			ldargs: ARRAY [CIL_OPCODES]
 		do
-			-- TODO implement
+
+			ldargs := <<{CIL_OPCODES}.i_ldarg_0, {CIL_OPCODES}.i_ldarg_1,
+						{CIL_OPCODES}.i_ldarg_2, {CIL_OPCODES}.i_ldarg_3>>
+
+
+
+			across instructions as  ins loop
+				inspect ins.opcode
+				when {CIL_OPCODES}.i_ldarg, {CIL_OPCODES}.i_ldarga, {CIL_OPCODES}.i_starg then
+					if attached ins.operand as l_op then
+						if attached {PARAM} l_op.value as l_param then
+							-- TODO implement
+							l_index := l_param.index
+							inspect ins.opcode
+							when {CIL_OPCODES}.i_ldarg then
+								if l_index < 4 then
+										-- TODO check the l_index, since
+										-- the C++ code use a 0 based to access ldlocs.
+
+									ins.set_opcode(ldargs[l_index])
+									ins.set_operand({OPERAND_FACTORY}.default_operand)
+								elseif l_index < 128 and then l_index >= -128 then
+									ins.set_opcode({CIL_OPCODES}.i_ldloc_s)
+								end
+							when {CIL_OPCODES}.i_ldloca then
+								if l_index < 128 and then l_index >= -128 then
+									ins.set_opcode({CIL_OPCODES}.i_ldloca_s)
+								end
+							when {CIL_OPCODES}.i_stloc then
+								if l_index < 4 then
+										-- TODO check the l_index, since
+										-- the C++ code use a 0 based to access ldlocs.	
+
+									ins.set_opcode(ldargs[l_index])
+									ins.set_operand({OPERAND_FACTORY}.default_operand)
+								else
+									if l_index < 128 and then l_index >= -128 then
+										ins.set_opcode({CIL_OPCODES}.i_ldarg_s)
+									end
+									if attached ins.operand as l_operand and then
+										l_operand.type = {OPERAND_TYPE}.t_value and then
+										attached l_op.value as l_val and then
+										attached l_val.type as l_type  and then
+										l_type.tp = {BASIC_TYPE}.mvar
+									then
+										ins.set_operand({OPERAND_FACTORY}.integer_operand (l_index, {OPERAND_SIZE}.i32))
+									end
+								end
+							else
+								-- do nothing.
+							end
+						end
+					end
+				else
+					-- do nothing.
+				end
+			end
 		end
 
 	optimize_branch (a_pe: PE_LIB)
