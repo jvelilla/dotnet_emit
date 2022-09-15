@@ -165,19 +165,30 @@ feature {NONE} -- Implementation
 		end
 
 	optimize_locals (a_pe: PE_LIB)
+		local
+			l_sorter: SORTER [CLS_LOCAL]
+			comparator: PREDICATE [CLS_LOCAL, CLS_LOCAL]
+			l_index: INTEGER
 		do
+
 			across instructions as ins loop
 				if attached {OPERAND} ins.operand as l_op then
 					if attached {CLS_LOCAL} l_op.value as l_val then
-
+						l_val.increment_uses
 					end
 				end
 			end
+				-- sort var_list
+			comparator := agent (left, right: CLS_LOCAL): BOOLEAN do Result := left.uses > right.uses end
+			create {QUICK_SORTER [CLS_LOCAL]} l_sorter.make ((create {AGENT_EQUALITY_TESTER [CLS_LOCAL]}.make (comparator)))
+			l_sorter.sort (var_list)
+
+			l_index := 0
+			across var_list as l_var loop
+				l_var.index := l_index
+				l_index := l_index + 1
+			end
 		end
 
-	optimize_code(a_pe: PE_LIB)
-		do
-			-- Call CodeContainer::Optimize
-		end
 
 end

@@ -29,13 +29,21 @@ feature {NONE}-- Initialization
 
 feature -- Access
 
+
 	uses: INTEGER
 
-	index: INTEGER
-		-- return index of a variable.
+	index: INTEGER assign set_index
+			-- return index of a variable
 
+feature -- Element change
 
-feature -- Change Element
+	set_index (an_index: like index)
+			-- Assign `index' with `an_index'.
+		do
+			index := an_index
+		ensure
+			index_assigned: index = an_index
+		end
 
 	increment_uses
 			-- Increment uses of a variable..

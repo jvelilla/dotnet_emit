@@ -35,7 +35,7 @@ feature -- Access
 
 	has_seh: BOOLEAN
 
-feature -- Change Element
+feature -- Element Change
 
 	set_container (a_item: DATA_CONTAINER)
 			-- Set `parent` container with `a_item`.
@@ -43,6 +43,46 @@ feature -- Change Element
 			parent := a_item
 		end
 
+
+feature -- Optimization
+
+	optimize_code (a_pe: PE_LIB)
+		do
+			load_labels
+			optimize_ldc(a_pe)
+			optimize_ldloc(a_pe)
+			optimize_ldarg(a_pe)
+			optimize_branch(a_pe)
+			labels.wipe_out
+		end
+
+feature {NONE} -- Implementation
+
+	load_labels
+		do
+			-- TODO implement
+		end
+
+
+	optimize_ldc (a_pe: PE_LIB)
+		do
+			-- TODO implement
+		end
+
+	optimize_ldloc (a_pe: PE_LIB)
+		do
+			-- TODO implement
+		end
+
+	optimize_ldarg (a_pe: PE_LIB)
+		do
+			-- TODO implement
+		end
+
+	optimize_branch (a_pe: PE_LIB)
+		do
+			-- TODO implement
+		end
 
 
 end
