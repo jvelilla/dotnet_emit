@@ -152,8 +152,71 @@ feature -- Output
 	dump_output_file (a_file_name: STRING_32; a_mode: OUTPUT_MODE; a_gui: BOOLEAN)
 			-- write an output file, possibilities are a .il file, an EXE or a DLL
          	-- the file can also be tagged as either console or win32
+		local
+			rv: BOOLEAN
 		do
+			create {RAW_FILE} output_stream.make_create_read_write (a_file_name)
+			inspect a_mode
+			when {OUTPUT_MODE}.ilasm then
+				rv := il_src_dump
+			when {OUTPUT_MODE}.peexe then
+				rv := dump_pe_file (a_file_name, true, a_gui)
+			when {OUTPUT_MODE}.pedll then
+			when {OUTPUT_MODE}.object then
+				rv :=obj_out
+			else
+				rv := False
+			end
+			if attached output_stream as l_stream then
+				l_stream.close
+			end
+		end
+
+feature {NONE} -- Output Implementation
+
+	il_src_dump: BOOLEAN
+		do
+			Result := il_src_dump_header and then il_src_dump_file
+		end
+
+	il_src_dump_header: BOOLEAN
+		local
+			rv: BOOLEAN
+		do
+			if attached output_stream as l_stream then
+				l_stream.put_string (".corflags ")
+				l_stream.put_integer (core_flags)
+				l_stream.put_new_line
+				l_stream.flush
+				l_stream.put_new_line
+				l_stream.flush
+
+				across assembly_refs  as it loop
+					rv := it.il_header_dump (l_stream)
+				end
+				l_stream.close
+			else
+				Result := False
+			end
 
 		end
+
+	il_src_dump_file: BOOLEAN
+		do
+			-- -- TODO to implement
+		end
+
+
+	dump_pe_file (a_file_name: STRING_32; a_is_exe: BOOLEAN; a_is_gui: BOOLEAN): BOOLEAN
+		do
+			-- TODO implement
+		end
+
+	obj_out: BOOLEAN
+		do
+			-- TODO to implement
+		end
+
+
 
 end

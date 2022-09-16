@@ -1,9 +1,18 @@
 note
-	description: "Summary description for {OUTPUT_MODE}."
+	description: "Object representing output modes."
 	date: "$Date$"
 	revision: "$Revision$"
 
-class
+once class
 	OUTPUT_MODE
+create
+	ilasm, peexe, pedll, object
+
+feature {NONE} -- Creation
+
+	ilasm once  end
+	peexe once  end
+	pedll once  end
+	object once  end
 
 end

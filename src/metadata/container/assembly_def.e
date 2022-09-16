@@ -34,4 +34,11 @@ feature -- Access
 
 	public_key_token: INTEGER_8
 
+
+feature -- Output
+
+	il_header_dump (a_file: FILE): BOOLEAN
+		do
+
+		end
 end
