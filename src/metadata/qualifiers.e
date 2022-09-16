@@ -32,12 +32,16 @@ feature {NONE} -- Initialization
 			flags := other.flags
 		end
 
-
-
 feature -- Access
 
 	flags: INTEGER;
 
+	after_flags : INTEGER
+		do
+			Result := {METHOD_ATTRIBUTES}.preservesig | {METHOD_ATTRIBUTES}.cil | {METHOD_ATTRIBUTES}.managed | {METHOD_ATTRIBUTES}.runtime
+		ensure
+			instance_free: class
+		end
 
 	qualifier_names: ARRAYED_LIST [STRING]
 			-- TODO check if this is a good way to represent and
@@ -55,6 +59,18 @@ feature -- Change Element
 			-- Set `flags` with `a_flag`.
 		do
 			flags := a_flag
+		end
+
+feature -- Output
+
+	il_src_dump_before_flags (a_file: FILE)
+		local
+			n: INTEGER
+		do
+			n := after_flags.bit_not & flags
+			across 0 |..| 31 as ic loop
+
+			end
 		end
 
 end

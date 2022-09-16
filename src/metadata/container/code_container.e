@@ -380,4 +380,13 @@ feature {NONE} -- Implementation
 			-- TODO implement
 		end
 
+
+feature -- Output
+
+
+	il_src_dump (a_file: FILE): BOOLEAN
+		do
+			a_file.put_string (".method")
+			flags.il_src_dump_before_flags (a_file)
+		end
 end

@@ -113,4 +113,19 @@ feature --Change Element
 		ensure
 			-- To be added.
 		end
+
+
+feature -- Output
+
+	il_src_dump (a_file: FILE): BOOLEAN
+		do
+			across fields as l_field loop
+				-- TODO implement
+			end
+			across methods as method  loop
+				Result := method.il_src_dump(a_file)
+			end
+			across children as l_child loop
+			end
+		end
 end

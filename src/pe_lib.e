@@ -203,7 +203,11 @@ feature {NONE} -- Output Implementation
 
 	il_src_dump_file: BOOLEAN
 		do
-			-- -- TODO to implement
+			if attached output_stream as l_stream then
+
+			else
+				Result := False
+			end
 		end
 
 
