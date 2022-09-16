@@ -194,7 +194,6 @@ feature {NONE} -- Output Implementation
 				across assembly_refs  as it loop
 					rv := it.il_header_dump (l_stream)
 				end
-				l_stream.close
 			else
 				Result := False
 			end

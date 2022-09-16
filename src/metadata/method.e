@@ -14,6 +14,8 @@ inherit
 	CODE_CONTAINER
 		rename
 			make as make_code
+		redefine
+			il_src_dump
 		end
 
 create
@@ -188,6 +190,14 @@ feature {NONE} -- Implementation
 				l_var.index := l_index
 				l_index := l_index + 1
 			end
+		end
+
+feature -- Output
+
+	il_src_dump (a_file: FILE): BOOLEAN
+		do
+			a_file.put_string (".method")
+			flags.il_src_dump_before_flags (a_file)
 		end
 
 

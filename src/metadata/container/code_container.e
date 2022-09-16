@@ -306,10 +306,9 @@ feature {NONE} -- Implementation
 
 	modify_branches: BOOLEAN
 		local
-			rv: BOOLEAN
 			l_offset: INTEGER
 		do
-			rv := True
+			Result := True
 			across instructions as ins loop
 				if ins.is_rel4 then
 					l_offset := ins.offset
@@ -386,7 +385,6 @@ feature -- Output
 
 	il_src_dump (a_file: FILE): BOOLEAN
 		do
-			a_file.put_string (".method")
-			flags.il_src_dump_before_flags (a_file)
+			-- TO be implemented
 		end
 end

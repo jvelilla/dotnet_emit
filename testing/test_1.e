@@ -51,5 +51,7 @@ feature -- Access
 
 			start.optimize(lib_entry)
 
+			lib_entry.dump_output_file ("test1.il",{OUTPUT_MODE}.ilasm, False)
+
 		end
 end
