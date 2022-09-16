@@ -39,7 +39,7 @@ feature {NONE} -- Initialization
 			create using_list.make (0)
 			create container_stack.make
 
-			create l_assembly_ref.make (a_name, False, 0)
+			create l_assembly_ref.make (a_name, False, create {ARRAY [NATURAL_8]}.make_filled (0, 1, 8))
 			assembly_refs.force (l_assembly_ref)
 
 		end
@@ -194,6 +194,8 @@ feature {NONE} -- Output Implementation
 				across assembly_refs  as it loop
 					rv := it.il_header_dump (l_stream)
 				end
+				l_stream.put_new_line
+				l_stream.flush
 			else
 				Result := False
 			end

@@ -22,12 +22,13 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_name: STRING_32; a_external: BOOLEAN; a_byte: INTEGER_8)
+	make (a_name: STRING_32; a_external: BOOLEAN; a_byte: ARRAY [NATURAL_8])
+		require
+			valid_length: a_byte.count = 8
 		do
 			make_data_container (a_name, create {QUALIFIERS}.make)
-				 -- TODO check how to represent a Byte * in Eiffel
-				 -- NATURAL_8 is another option.
---			public_key_token := a_byte
+
+			create public_key_token.make_from_array (a_byte)
 		end
 
 feature -- Access
@@ -46,6 +47,8 @@ feature -- Access
 
 	is_external: BOOLEAN assign set_is_external
 			-- `is_external'
+
+	public_key_token : ARRAY [NATURAL_8]
 
 
 feature -- Element change
@@ -102,6 +105,34 @@ feature -- Output
 			a_file.put_string ("{")
 			a_file.put_new_line
 			a_file.flush
+			if major /= 0 or else minor /=0 or else build /= 0 or revision /=0  then
+				a_file.put_string ("%T.ver ")
+				a_file.put_integer (major)
+				a_file.put_string (":")
+				a_file.put_integer (minor)
+				a_file.put_string (":")
+				a_file.put_integer (build)
+				a_file.put_string (":")
+				a_file.put_integer (revision)
+				a_file.put_new_line
+				a_file.flush
+			end
 
+			across 1 |..| 8 as i loop
+				if public_key_token[i] /= 0 then
+					a_file.put_string ("%T.publickeytoken = (")
+					across 1 |..| 8 as j loop
+						a_file.put_string (public_key_token[j].to_hex_string)
+						a_file.put_string (" ")
+					end
+					a_file.put_string (")")
+					a_file.put_new_line
+					a_file.flush
+				end
+			end
+			a_file.put_string ("}")
+			a_file.put_new_line
+			a_file.flush
+			Result := True
 		end
 end
