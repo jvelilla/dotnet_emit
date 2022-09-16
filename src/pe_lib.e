@@ -146,4 +146,14 @@ feature -- Operations
 				-- In C++ it's needed since the class it's responsible to Manage the Memory
 			create Result.make (a_method_sig, a_flags, a_entry)
 		end
+
+feature -- Output
+
+	dump_output_file (a_file_name: STRING_32; a_mode: OUTPUT_MODE; a_gui: BOOLEAN)
+			-- write an output file, possibilities are a .il file, an EXE or a DLL
+         	-- the file can also be tagged as either console or win32
+		do
+
+		end
+
 end

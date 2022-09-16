@@ -314,16 +314,55 @@ feature {NONE} -- Implementation
 				if ins.is_rel4 then
 					l_offset := ins.offset
 					-- TODO implement.
-
-
-
 				end
 			end
 		end
 
 	validate_instructions
 		do
-			-- TODO implement	
+			calculate_offsets
+			across instructions as ins loop
+				if ins.is_branch then
+					-- TODO implement
+				else
+					inspect ins.opcode
+					when {CIL_OPCODES}.i_ldarg, {CIL_OPCODES}.i_ldarga, {CIL_OPCODES}.i_starg  then
+						if attached ins.operand as l_operand and then
+						   attached {PARAM} l_operand.value as l_value and then
+						   l_value.index > 	65534
+						then
+							-- TODO reimplement.
+							(create {EXCEPTION}.make_with_tag_and_trace(generator + "validate_instructions: IndexOutOfRange", l_value.name)).raise
+						end
+					when {CIL_OPCODES}.i_ldloc, {CIL_OPCODES}.i_ldloca, {CIL_OPCODES}.i_stloc then
+						if attached ins.operand as l_operand and then
+						   attached {CLS_LOCAL} l_operand.value as l_value and then
+						   l_value.index > 	65534
+						then
+							-- TODO reimplement.
+							(create {EXCEPTION}.make_with_tag_and_trace(generator + "validate_instructions: IndexOutOfRange", l_value.name)).raise
+						end
+					when {CIL_OPCODES}.i_ldarg_s, {CIL_OPCODES}.i_ldarga_s, {CIL_OPCODES}.i_starg_s then
+						if attached ins.operand as l_operand and then
+						   attached {PARAM} l_operand.value as l_value and then
+						   l_value.index > 	255
+						then
+							-- TODO reimplement.
+							(create {EXCEPTION}.make_with_tag_and_trace(generator + "validate_instructions: IndexOutOfRange", l_value.name)).raise
+						end
+					when {CIL_OPCODES}.i_ldloc_s, {CIL_OPCODES}.i_ldloca_s, {CIL_OPCODES}.i_stloc_s  then
+						if attached ins.operand as l_operand and then
+						   attached {CLS_LOCAL} l_operand.value as l_value and then
+						   l_value.index > 	255
+						then
+							-- TODO reimplement.
+							(create {EXCEPTION}.make_with_tag_and_trace(generator + "validate_instructions: IndexOutOfRange", l_value.name)).raise
+						end
+					else
+						-- Do nothing
+					end
+				end
+			end
 		end
 
 	validate_seh_tags(tags: LIST [INSTRUCTION]; a_offset: INTEGER)
