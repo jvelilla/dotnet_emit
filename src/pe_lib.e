@@ -196,6 +196,7 @@ feature {NONE} -- Output Implementation
 				end
 				l_stream.put_new_line
 				l_stream.flush
+				Result := True
 			else
 				Result := False
 			end
@@ -205,7 +206,7 @@ feature {NONE} -- Output Implementation
 	il_src_dump_file: BOOLEAN
 		do
 			if attached output_stream as l_stream then
-
+				Result := working_assembly.il_src_dump (l_stream)
 			else
 				Result := False
 			end

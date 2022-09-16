@@ -48,7 +48,40 @@ feature -- Access
 			-- equivalent static field in C++
 			-- see QUALIFIERS class.
 		once
-			create Result.make (0)
+			create Result.make_from_array (<<
+										  	"public",
+                                             "private",
+                                             "static",
+                                             "instance",
+                                             "explicit",
+                                             "ansi",
+                                             "sealed",
+                                             "enum",
+                                             "value",
+                                             "sequential",
+                                             "auto",
+                                             "literal",
+                                             "hidebysig",
+                                             "preservesig",
+                                             "specialname",
+                                             "rtspecialname",
+                                             "cil",
+                                             "managed",
+                                             "runtime",
+                                             "",
+                                             "virtual",
+                                             "newslot",
+                                             "",
+                                             "",
+                                             "",
+                                             "",
+                                             "",
+                                             "",
+                                             "",
+                                             "",
+                                             "",
+                                             ""
+			>>)
 		ensure
 			instance_free: class
 		end
@@ -68,8 +101,11 @@ feature -- Output
 			n: INTEGER
 		do
 			n := after_flags.bit_not & flags
-			across 0 |..| 31 as ic loop
-
+			across 0 |..| 31 as i loop
+				if n & (1 |<< i) >= 0 then
+					a_file.put_string (" ")
+					a_file.put_string (qualifier_names[i+1])
+				end
 			end
 		end
 
