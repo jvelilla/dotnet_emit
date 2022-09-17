@@ -26,6 +26,9 @@ feature {NONE} -- Initialization
 	make (a_name: STRING_32; a_flags: QUALIFIERS; a_pack: INTEGER; a_size: INTEGER)
 		do
 			make_container (a_name, a_flags)
+			create extends_name.make_empty
+			create {ARRAYED_LIST [CLS_CLASS]} generics.make (0)
+			create {ARRAYED_LIST [PROPERTY]} properties.make (0)
 		end
 
 feature -- Access
@@ -44,6 +47,14 @@ feature -- Access
 
 	pack: INTEGER assign set_pack
 			-- `pack'
+
+	generics: LIST [CLS_CLASS]
+		-- The list of generics.
+
+	extends_name: STRING_32
+
+	properties: LIST [PROPERTY]
+			-- The list of properties.
 
 feature -- Element change
 

@@ -145,8 +145,14 @@ feature -- Output
 					a_file.put_string (name)
 					a_file.put_string ("'")
 				else
-					if attached {CLS_CLASS} then
-
+					if attached {CLS_CLASS} container as l_container and then
+						not l_container.generics.is_empty
+					then
+						if l_container.flags.flags & {METHOD_ATTRIBUTES}.value /= 0 then
+							a_file.put_string ("valuetype ")
+						else
+							a_file.put_string ("class ")
+						end
 					end
 
 				end

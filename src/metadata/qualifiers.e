@@ -43,6 +43,18 @@ feature -- Access
 			instance_free: class
 		end
 
+
+feature -- Change Element
+
+	set_flags (a_flag: INTEGER)
+			-- Set `flags` with `a_flag`.
+		do
+			flags := a_flag
+		end
+
+
+feature -- Static features
+
 	qualifier_names: ARRAYED_LIST [STRING]
 			-- TODO check if this is a good way to represent and
 			-- equivalent static field in C++
@@ -86,12 +98,27 @@ feature -- Access
 			instance_free: class
 		end
 
-feature -- Change Element
-
-	set_flags (a_flag: INTEGER)
-			-- Set `flags` with `a_flag`.
+	reverse_name_prefix (a_rv: STRING_32; a_parent: DATA_CONTAINER; a_pos: INTEGER; a_type: BOOLEAN)
 		do
-			flags := a_flag
+			-- TODO implement
+		ensure
+			instance_free: class
+		end
+
+	name_prefix (a_parent: DATA_CONTAINER; a_type: BOOLEAN): STRING_32
+		do
+			-- TODO implement
+			create Result.make_empty
+		ensure
+			instance_free: class
+		end
+
+	name (a_root: STRING_32; a_parent: DATA_CONTAINER; a_type: BOOLEAN): STRING_32
+		do
+			-- TODO implement
+			create Result.make_empty
+		ensure
+			instance_free: class
 		end
 
 feature -- Output
