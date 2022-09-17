@@ -38,10 +38,13 @@ feature -- Access
 
 	tp: BASIC_TYPE
 		--The type of the CLS_TYPE object
+		-- TODO refactor this tp name to basic_type.
 
 	type_ref: detachable DATA_CONTAINER
+		-- The class reference for class type objects.
 
 	method_ref: detachable METHOD_SIGNATURE
+		-- The signature reference for method type objects
 
 	pe_index: NATURAL
 
@@ -62,6 +65,13 @@ feature --Access Instance Free
 			create Result.make(0)
 		ensure
 			instance_free: class
+		end
+
+feature -- Output
+
+	il_src_dump (a_file: FILE): BOOLEAN
+		do
+			-- TODO implement
 		end
 
 end

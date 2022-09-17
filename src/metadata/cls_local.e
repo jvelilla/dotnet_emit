@@ -53,4 +53,11 @@ feature -- Element change
 			uses_incremented: old uses + 1 = uses
 		end
 
+feature -- Output
+
+	il_src_dump (a_file: FILE): BOOLEAN
+		do
+			-- TODO to be implemented.
+		end
+
 end

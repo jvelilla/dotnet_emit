@@ -31,6 +31,7 @@ feature {NONE} --Initialization
 			create {ARRAYED_LIST [FIELD]} fields.make (0)
 		end
 
+feature -- Access
 
 	children: LIST [DATA_CONTAINER]
 

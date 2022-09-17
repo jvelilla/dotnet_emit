@@ -217,7 +217,51 @@ feature -- Output
 				then
 						-- TODO check why we need to include this references Hardcoded.
 						-- Allow C# to use
+					a_file.put_string ("%T.param%T[")
+					a_file.put_integer (prototype.params.count)
+					a_file.put_string ("]")
+					a_file.put_new_line
+					a_file.flush
 
+					a_file.put_string ("%T.custom instance void [mscorlib]System.ParamArrayAttribute::.ctor() = ( 01 00 00 00 )")
+					a_file.put_new_line
+					a_file.flush
+				end
+				if not var_list.is_empty then
+					a_file.put_string ("%T.locals (")
+					a_file.put_new_line
+					a_file.flush
+					across var_list as it loop
+						a_file.put_string ("%T%T[")
+						a_file.put_integer (it.index)
+						a_file.put_string ("]%T")
+						if attached {CLS_TYPE} it.type as l_type and then
+						   l_type.tp = {BASIC_TYPE}.cls
+						then
+							if attached {DATA_CONTAINER} l_type.type_ref as l_class and then
+							(l_class.flags.flags & {METHOD_ATTRIBUTES}.value) /= 0
+							then
+								a_file.put_string ("valuetype ")
+							else
+								a_file.put_string ("class ")
+							end
+						end
+						if attached {CLS_TYPE} it.type as l_type then
+							Result :=l_type.il_src_dump(a_file)
+						end
+						a_file.put_string (" ")
+
+						if @ it.cursor_index + 1 /= @ it.last_index then
+							a_file.put_string (",")
+							a_file.put_new_line
+							a_file.flush
+						else
+							a_file.put_new_line
+							a_file.flush
+						end
+
+
+					end
 
 				end
 			end
