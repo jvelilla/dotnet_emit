@@ -13,6 +13,8 @@ inherit
 	VALUE
 		rename
 			make as make_value
+		redefine
+			il_src_dump
 		end
 
 create

@@ -385,6 +385,9 @@ feature -- Output
 
 	il_src_dump (a_file: FILE): BOOLEAN
 		do
-			-- TO be implemented
+			across instructions as ins loop
+				Result := ins.il_src_dump (a_file)
+			end
+			Result := True
 		end
 end

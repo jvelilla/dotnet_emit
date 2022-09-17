@@ -42,4 +42,15 @@ feature -- Change Element
 		do
 			type := a_type
 		end
+
+feature -- Output
+
+	il_src_dump (a_file: FILE): BOOLEAN
+		do
+			-- used for types
+			if attached type as l_type then
+				Result := l_type.il_src_dump (a_file)
+			end
+			Result := True
+		end
 end

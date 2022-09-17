@@ -17,6 +17,7 @@ feature {NONE} -- Initialization
 			opcode := a_op
 			operand := a_operand
 			create text.make_empty
+			seh_type := {CIL_SEH}.seh_try
 		end
 
 feature -- Access
@@ -41,7 +42,7 @@ feature -- Access
 
 	offset: INTEGER assign set_offset
 
-	seh_type: INTEGER
+	seh_type: CIL_SEH
 
 	seh_begin: BOOLEAN
 			-- true if it is a begin tag.
@@ -159,6 +160,96 @@ feature -- Element change
 			offset := a_val
 		ensure
 			offet_set: offset = a_val
+		end
+
+feature -- Output
+
+	il_src_dump (a_file: FILE): BOOLEAN
+		local
+			i: INTEGER
+		do
+			if opcode ={CIL_OPCODES}.i_SEH then
+				if seh_begin then
+					inspect seh_type
+					when {CIL_SEH}.seh_try  then
+						a_file.put_string (".try {")
+						a_file.put_new_line
+						a_file.flush
+					when {CIL_SEH}.seh_catch  then
+						a_file.put_string ("catch ")
+						if attached seh_catch_type as l_seh_catch_type then
+							Result := l_seh_catch_type.il_src_dump (a_file)
+						else
+							a_file.put_string ("  [mscorlib]System.Object")
+						end
+						a_file.put_string (" {")
+						a_file.put_new_line
+						a_file.flush
+					when {CIL_SEH}.seh_filter  then
+						a_file.put_string ("filter {")
+						a_file.put_new_line
+						a_file.flush
+					when {CIL_SEH}.seh_filter_handler  then
+						a_file.put_string ("{")
+						a_file.put_new_line
+						a_file.flush
+					when {CIL_SEH}.seh_fault  then
+						a_file.put_string ("fault {")
+						a_file.put_new_line
+						a_file.flush
+					when {CIL_SEH}.seh_finally  then
+						a_file.put_string ("finally {")
+						a_file.put_new_line
+						a_file.flush
+					else
+						-- Do nothing
+					end
+				else
+					a_file.put_string ("}")
+					a_file.put_new_line
+					a_file.flush
+				end
+			elseif opcode = {CIL_OPCODES}.i_label  then
+				a_file.put_string (label)
+				a_file.put_new_line
+				a_file.flush
+			elseif opcode = {CIL_OPCODES}.i_comment  then
+				a_file.put_string ("// ")
+				a_file.put_new_line
+				a_file.flush
+			elseif opcode = {CIL_OPCODES}.i_switch  then
+				a_file.put_string ("%Tswitch (")
+				if not switches.is_empty then
+					across switches as it  loop
+						a_file.put_string (it)
+						if @ it.cursor_index + 1 /= @ it.last_index then
+							a_file.put_string (", ")
+							i := i + 1
+							if i \\ 8 = 0 then
+								a_file.put_string ("%N%T%T")
+							end
+						end
+					end
+				end
+				a_file.put_string ("%T")
+				a_file.put_new_line
+				a_file.flush
+			else
+				if attached operand as l_operand then
+					a_file.put_string ("%T")
+					a_file.put_string (instructions.at (opcode.index + 1).name)
+					a_file.put_string ("%T")
+					Result := l_operand.il_src_dump (a_file)
+					a_file.put_new_line
+					a_file.flush
+				else
+					a_file.put_string ("%T")
+					a_file.put_string (instructions.at (opcode.index + 1).name)
+					a_file.put_new_line
+					a_file.flush
+				end
+			end
+			Result := True
 		end
 
 feature -- Static

@@ -114,4 +114,36 @@ feature --Access
 			end
 		end
 
+	escaped_string: STRING_32
+		do
+			-- TODO to implement
+			Result := string_value
+		end
+feature -- Output
+
+	il_src_dump (a_file: FILE): BOOLEAN
+		do
+			inspect type
+			when  {OPERAND_TYPE}.t_none then
+				-- no operand, nothing to display
+			when  {OPERAND_TYPE}.t_value then
+				if attached ref_value as l_value then
+					Result := l_value.il_src_dump (a_file)
+				end
+			when  {OPERAND_TYPE}.t_int then
+				a_file.put_integer_64 (int_value)
+			when  {OPERAND_TYPE}.t_real then
+				-- TODO implement
+			when  {OPERAND_TYPE}.t_string then
+				a_file.put_string ("%"")
+				a_file.put_string (escaped_string)
+				a_file.put_string ("%"")
+			when  {OPERAND_TYPE}.t_label then
+				a_file.put_string (string_value)
+			else
+				-- do nothing
+			end
+			Result := True
+		end
+
 end
