@@ -259,11 +259,30 @@ feature -- Output
 							a_file.put_new_line
 							a_file.flush
 						end
-
-
 					end
-
+					a_file.put_string ("%T")
+					a_file.put_new_line
+					a_file.flush
 				end
+				if entry_point then
+					a_file.put_string ("%T.entrypoint")
+					a_file.put_new_line
+					a_file.flush
+				end
+				a_file.put_string ("%T.maxstack ")
+				a_file.put_integer (max_stack)
+				a_file.put_new_line
+				a_file.flush
+				a_file.put_new_line
+				a_file.flush
+				Result := Precursor {CODE_CONTAINER}(a_file)
+				a_file.put_string ("}")
+				a_file.put_new_line
+				a_file.flush
+			else
+				a_file.put_string ("{}")
+				a_file.put_new_line
+				a_file.flush
 			end
 		end
 
