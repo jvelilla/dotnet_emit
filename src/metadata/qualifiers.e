@@ -1,7 +1,7 @@
 note
 	description: "[
 		Qualifiers is a generic class that holds all the 'tags' you would see on various objects in
-		the assembly file.   Where possible things are handled implicitly for example 'nested'
+		the assembly file.   Where possible things are handled impicitly for example 'nested'
 		will automatically be added when a class is nested in another class.
 	]"
 	date: "$Date$"

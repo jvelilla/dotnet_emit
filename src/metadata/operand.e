@@ -122,6 +122,9 @@ feature --Access
 feature -- Output
 
 	il_src_dump (a_file: FILE): BOOLEAN
+		local
+			l_buf: ARRAY[NATURAL_8]
+			l_sz, i: INTEGER
 		do
 			inspect type
 			when  {OPERAND_TYPE}.t_none then
@@ -133,7 +136,13 @@ feature -- Output
 			when  {OPERAND_TYPE}.t_int then
 				a_file.put_integer_64 (int_value)
 			when  {OPERAND_TYPE}.t_real then
-				-- TODO implement
+				if float_value.is_nan or else  float_value.is_negative_infinity or else float_value.is_positive_infinity  then
+					create l_buf.make_filled (0, 1, 8)
+					if size = {OPERAND_SIZE}.r4 then
+						l_sz := 4
+						--  *(float*)buf = floatValue_;
+					end
+				end
 			when  {OPERAND_TYPE}.t_string then
 				a_file.put_string ("%"")
 				a_file.put_string (escaped_string)

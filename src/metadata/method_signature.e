@@ -106,8 +106,51 @@ feature -- Change Element
 
 feature -- Output
 
-	il_src_dump (a_file: FILE; a_names: BOOLEAN; a_types: BOOLEAN; a_pinvoke: BOOLEAN): BOOLEAN
+	il_src_dump (a_file: FILE; a_names: BOOLEAN; a_type: BOOLEAN; a_pinvoke: BOOLEAN): BOOLEAN
 		do
-			-- TO be implemented
+			-- this usage of vararg is for C style varargs
+		    -- occil uses C# style varags except in pinvoke and generates
+    		-- the associated object array argument
+    		if ((flags & {METHOD_SIGNATURE_ATTRIBUTES}.vararg) /= 0) and then
+    			not ((flags & {METHOD_SIGNATURE_ATTRIBUTES}.managed) /= 0)
+    		then
+    			a_file.put_string ("vararg ")
+    		end
+    		if flags & {METHOD_SIGNATURE_ATTRIBUTES}.instance_flag /= 0 then
+    			a_file.put_string ("instance ")
+    		end
+    		if attached return_type as l_ret_type and then
+    			l_ret_type.tp = {BASIC_TYPE}.cls
+    		then
+    			if attached l_ret_type.type_ref as l_type_ref and then l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value /= 0  then
+    				a_file.put_string ("valuetype ")
+    			else
+    				a_file.put_string ("class ")
+    			end
+    		end
+    		if attached return_type as l_ret_type then
+    			Result := l_ret_Type.il_src_dump (a_file)
+    		end
+			a_file.put_string (" ")
+			if a_type then
+				a_file.put_string (" *")
+			elseif not name.is_empty then
+				if attached array_object as l_array_obj then
+					Result := l_array_obj.il_src_dump (a_file)
+					a_file.put_string ("::'")
+					a_file.put_string (name)
+					a_file.put_string ("'")
+				elseif a_names then
+					a_file.put_string ("'")
+					a_file.put_string (name)
+					a_file.put_string ("'")
+				else
+					if attached {CLS_CLASS} then
+
+					end
+
+				end
+
+			end
 		end
 end
