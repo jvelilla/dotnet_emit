@@ -198,6 +198,29 @@ feature -- Output
 		do
 			a_file.put_string (".method")
 			flags.il_src_dump_before_flags (a_file)
+			if invoke_mode = {INVOKE_MODE}.PInvoke then
+				a_file.put_string (" pinvokeimpl(%"")
+				a_file.put_string (pinvoke_name)
+				a_file.put_string ("%"")
+				a_file.put_string (if pinvoke_type = {INVOKE_TYPE}.Cdecl then "cdecl)" else "stdcall)" end)
+			else
+				a_file.put_string (" ")
+			end
+			Result := prototype.il_src_dump (a_file, invoke_mode /= {INVOKE_MODE}.PInvoke, False,  invoke_mode = {INVOKE_MODE}.PInvoke)
+			flags.il_src_dump_after_flags (a_file)
+			if invoke_mode /= {INVOKE_MODE}.PInvoke then
+				a_file.put_string ("{")
+				a_file.put_new_line
+				a_file.flush
+				if (prototype.flags & {METHOD_SIGNATURE_ATTRIBUTES}.vararg) /= 0 and then
+					(prototype.flags & {METHOD_SIGNATURE_ATTRIBUTES}.managed) /= 0
+				then
+						-- TODO check why we need to include this references Hardcoded.
+						-- Allow C# to use
+
+
+				end
+			end
 		end
 
 

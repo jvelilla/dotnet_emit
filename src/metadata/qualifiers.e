@@ -102,11 +102,23 @@ feature -- Output
 		do
 			n := after_flags.bit_not & flags
 			across 0 |..| 31 as i loop
-				if n & (1 |<< i) >= 0 then
+					if n & (1 |<< i) /= 0 then
 					a_file.put_string (" ")
 					a_file.put_string (qualifier_names[i+1])
 				end
 			end
 		end
 
+	il_src_dump_after_flags (a_file: FILE)
+		local
+			n: INTEGER
+		do
+			n := after_flags & flags
+			across 0 |..| 31 as i loop
+					if n & (1 |<< i) /= 0 then
+					a_file.put_string (" ")
+					a_file.put_string (qualifier_names[i+1])
+				end
+			end
+		end
 end

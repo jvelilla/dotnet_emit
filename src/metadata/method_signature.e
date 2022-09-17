@@ -102,4 +102,12 @@ feature -- Change Element
 				flags := flags & ({METHOD_SIGNATURE_ATTRIBUTES}.instance_flag.bit_not)
 			end
 		end
+
+
+feature -- Output
+
+	il_src_dump (a_file: FILE; a_names: BOOLEAN; a_types: BOOLEAN; a_pinvoke: BOOLEAN): BOOLEAN
+		do
+			-- TO be implemented
+		end
 end
