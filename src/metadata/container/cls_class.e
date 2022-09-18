@@ -16,6 +16,8 @@ inherit
 	DATA_CONTAINER
 		rename
 			make as make_container
+		redefine
+			adorn_generics
 		end
 
 create

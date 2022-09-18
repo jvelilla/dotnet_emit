@@ -129,4 +129,10 @@ feature -- Output
 			across children as l_child loop
 			end
 		end
+
+	adorn_generics (names: BOOLEAN): STRING_32
+		do
+			-- TODO to be implemented.
+			create Result.make_empty
+		end
 end

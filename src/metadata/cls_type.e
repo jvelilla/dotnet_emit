@@ -100,9 +100,16 @@ feature -- Output
 				end
 				if attached type_ref as l_type_ref then
 					l_name := {QUALIFIERS}.name ("", l_type_ref, True)
-				end
 
-				--TODO to be completed.
+					if l_name[1] /= "[" then
+						a_file.put_string ("'")
+						a_file.put_string (l_name)
+						a_file.put_string ("'")
+						a_file.put_string (l_type_ref.adorn_generics(False))
+					else
+						-- TODO implement.
+					end
+				end
 			elseif tp = {BASIC_TYPE}.var then
 				a_file.put_string ("!")
 				a_file.put_integer (var_num)
@@ -117,6 +124,29 @@ feature -- Output
 			else
 				a_file.put_string (type_names.at (tp.index + 1))
 			end
+			if array_level = 1 then
+				a_file.put_string (" []")
+			elseif array_level /= 0 then
+				a_file.put_string (" [")
+				across 0 |..| array_level as  i loop
+					if i /= 0 then
+						a_file.put_string (", 0...")
+					else
+						a_file.put_string ("0...")
+					end
+				end
+				a_file.put_string ("]")
+			end
+			across 0 |..| array_level as  i loop
+				a_file.put_string (" *")
+			end
+			if by_ref then
+				a_file.put_string ("&")
+			end
+			if pinned then
+				a_file.put_string (" pinned")
+			end
+			Result := True
 		end
 
 end
