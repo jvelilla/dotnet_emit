@@ -13,6 +13,8 @@ inherit
 	VALUE
 		rename
 			make as make_value
+		redefine
+			il_src_dump
 		end
 create
 	make
@@ -29,4 +31,11 @@ feature -- Access
 
 	signature: METHOD_SIGNATURE
 
+
+feature -- Output
+
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
+		do
+			Result := signature.il_src_dump (a_file, false, false, false)
+		end
 end

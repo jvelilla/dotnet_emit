@@ -188,7 +188,6 @@ feature -- Output
 					end
 				end
 			end
-
 			if not a_pinvoke and then (flags & {METHOD_SIGNATURE_ATTRIBUTES}.vararg /= 0) then
 				if (flags & {METHOD_ATTRIBUTES}.managed) /= 0 then
 					a_file.put_string (", ...")
@@ -198,7 +197,7 @@ feature -- Output
 							if attached {CLS_TYPE} it.type as l_type then
 								Result := l_type.il_src_dump (a_file)
 							end
-							if @ it.cursor_index + 1 /= @ it.last_index then
+							if @ it.target_index + 1 /= @ it.last_index then
 								a_file.put_string (", ")
 							end
 						end
