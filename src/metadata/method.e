@@ -28,6 +28,7 @@ feature {NONE} --Initialization
 			make_code(a_flags)
 			prototype := a_prototype
 			max_stack := 100
+			entry_point := a_entry
 			invoke_mode := {INVOKE_MODE}.CIL
 			pinvoke_type := {INVOKE_TYPE}.Stdcall
 			create {ARRAYED_LIST [CLS_LOCAL]} var_list.make (0)

@@ -116,13 +116,13 @@ feature -- Output
     		then
     			a_file.put_string ("vararg ")
     		end
-    		if flags & {METHOD_SIGNATURE_ATTRIBUTES}.instance_flag /= 0 then
+    		if (flags & {METHOD_SIGNATURE_ATTRIBUTES}.instance_flag) /= 0 then
     			a_file.put_string ("instance ")
     		end
     		if attached return_type as l_ret_type and then
     			l_ret_type.tp = {BASIC_TYPE}.cls
     		then
-    			if attached l_ret_type.type_ref as l_type_ref and then l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value /= 0  then
+    			if attached l_ret_type.type_ref as l_type_ref and then (l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value) /= 0  then
     				a_file.put_string ("valuetype ")
     			else
     				a_file.put_string ("class ")
@@ -148,7 +148,7 @@ feature -- Output
 					if attached {CLS_CLASS} container as l_container and then
 						not l_container.generics.is_empty
 					then
-						if l_container.flags.flags & {METHOD_ATTRIBUTES}.value /= 0 then
+						if (l_container.flags.flags & {METHOD_ATTRIBUTES}.value) /= 0 then
 							a_file.put_string ("valuetype ")
 						else
 							a_file.put_string ("class ")
@@ -156,10 +156,62 @@ feature -- Output
 							-- TODO implement {QUALIFIERS}.name
 						a_file.put_string ({QUALIFIERS}.name ("", l_container, False))
 						a_file.put_string (l_container.adorn_generics (False))
+					else
+						-- TODO implement {QUALIFIERS}.name
+						if attached {CLS_CLASS} container as l_container then
+							a_file.put_string ({QUALIFIERS}.name ("", l_container, False))
+						end
 					end
-
 				end
-
 			end
+
+			a_file.put_string (adorn_generics(false))
+			a_file.put_string ("(")
+			across params as it loop
+				if attached {CLS_TYPE} it.type as l_type and then  l_type.tp = {BASIC_TYPE}.cls then
+					if attached l_type.type_ref as l_type_ref and then
+						(l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value) /= 0 then
+						a_file.put_string ("valuetype ")
+					else
+						a_file.put_string ("class ")
+					end
+				end
+				if attached {CLS_TYPE} it.type as l_type  then
+					Result := l_type.il_src_dump (a_file)
+					if l_type.tp /= {BASIC_TYPE}.var and then
+						l_type.tp /= {BASIC_TYPE}.mvar
+					then
+						Result := l_type.il_src_dump (a_file)
+					end
+					if @ it.cursor_index + 1 /= @ it.last_index then
+						a_file.put_string (", ")
+					end
+				end
+			end
+
+			if not a_pinvoke and then (flags & {METHOD_SIGNATURE_ATTRIBUTES}.vararg /= 0) then
+				if (flags & {METHOD_ATTRIBUTES}.managed) /= 0 then
+					a_file.put_string (", ...")
+					if not vararg_params.is_empty then
+						a_file.put_string (", ")
+						across vararg_params as it loop
+							if attached {CLS_TYPE} it.type as l_type then
+								Result := l_type.il_src_dump (a_file)
+							end
+							if @ it.cursor_index + 1 /= @ it.last_index then
+								a_file.put_string (", ")
+							end
+						end
+					end
+				end
+			end
+			a_file.put_string (")")
+			Result := True
+		end
+
+	adorn_generics(a_names: BOOLEAN): STRING_32
+		do
+			--TODO implement.
+			create Result.make_empty
 		end
 end
