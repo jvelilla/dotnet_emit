@@ -123,7 +123,7 @@ feature -- Static features
 
 feature -- Output
 
-	il_src_dump_before_flags (a_file: FILE)
+	il_src_dump_before_flags (a_file: FILE_STREAM)
 		local
 			n: INTEGER
 		do
@@ -136,7 +136,7 @@ feature -- Output
 			end
 		end
 
-	il_src_dump_after_flags (a_file: FILE)
+	il_src_dump_after_flags (a_file: FILE_STREAM)
 		local
 			n: INTEGER
 		do

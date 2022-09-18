@@ -164,7 +164,7 @@ feature -- Element change
 
 feature -- Output
 
-	il_src_dump (a_file: FILE): BOOLEAN
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		local
 			i: INTEGER
 		do

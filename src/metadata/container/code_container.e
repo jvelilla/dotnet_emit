@@ -383,7 +383,7 @@ feature {NONE} -- Implementation
 feature -- Output
 
 
-	il_src_dump (a_file: FILE): BOOLEAN
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
 			across instructions as ins loop
 				Result := ins.il_src_dump (a_file)

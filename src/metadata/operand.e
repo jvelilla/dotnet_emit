@@ -121,7 +121,7 @@ feature --Access
 		end
 feature -- Output
 
-	il_src_dump (a_file: FILE): BOOLEAN
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		local
 			l_buf: ARRAY[NATURAL_8]
 			l_sz, i: INTEGER

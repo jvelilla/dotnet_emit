@@ -27,7 +27,7 @@ feature {NONE} -- Initialization
 		do
 			make_container (a_name, a_flags)
 			create extends_name.make_empty
-			create {ARRAYED_LIST [CLS_CLASS]} generics.make (0)
+			create {ARRAYED_LIST [CLS_TYPE]} generics.make (0)
 			create {ARRAYED_LIST [PROPERTY]} properties.make (0)
 		end
 
@@ -48,7 +48,7 @@ feature -- Access
 	pack: INTEGER assign set_pack
 			-- `pack'
 
-	generics: LIST [CLS_CLASS]
+	generics: LIST [CLS_TYPE]
 		-- The list of generics.
 
 	extends_name: STRING_32
@@ -98,6 +98,29 @@ feature -- Element change
 			pack_assigned: pack = a_pack
 		end
 
-feature -- Access		
+
+feature -- Output
+
+	adorn_generics (a_names: BOOLEAN): STRING_32
+		local
+			l_count: INTEGER
+			l_type: CLS_TYPE
+			l_file: FILE
+		do
+			create {RAW_FILE} l_file.make_open_temporary
+			create Result.make_empty
+			if not generics.is_empty then
+				Result.append ("<")
+				across generics as it loop
+					if a_names and then it.tp = {BASIC_TYPE}.var then
+						Result.append_character ('A' + (it.var_num // 26))
+						Result.append_character ('A' + (it.var_num \\ 26))
+					else
+						l_type := it
+						l_type.show_type := True
+					end
+				end
+			end
+		end
 
 end

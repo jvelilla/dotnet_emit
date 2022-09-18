@@ -48,8 +48,18 @@ feature -- Access
 
 	pe_index: NATURAL
 
-	show_type: BOOLEAN
+	show_type: BOOLEAN assign set_show_type
 
+
+
+feature -- Element Change
+
+	set_show_type (a_val: BOOLEAN)
+		do
+			show_type := a_val
+		ensure
+			show_type_set: show_type = a_val
+		end
 
 feature -- Status Report
 
@@ -69,7 +79,7 @@ feature --Access Instance Free
 
 feature -- Output
 
-	il_src_dump (a_file: FILE): BOOLEAN
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
 			-- TODO implement
 		end

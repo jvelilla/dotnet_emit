@@ -95,7 +95,7 @@ feature -- Element change
 
 feature -- Output
 
-	il_header_dump (a_file: FILE): BOOLEAN
+	il_header_dump (a_file: FILE_STREAM): BOOLEAN
 		do
 			a_file.put_string (".assembly ")
 			if is_external then

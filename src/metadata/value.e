@@ -45,7 +45,7 @@ feature -- Change Element
 
 feature -- Output
 
-	il_src_dump (a_file: FILE): BOOLEAN
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
 			-- used for types
 			if attached type as l_type then

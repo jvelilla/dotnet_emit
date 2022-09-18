@@ -118,7 +118,7 @@ feature --Change Element
 
 feature -- Output
 
-	il_src_dump (a_file: FILE): BOOLEAN
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
 			across fields as l_field loop
 				-- TODO implement

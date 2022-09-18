@@ -37,7 +37,6 @@ feature {NONE} -- Creation
 	object once end
 	string once end
 
-
 feature -- Access
 
 	instances: ITERABLE [BASIC_TYPE]

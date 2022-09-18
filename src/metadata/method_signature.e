@@ -106,7 +106,7 @@ feature -- Change Element
 
 feature -- Output
 
-	il_src_dump (a_file: FILE; a_names: BOOLEAN; a_type: BOOLEAN; a_pinvoke: BOOLEAN): BOOLEAN
+	il_src_dump (a_file: FILE_STREAM; a_names: BOOLEAN; a_type: BOOLEAN; a_pinvoke: BOOLEAN): BOOLEAN
 		do
 			-- this usage of vararg is for C style varargs
 		    -- occil uses C# style varags except in pinvoke and generates
@@ -153,6 +153,9 @@ feature -- Output
 						else
 							a_file.put_string ("class ")
 						end
+							-- TODO implement {QUALIFIERS}.name
+						a_file.put_string ({QUALIFIERS}.name ("", l_container, False))
+						a_file.put_string (l_container.adorn_generics (False))
 					end
 
 				end

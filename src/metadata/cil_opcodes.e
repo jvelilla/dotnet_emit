@@ -193,7 +193,7 @@ feature {NONE} -- Creation
 	i_ldarga_s once index := 106 end
 	i_ldc_i4 once index := 107 end
 	i_ldc_i4_0 once index := 108 end
-	i_ldc_i4_1 once index :=109 end
+	i_ldc_i4_1 once index := 109 end
 	i_ldc_i4_2 once index := 110 end
 	i_ldc_i4_3 once index := 111 end
 	i_ldc_i4_4 once index := 112 end
@@ -321,5 +321,6 @@ feature {NONE} -- Creation
 feature -- Access
 
 	index: NATURAL_8
-		-- Index of the element.
+			-- Index of the element.
+
 end

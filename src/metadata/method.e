@@ -194,7 +194,7 @@ feature {NONE} -- Implementation
 
 feature -- Output
 
-	il_src_dump (a_file: FILE): BOOLEAN
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
 			a_file.put_string (".method")
 			flags.il_src_dump_before_flags (a_file)

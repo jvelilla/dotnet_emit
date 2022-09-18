@@ -55,7 +55,7 @@ feature {NONE} -- Initialization
 
 	assembly_name: STRING_32
 
-	output_stream: detachable FILE
+	output_stream: detachable FILE_STREAM
 
 	input_stream: detachable FILE
 
@@ -154,8 +154,11 @@ feature -- Output
          	-- the file can also be tagged as either console or win32
 		local
 			rv: BOOLEAN
+			l_stream: FILE_STREAM
 		do
-			create {RAW_FILE} output_stream.make_create_read_write (a_file_name)
+			create l_stream.make_binary (a_file_name)
+			l_stream.enable_debug
+			output_stream := l_stream
 			inspect a_mode
 			when {OUTPUT_MODE}.ilasm then
 				rv := il_src_dump
@@ -167,9 +170,7 @@ feature -- Output
 			else
 				rv := False
 			end
-			if attached output_stream as l_stream then
-				l_stream.close
-			end
+			l_stream.close
 		end
 
 feature {NONE} -- Output Implementation
