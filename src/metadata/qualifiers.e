@@ -113,7 +113,7 @@ feature -- Static features
 			instance_free: class
 		end
 
-	name (a_root: STRING_32; a_parent: DATA_CONTAINER; a_type: BOOLEAN): STRING_32
+	name (a_root: STRING_32; a_parent: detachable DATA_CONTAINER; a_type: BOOLEAN): STRING_32
 		do
 			-- TODO implement
 			create Result.make_empty

@@ -137,8 +137,10 @@ feature -- Output
 				end
 				a_file.put_string ("]")
 			end
-			across 0 |..| array_level as  i loop
-				a_file.put_string (" *")
+			if pointer_level > 0 then
+				across 0 |..| pointer_level as  i loop
+					a_file.put_string (" *")
+				end
 			end
 			if by_ref then
 				a_file.put_string ("&")
