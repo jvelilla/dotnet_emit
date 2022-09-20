@@ -202,8 +202,8 @@ feature -- Output
 			if invoke_mode = {INVOKE_MODE}.PInvoke then
 				a_file.put_string (" pinvokeimpl(%"")
 				a_file.put_string (pinvoke_name)
-				a_file.put_string ("%"")
-				a_file.put_string (if pinvoke_type = {INVOKE_TYPE}.Cdecl then "cdecl)" else "stdcall)" end)
+				a_file.put_string ("%" ")
+				a_file.put_string (if pinvoke_type = {INVOKE_TYPE}.Cdecl then "cdecl) " else "stdcall) " end)
 			else
 				a_file.put_string (" ")
 			end

@@ -208,6 +208,9 @@ feature {NONE} -- Output Implementation
 		do
 			if attached output_stream as l_stream then
 				Result := working_assembly.il_src_dump (l_stream)
+				across p_invoke_signatures as ic loop
+					Result := ic.il_src_dump (l_stream)
+				end
 			else
 				Result := False
 			end

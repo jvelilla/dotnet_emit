@@ -105,18 +105,33 @@ feature -- Static features
 			instance_free: class
 		end
 
-	name_prefix (a_parent: DATA_CONTAINER; a_type: BOOLEAN): STRING_32
+	name_prefix (a_parent: detachable DATA_CONTAINER; a_type: BOOLEAN): STRING_32
+		local
+			pos: INTEGER
 		do
-			-- TODO implement
 			create Result.make_empty
+			if attached a_parent then
+				pos:= 0
+				reverse_name_prefix (Result, a_parent, pos, a_type)
+			end
 		ensure
 			instance_free: class
 		end
 
 	name (a_root: STRING_32; a_parent: detachable DATA_CONTAINER; a_type: BOOLEAN): STRING_32
 		do
-			-- TODO implement
-			create Result.make_empty
+			Result := name_prefix (a_parent, a_type)
+			if not Result.is_empty then
+				Result := Result.substring (1, Result.count - 1)
+			end
+			if not a_root.empty then
+				if not Result.is_empty then
+					Result.append ("::")
+				end
+				Result.append_character(''')
+				Result.append(a_root)
+				Result.append_character(''')
+			end
 		ensure
 			instance_free: class
 		end
