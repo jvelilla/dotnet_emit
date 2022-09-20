@@ -7,9 +7,19 @@ class
 	FILE_STREAM
 
 create
+	make,
 	make_binary
 
 feature {NONE} -- Initialiation
+
+
+	make (a_file_name: STRING_32)
+		do
+			create {PLAIN_TEXT_FILE} output_stream.make_create_read_write (a_file_name)
+			create debug_output.make_empty
+			on_debug := False
+		end
+
 
 	make_binary (a_file_name: STRING_32)
 		do

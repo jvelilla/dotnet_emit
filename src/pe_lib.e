@@ -156,8 +156,15 @@ feature -- Output
 			rv: BOOLEAN
 			l_stream: FILE_STREAM
 		do
-			create l_stream.make_binary (a_file_name)
-			l_stream.enable_debug
+			if a_mode = {OUTPUT_MODE}.ilasm or else a_mode = {OUTPUT_MODE}.object then
+				create l_stream.make (a_file_name)
+			else
+				create l_stream.make_binary (a_file_name)
+			end
+
+			debug ("debug-cli")
+				l_stream.enable_debug
+			end
 			output_stream := l_stream
 			inspect a_mode
 			when {OUTPUT_MODE}.ilasm then
@@ -218,8 +225,12 @@ feature {NONE} -- Output Implementation
 
 
 	dump_pe_file (a_file_name: STRING_32; a_is_exe: BOOLEAN; a_is_gui: BOOLEAN): BOOLEAN
+		local
+			n: NATURAL
 		do
-			-- TODO implement
+			n := 1
+				-- Give initial PE Indexes for field resolution..
+			n :=  working_assembly.number (n)
 		end
 
 	obj_out: BOOLEAN

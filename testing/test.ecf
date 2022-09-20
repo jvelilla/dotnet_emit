@@ -19,7 +19,8 @@
 			</option>
 		</library>
 		<library name="dotnet_emit" location="..\dotnet_emit.ecf" readonly="false">
-			<option warning="none">
+			<option debug="true" warning="none">
+				<debug name="debug-cli" enabled="true"/>
 			</option>
 		</library>
 		<cluster name="dotnet_emit_test" location=".\" recursive="true">

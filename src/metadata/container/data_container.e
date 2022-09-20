@@ -76,7 +76,7 @@ feature -- Access Enumerations
 			-- reference to 'System' namespace
 
 
-feature --Change Element
+feature --Element Change
 
 	add_data_container (a_item: DATA_CONTAINER)
 			-- Add another data container
@@ -113,6 +113,17 @@ feature --Change Element
 			end
 		ensure
 			-- To be added.
+		end
+
+	number (n: NATURAL) : NATURAL
+		do
+			if attached {NAMESPACE} Current  then
+				Result := n + 1
+				pe_index := Result
+			end
+			across children as child loop
+				Result := child.number (Result)
+			end
 		end
 
 
