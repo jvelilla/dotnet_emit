@@ -227,10 +227,13 @@ feature {NONE} -- Output Implementation
 	dump_pe_file (a_file_name: STRING_32; a_is_exe: BOOLEAN; a_is_gui: BOOLEAN): BOOLEAN
 		local
 			n: NATURAL
+			l_pe_writer: PE_WRITER
 		do
 			n := 1
 				-- Give initial PE Indexes for field resolution..
 			n :=  working_assembly.number (n)
+
+--			create L_pe_writer
 		end
 
 	obj_out: BOOLEAN
