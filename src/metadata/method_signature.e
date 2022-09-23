@@ -30,24 +30,52 @@ feature {NONE} -- Initialization
 			create display_name.make_empty
 			create {ARRAYED_LIST[PARAM]} params.make(0)
 			create {ARRAYED_LIST[PARAM]} vararg_params.make(0)
-
+			create {ARRAYED_LIST[CLS_TYPE]} generic.make (0)
+			create display_name.make_empty
+		ensure
+			container_set: attached container as l_container and then l_container = a_container
+			name_set: name = a_name
+			flags_set: flags = a_flags
+			return_type_void: return_type = Void
+			ref_set: not ref
+			pe_index_set: pe_index = 0
+			pe_index_call_site_set: pe_index_call_site = 0
+			method_parent_void: method_parent = Void
+			array_object_void: array_object = Void
+			external_set: not is_external
+			definitions_set: definitions = 0
+			generic_parent_void: generic_parent = Void
+			generic_param_count_set: generic_param_count = 0
+			params_empty: params.is_empty
+			vararg_params_empty: vararg_params.is_empty
+			generic_empty : generic.is_empty
+			display_name_empty: display_name.is_empty
 		end
 
+	internal_definitions: NATURAL
+			-- definition count
 feature -- Access
 
 	method_parent: detachable METHOD_SIGNATURE
+		-- the parent declaration for a call site signature with vararg
+        --  params (the method_def version of the signature)
 
 	container: detachable DATA_CONTAINER
+		-- The data container.
 
 	return_type: detachable CLS_TYPE
+		-- return type.
 
 	array_object: detachable CLS_TYPE
+		-- The array object.
 
 	name: STRING_32
+		-- The name.
 
 	display_name: STRING_32
 
 	flags: INTEGER
+		-- qualifiers.
 
 	params: LIST [PARAM]
 
@@ -61,18 +89,31 @@ feature -- Access
 
 	pe_index_type: NATURAL
 
-	external_: BOOLEAN
+	is_external: BOOLEAN
+		-- not locally defined.
 
-	definitions: NATURAL
-
-	generic: detachable LINKED_LIST [CLS_TYPE]
+	generic: LIST [CLS_TYPE]
+		-- The lists of generics.
 
 	generic_parent: detachable METHOD_SIGNATURE
 
 	generic_param_count: INTEGER
 
+	definitions: NATURAL
+			-- Return definitions count.
+		do
+			Result := internal_definitions // 2;
+		end
 
 feature -- Change Element
+
+	increment_definitions
+			-- Increment definitions count.
+		do
+			internal_definitions := internal_definitions + 1
+		ensure
+			definitions_incremented: old internal_definitions + 1 = internal_definitions
+		end
 
 	set_return_type (a_type: CLS_TYPE)
 			-- Set `return_type` with `a_type`.	
@@ -94,7 +135,7 @@ feature -- Change Element
 		end
 
 	instance (a_instance: BOOLEAN)
-			-- Make it an instance member
+			-- Make it an instance member.
 		do
 			if a_instance then
 				flags := flags | {METHOD_SIGNATURE_ATTRIBUTES}.instance_flag

@@ -61,8 +61,8 @@ feature -- Access
 
 			-- we have to first make a pinvoke reference WITHOUT extra args
 
-			create signature_ex.make ("printf", 0, Void)
---			signature_rep.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
+			create signature_ex.make ("printf", {METHOD_SIGNATURE_ATTRIBUTES}.vararg, Void)
+			signature_ex.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0))
 --			signature_rep.add_parameter (create {PARAM}.make ("ch", create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0)))
 --			lib_entry.add_pinvoke_reference (signature_rep, "msvcrt.dll", true)
 
