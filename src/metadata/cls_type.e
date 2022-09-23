@@ -9,7 +9,8 @@ class
 	CLS_TYPE
 
 create
-	make
+	make,
+	make_with_container
 
 feature {NONE} --Initialization
 
@@ -21,6 +22,37 @@ feature {NONE} --Initialization
 			else
 				pointer_level := a_pointer_level
 			end
+		ensure
+			tp_set: tp = a_type
+			pointer_level_set: not (tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar ) implies pointer_level = a_pointer_level
+			pointer_level_defaul: (tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar ) implies pointer_level = 0
+			array_level_set: array_level = 0
+			by_ref_set: not by_ref
+			type_ref_void:  type_ref = Void
+			method_ref_void: method_ref = Void
+			pe_index_set: pe_index = 0
+			pinned_set: not pinned
+			show_type_set: not show_type
+			var_num_default: not (tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar ) implies var_num = 0
+			var_num_set: tp = (tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar ) implies var_num = a_pointer_level
+
+		end
+
+	make_with_container (a_container: DATA_CONTAINER)
+		do
+			tp := {BASIC_TYPE}.cls
+			type_ref := a_container
+		ensure
+			tp_set: tp = {BASIC_TYPE}.cls
+			pointer_level_set: pointer_level = 0
+			array_level_set: array_level = 0
+			by_ref_set: not by_ref
+			type_ref_set: attached type_ref as l_type_ref and then l_type_ref = a_container
+			method_ref_void: method_ref = Void
+			pe_index_set: pe_index = 0
+			pinned_set: not pinned
+			show_type_set: not show_type
+			var_num_set: var_num = 0
 		end
 
 

@@ -25,11 +25,15 @@ feature {NONE} -- Initialization
 	make_with_flags (a_flags: INTEGER)
 		do
 			flags := a_flags
+		ensure
+			flags_set: flags = a_flags
 		end
 
 	make_from_other (other: QUALIFIERS)
 		do
 			flags := other.flags
+		ensure
+			falgs_set: flags = other.flags
 		end
 
 feature -- Access

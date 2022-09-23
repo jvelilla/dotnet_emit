@@ -1,5 +1,5 @@
 note
-	description: "a field, could be either static or non-static"
+	description: "A field, could be either static or non-static"
 	date: "$Date$"
 	revision: "$Revision$"
 
