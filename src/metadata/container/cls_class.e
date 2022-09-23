@@ -31,6 +31,8 @@ feature {NONE} -- Initialization
 			create extends_name.make_empty
 			create {ARRAYED_LIST [CLS_TYPE]} generics.make (0)
 			create {ARRAYED_LIST [PROPERTY]} properties.make (0)
+			pack := a_pack
+			size := a_size
 		ensure
 			pack_set: pack = a_pack
 			size_set: size = a_size

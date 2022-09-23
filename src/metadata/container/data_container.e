@@ -78,6 +78,20 @@ feature -- Access Enumerations
 
 feature --Element Change
 
+	add (a_item: ANY)
+			-- Add an `a_item` to a container
+       		-- This could be a
+       		--	data container
+       		--	code container
+       		-- 	field container
+		do
+			if attached {DATA_CONTAINER} a_item as l_data  then
+				add_data_container (l_data)
+			elseif attached {CODE_CONTAINER} a_item as l_code then
+				add_code_container (l_code)
+			end
+		end
+
 	add_data_container (a_item: DATA_CONTAINER)
 			-- Add another data container
 			-- This could be an assemblydef, namespace, class, or enumeration.
