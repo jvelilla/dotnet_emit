@@ -20,17 +20,10 @@ feature {NONE} -- Initialization
 		do
 			core_flags := a_core_flags
 
-				-- TODO check if it's convenient to use a NULL Object in
-				-- the following cases.
---			pe_writer := Void
---			input_stream := Void
---			output_stream := Void
---			code_container := Void
---			obj_input_buf := Void
-
 			create module_refs.make (0)
 
 			create {LINKED_LIST [ASSEMBLY_DEF]} assembly_refs.make
+			assembly_refs.compare_objects
 			create p_invoke_signatures.make (0)
 			create p_invoke_references.make (0)
 			create assembly_name.make_empty
@@ -41,7 +34,23 @@ feature {NONE} -- Initialization
 
 			create l_assembly_ref.make (a_name, False, create {ARRAY [NATURAL_8]}.make_filled (0, 1, 8))
 			assembly_refs.force (l_assembly_ref)
-
+		ensure
+			valid_obj_input_size:	obj_input_size = 0
+			valid_obj_input_pos:	obj_input_pos = 0
+			valid_obj_input_cache:	obj_input_cache = 0
+			core_flags_set:  core_flags = a_core_flags
+			module_refs_empty: module_refs.is_empty
+			assembly_name_empty: assembly_name.is_empty
+			assembly_refs_set: assembly_refs.count = 1
+			using_list_empty: using_list.is_empty
+			input_stream_void: input_stream = Void
+			file_name_empty: file_name.is_empty
+			unmanaged_routines_empty: unmanaged_routines.is_empty
+			pe_writer_void: pe_writer = Void
+			container_stack_empty: container_stack.is_empty
+			code_container_void: code_container = Void
+			p_invoke_references_empty: p_invoke_references.is_empty
+			p_invoke_signatures_empty: p_invoke_signatures.is_empty
 		end
 
 	assembly_refs: LIST [ASSEMBLY_DEF]

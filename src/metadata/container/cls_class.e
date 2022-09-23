@@ -1,10 +1,10 @@
 note
 	description: "[
-		A class, note that it cannot contain namespaces which is enforced at compile time
-    	note that all classes have to eventually derive from one of the System base classes
-     	but that is handled internally 
-     	Enums derive from this
-	]"
+					A class, note that it cannot contain namespaces which is enforced at compile time
+			    	note that all classes have to eventually derive from one of the System base classes
+			     	but that is handled internally 
+			     	Enums derive from this
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -31,6 +31,16 @@ feature {NONE} -- Initialization
 			create extends_name.make_empty
 			create {ARRAYED_LIST [CLS_TYPE]} generics.make (0)
 			create {ARRAYED_LIST [PROPERTY]} properties.make (0)
+		ensure
+			pack_set: pack = a_pack
+			size_set: size = a_size
+			flags_set: flags = a_flags
+			name_set: name = a_name
+			extend_from_void: extend_from = Void
+			generic_parent_void: generic_parent = Void
+			is_external_false: not is_external
+			properties_empty: properties.is_empty
+			generics_empty: generics.is_empty
 		end
 
 feature -- Access
@@ -51,7 +61,7 @@ feature -- Access
 			-- `pack'
 
 	generics: LIST [CLS_TYPE]
-		-- The list of generics.
+			-- The list of generics.
 
 	extends_name: STRING_32
 
@@ -99,7 +109,6 @@ feature -- Element change
 		ensure
 			pack_assigned: pack = a_pack
 		end
-
 
 feature -- Output
 

@@ -1,13 +1,13 @@
 note
 	description: "[
-		The first program just calls putchar('A') via pinvoke.
+		The program calls printf("%s", "hi")
+		It only uses the unnamed namespace
 	]"
-	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	TEST_1
+	TEST_2
 
 feature -- Access
 
@@ -22,7 +22,7 @@ feature -- Access
 			ins: INSTRUCTION
 			method_name: METHOD_NAME
 		do
-			create lib_entry.make ("test1", {PE_LIB}.bits32)
+			create lib_entry.make ("test1",  {PE_LIB}.il_only | {PE_LIB}.bits32)
 			working := lib_entry.working_assembly
 
 			create signature_rep.make("putchar", 0, Void)
