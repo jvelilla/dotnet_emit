@@ -16,6 +16,21 @@ feature {NONE} -- Initialization
 			name := a_name
 			type := a_type
 			flags := a_flags
+			mode := {VALUE_MODE}.None
+			size := {VALUE_SIZE}.i8
+		ensure
+			parent_void: parent = Void
+			name_set: name = a_name
+			flags_set: flags = a_flags
+			type_set: type = a_type
+			mode_set: mode = {VALUE_MODE}.None
+			size_set: size = {VALUE_SIZE}.i8
+			byte_length_set: byte_length = 0
+			ref_set: not ref
+			pe_index_set: pe_index = 0
+			explicit_offset_set: explicit_offset = 0
+			is_external_set: not is_external
+			definitions_set: definitions = 0
 		end
 
 feature -- Access
@@ -27,26 +42,22 @@ feature -- Access
 			-- Not locally defined.
 
 	explicit_offset: NATURAL assign set_explicit_offset
-			-- `explicit_offset'
-		attribute check False then end end --| Remove line when `explicit_offset' is initialized in creation procedure.
+			-- Field offset for explicit structures
 
 	pe_index: NATURAL assign set_pe_index
-			-- `pe_index'
-		attribute check False then end end --| Remove line when `pe_index' is initialized in creation procedure.
+			-- Index in the `fielddef` table
 
 	ref: BOOLEAN assign set_ref
 			-- Is field referenced?
 
 	byte_length: INTEGER assign set_byte_length
 			-- `byte_length'
-		attribute check False then end end --| Remove line when `byte_length' is initialized in creation procedure.
 
 	type: CLS_TYPE assign set_type
 			-- The `type' of field.
 
 	size: VALUE_SIZE assign set_size
 			-- `size'
-		attribute check False then end end --| Remove line when `size' is initialized in creation procedure.
 
 	parent: detachable DATA_CONTAINER
 			-- `parent'
@@ -59,8 +70,12 @@ feature -- Access
 
 	mode: VALUE_MODE assign set_mode
 			-- `mode'
-		attribute check False then end end --| Remove line when `mode' is initialized in creation procedure.
 
+	-- The following two attributes are represented as a Union
+	byte_value: NATURAL
+		-- TO be checked but it could be an ARRAY[NATURAL_8]
+
+	enum_value: INTEGER_64
 
 
 feature -- Element change

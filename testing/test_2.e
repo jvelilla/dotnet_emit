@@ -15,7 +15,9 @@ feature -- Access
 		local
 			lib_entry: PE_LIB
 			working: DATA_CONTAINER
-			i8_clas: CLS_CLASS
+			i8_cls: CLS_CLASS
+			ps: FIELD
+			str: FIELD
 
 			signature_rep: METHOD_SIGNATURE
 			signature_m: METHOD_SIGNATURE
@@ -27,7 +29,7 @@ feature -- Access
 			create lib_entry.make ("test1", {PE_LIB}.il_only | {PE_LIB}.bits32)
 			working := lib_entry.working_assembly
 
-			create i8_clas.make ("int8[]", create {QUALIFIERS}.make_with_flags (
+			create i8_cls.make ("int8[]", create {QUALIFIERS}.make_with_flags (
 					{METHOD_ATTRIBUTES}.private |
 					{METHOD_ATTRIBUTES}.explicit |
 					{METHOD_ATTRIBUTES}.ansi |
@@ -35,8 +37,12 @@ feature -- Access
 					{METHOD_ATTRIBUTES}.value)
 				, 1, 1)
 
+			create ps.make ("pS", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.static))
+			create str.make ("pS", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.static))
 
-			
+			working.add_data_container (i8_cls)
+
+
 
 			create signature_rep.make ("putchar", 0, Void)
 			signature_rep.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
