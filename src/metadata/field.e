@@ -18,6 +18,7 @@ feature {NONE} -- Initialization
 			flags := a_flags
 			mode := {VALUE_MODE}.None
 			size := {VALUE_SIZE}.i8
+			create byte_value.make_empty
 		ensure
 			parent_void: parent = Void
 			name_set: name = a_name
@@ -25,12 +26,12 @@ feature {NONE} -- Initialization
 			type_set: type = a_type
 			mode_set: mode = {VALUE_MODE}.None
 			size_set: size = {VALUE_SIZE}.i8
-			byte_length_set: byte_length = 0
 			ref_set: not ref
 			pe_index_set: pe_index = 0
 			explicit_offset_set: explicit_offset = 0
 			is_external_set: not is_external
 			definitions_set: definitions = 0
+			byte_value_empty: byte_value.is_empty
 		end
 
 feature -- Access
@@ -49,9 +50,6 @@ feature -- Access
 
 	ref: BOOLEAN assign set_ref
 			-- Is field referenced?
-
-	byte_length: INTEGER assign set_byte_length
-			-- `byte_length'
 
 	type: CLS_TYPE assign set_type
 			-- The `type' of field.
@@ -72,13 +70,25 @@ feature -- Access
 			-- `mode'
 
 	-- The following two attributes are represented as a Union
-	byte_value: NATURAL
+	byte_value: ARRAY [NATURAL_8]
 		-- TO be checked but it could be an ARRAY[NATURAL_8]
 
 	enum_value: INTEGER_64
 
 
 feature -- Element change
+
+	add_initializer (a_bytes: ARRAY [NATURAL_8])
+			--  Add an SDATA initializer
+			--| this will be readonly in ILONLY assemblies.
+		do
+			if mode = {VALUE_MODE}.None then
+				create byte_value.make_from_array (a_bytes)
+				mode :={VALUE_MODE}.Bytes
+			end
+		ensure
+			initiliazed: (old mode = {VALUE_MODE}.None) implies byte_value.same_items (a_bytes) and then mode = {VALUE_MODE}.Bytes
+		end
 
 	increment_definitions
 			-- Increment `definitions` count.
@@ -118,14 +128,6 @@ feature -- Element change
 			ref := a_ref
 		ensure
 			ref_assigned: ref = a_ref
-		end
-
-	set_byte_length (a_byte_length: like byte_length)
-			-- Assign `byte_length' with `a_byte_length'.
-		do
-			byte_length := a_byte_length
-		ensure
-			byte_length_assigned: byte_length = a_byte_length
 		end
 
 	set_type (a_type: like type)

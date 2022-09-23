@@ -89,6 +89,8 @@ feature --Element Change
 				add_data_container (l_data)
 			elseif attached {CODE_CONTAINER} a_item as l_code then
 				add_code_container (l_code)
+			elseif attached {FIELD} a_item as l_field then
+				add_field_container (l_field)
 			end
 		end
 
@@ -108,6 +110,15 @@ feature --Element Change
 			item.set_container (Current)
 			methods.force (item)
 		end
+
+
+	add_field_container (item: FIELD)
+			-- Add a field
+		do
+			item.set_container (Current)
+			fields.force (item)
+		end
+
 
 	set_parent (a_item: DATA_CONTAINER)
 		do
