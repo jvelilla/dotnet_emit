@@ -14,8 +14,8 @@ feature  -- Initialization
 	make
 			-- Run application.
 		do
-			(create {TEST_1}).test()
-			(create {TEST_2}).test()
+			(create {TEST_1}).test;
+			(create {TEST_2}).test;
 		end
 
 note
