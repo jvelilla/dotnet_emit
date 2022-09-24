@@ -14,6 +14,7 @@ note
 	date: "$Date$"
 	revision: "$Revision$"
 
+
 class
 	METHOD_SIGNATURE
 
@@ -33,7 +34,7 @@ feature {NONE} -- Initialization
 			create {ARRAYED_LIST[CLS_TYPE]} generic.make (0)
 			create display_name.make_empty
 		ensure
-			container_set: attached container as l_container and then l_container = a_container
+			container_set: attached container as l_container implies l_container = a_container
 			name_set: name = a_name
 			flags_set: flags = a_flags
 			return_type_void: return_type = Void
@@ -134,6 +135,17 @@ feature -- Change Element
 			params.force (a_param)
 		end
 
+	add_vararg_param (a_param: PARAM)
+			--  Add a vararg parameter `a_param`.
+			--| These are NATIVE vararg parameters not
+			--| C# ones.
+			--| They are only added to signatures at a call site...
+			--| Note: Call site I.12.4.1.1 Call site descriptors
+		do
+			a_param.set_index (params.count + vararg_params.count)
+			vararg_params.force (a_param)
+		end
+
 	instance (a_instance: BOOLEAN)
 			-- Make it an instance member.
 		do
@@ -142,6 +154,16 @@ feature -- Change Element
 			else
 				flags := flags & ({METHOD_SIGNATURE_ATTRIBUTES}.instance_flag.bit_not)
 			end
+		end
+
+
+	signature_parent (a_parent: METHOD_SIGNATURE)
+			-- the parent declaration `a_parent` for a call site signature with vararg
+         	-- params (the methoddef version of the signature)
+		do
+			method_parent := a_parent
+		ensure
+			method_parent_set: attached method_parent as l_method_parent implies l_method_parent = a_parent
 		end
 
 

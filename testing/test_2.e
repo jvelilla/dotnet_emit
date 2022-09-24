@@ -22,7 +22,7 @@ feature -- Access
 			ps_init: ARRAY [NATURAL_8]
 			str_init: ARRAY [NATURAL_8]
 
-			signature_ex: METHOD_SIGNATURE
+			signature_ex, signature_ep: METHOD_SIGNATURE
 			signature_m: METHOD_SIGNATURE
 			start: METHOD
 			op: OPERAND
@@ -63,15 +63,34 @@ feature -- Access
 
 			create signature_ex.make ("printf", {METHOD_SIGNATURE_ATTRIBUTES}.vararg, Void)
 			signature_ex.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0))
---			signature_rep.add_parameter (create {PARAM}.make ("ch", create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0)))
---			lib_entry.add_pinvoke_reference (signature_rep, "msvcrt.dll", true)
+			signature_ex.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
+			lib_entry.add_pinvoke_reference (signature_ex, "msvcrt.dll", true)
 
---			create signature_m.make ("$Main", {METHOD_ATTRIBUTES}.managed, working)
---			signature_m.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
 
---			create start.make (signature_m, create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.Static | {METHOD_ATTRIBUTES}.hidebysig | {METHOD_ATTRIBUTES}.Cil | {METHOD_ATTRIBUTES}.managed), True)
+			--  then we make a call site signature that enumerates all the args
+			--  including the ones we are adding as variable length
+			--  this is the one we use in the call
+			create signature_ep.make ("printf", {METHOD_SIGNATURE_ATTRIBUTES}.vararg, Void)
+			signature_ep.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0))
+			signature_ep.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
+			signature_ep.add_vararg_param (create {PARAM}.make ("A_1", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
 
---			working.add_code_container (start)
+			--  note the reference to the pinvoke signature
+			signature_ep.signature_parent (signature_ex)
+
+
+
+			create signature_m.make ("$Main", {METHOD_ATTRIBUTES}.managed, working)
+			signature_m.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
+
+			create start.make (signature_m,
+											create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private |
+													{METHOD_ATTRIBUTES}.Static |
+													{METHOD_ATTRIBUTES}.hidebysig |
+													{METHOD_ATTRIBUTES}.Cil |
+													{METHOD_ATTRIBUTES}.managed), True)
+
+			working.add_code_container (start)
 
 --			op := {OPERAND_FACTORY}.character_operand ('A', {OPERAND_SIZE}.i32)
 --			create ins.make ({CIL_OPCODES}.i_ldc_i4, op)
