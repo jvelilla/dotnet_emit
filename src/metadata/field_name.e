@@ -23,6 +23,14 @@ feature {NONE} -- Initialization
 			--|assembly, in a rudimentary way
 		do
 			make_value("", Void)
+			field := a_field
+		ensure
+			field_set: field = a_field
 		end
+
+feature -- Access
+
+	field: FIELD
+		-- The field reference.		
 
 end

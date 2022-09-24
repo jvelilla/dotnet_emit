@@ -29,7 +29,7 @@ feature -- Access
 			ins: INSTRUCTION
 			method_name: METHOD_NAME
 		do
-			create lib_entry.make ("test1", {PE_LIB}.il_only | {PE_LIB}.bits32)
+			create lib_entry.make ("test2", {PE_LIB}.il_only | {PE_LIB}.bits32)
 			working := lib_entry.working_assembly
 
 			create i8_cls.make ("int8[]", create {QUALIFIERS}.make_with_flags (
@@ -92,23 +92,21 @@ feature -- Access
 
 			working.add_code_container (start)
 
---			op := {OPERAND_FACTORY}.character_operand ('A', {OPERAND_SIZE}.i32)
---			create ins.make ({CIL_OPCODES}.i_ldc_i4, op)
---			start.add_instruction (ins)
 
---			create method_name.make (signature_rep)
+			create ins.make ({CIL_OPCODES}.i_ldsflda,{OPERAND_FACTORY}.complex_operand (create {FIELD_NAME}.make (ps)))
+			start.add_instruction (ins)
+			create ins.make ({CIL_OPCODES}.i_ldsflda,{OPERAND_FACTORY}.complex_operand (create {FIELD_NAME}.make (str)))
+			start.add_instruction (ins)
+			create ins.make ({CIL_OPCODES}.i_call,{OPERAND_FACTORY}.complex_operand (create {METHOD_NAME}.make (signature_ep)))
+			start.add_instruction (ins)
+			create ins.make ({CIL_OPCODES}.i_ret, Void)
+			start.add_instruction (ins)
 
---			op := {OPERAND_FACTORY}.complex_operand (method_name)
---			create ins.make ({CIL_OPCODES}.i_call, op)
---			start.add_instruction (ins)
 
---			create ins.make ({CIL_OPCODES}.i_ret, Void)
---			start.add_instruction (ins)
+			start.optimize (lib_entry)
 
---			start.optimize (lib_entry)
-
---			lib_entry.dump_output_file ("test1.il", {OUTPUT_MODE}.ilasm, False)
---			lib_entry.dump_output_file ("test1.exe", {OUTPUT_MODE}.peexe, False)
+			lib_entry.dump_output_file ("test2.il", {OUTPUT_MODE}.ilasm, False)
+			--lib_entry.dump_output_file ("test1.exe", {OUTPUT_MODE}.peexe, False)
 
 		end
 
