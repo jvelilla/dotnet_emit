@@ -126,7 +126,7 @@ feature {NONE} -- Implementation
 		do
 			-- TODO double check what's the best way to representt these arrays.
 			-- Potential issue: indexes
-			-- Memory issue, maybe we can create it iff we need it.
+			-- Memory issue, maybe we can create them iff we need them.
 
 
 			ldlocs := <<{CIL_OPCODES}.i_ldloc_0, {CIL_OPCODES}.i_ldloc_1,

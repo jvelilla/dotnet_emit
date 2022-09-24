@@ -156,8 +156,8 @@ feature -- Output
 
 	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
-			across fields as l_field loop
-				-- TODO implement
+			across fields as field loop
+				Result := field.il_src_dump (a_file)
 			end
 			across methods as method  loop
 				Result := method.il_src_dump(a_file)

@@ -179,4 +179,28 @@ feature -- Element change
 			mode_assigned: mode = a_mode
 		end
 
+feature -- Output
+
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
+		do
+			a_file.put_string (".field")
+			if attached parent as l_parent and then
+				l_parent.flags.flags & {METHOD_ATTRIBUTES}.explicit /= 0 or else
+				attached parent as l_parent and then
+				l_parent.flags.flags & {METHOD_ATTRIBUTES}.sequential /= 0 and then explicit_offset /= 0
+			then
+				a_file.put_string (" [")
+				a_file.put_integer_64 (explicit_offset)
+				a_file.put_string ("]")
+			end
+			flags.il_src_dump_before_flags(a_file)
+			flags.il_src_dump_after_flags(a_file)
+
+			if type.tp = {BASIC_TYPE}.cls then
+				
+			end
+
+			Result := true
+		end
+
 end
