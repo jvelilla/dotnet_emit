@@ -197,9 +197,33 @@ feature -- Output
 			flags.il_src_dump_after_flags(a_file)
 
 			if type.tp = {BASIC_TYPE}.cls then
-				
+				if attached {DATA_CONTAINER} type.type_ref as l_type_ref and then
+					l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value /= 0
+				then
+					a_file.put_string (" valuetype ")
+					Result := type.il_src_dump (a_file)
+				else
+					a_file.put_string (" class ")
+					Result :=type.il_src_dump (a_file)
+				end
+			else
+				a_file.put_string (" ")
+				Result := type.il_src_dump (a_file)
 			end
+			a_file.put_string (" '")
+			a_file.put_string (name)
+			a_file.put_string ("'")
 
+			inspect mode
+			when {VALUE_MODE}.None then
+				-- do nothing
+			when {VALUE_MODE}.Enum then
+				-- To be implemented
+			when {VALUE_MODE}.Bytes then
+				-- To be implemented	
+			else
+
+			end
 			Result := true
 		end
 

@@ -102,9 +102,37 @@ feature -- Static features
 			instance_free: class
 		end
 
-	reverse_name_prefix (a_rv: STRING_32; a_parent: DATA_CONTAINER; a_pos: INTEGER; a_type: BOOLEAN)
+	reverse_name_prefix (a_rv: STRING_32; a_parent: detachable DATA_CONTAINER; a_pos: INTEGER; a_type: BOOLEAN): INTEGER
+		local
+			pos: INTEGER
 		do
-			-- TODO implement
+			pos := a_pos
+			if attached a_parent as l_parent then
+				pos := reverse_name_prefix (a_rv, l_parent.parent, pos, a_type)
+				if pos /= 0 then
+					a_rv.append (l_parent.name)
+					if attached {CLS_CLASS} l_parent and then
+						l_parent.parent = Void or else
+						not attached {CLS_CLASS}l_parent.parent
+					then
+						if a_type then
+							a_rv.append ("%/0xf8/")
+						else
+							a_rv.append ("/")
+						end
+					else
+						a_rv.append (".")
+					end
+				elseif attached {ASSEMBLY_DEF} l_parent as l_parent_assembly then
+					if l_parent_assembly.is_external then
+						a_rv.append ("[")
+						a_rv.append (l_parent_assembly.name)
+						a_rv.append ("]")
+					end
+				end
+				pos := pos + 1
+				Result := pos
+			end
 		ensure
 			instance_free: class
 		end
@@ -115,8 +143,8 @@ feature -- Static features
 		do
 			create Result.make_empty
 			if attached a_parent then
-				pos:= 0
-				reverse_name_prefix (Result, a_parent, pos, a_type)
+				pos := 0
+				pos := reverse_name_prefix (Result, a_parent, pos, a_type)
 			end
 		ensure
 			instance_free: class
