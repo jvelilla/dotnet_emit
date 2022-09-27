@@ -227,22 +227,26 @@ feature -- Output
 				if not byte_value.is_empty then
 					a_file.put_string(" at $")
 					a_file.put_string(name)
+					a_file.put_new_line
 					a_file.put_string(".data cil $")
 					a_file.put_string(name)
 					a_file.put_string(" = bytearray (")
+					a_file.put_new_line
 
 					across byte_value as ic loop
-						a_file.put_integer_64 (ic)
-						a_file.put_string (format_integer(2,'0').formatted(ic))
+						a_file.put_string (ic.to_hex_string)
+						a_file.put_string (" ")
 						if @ ic.target_index = @ ic.last_index then
 							a_file.put_new_line
 							a_file.put_string ("%T")
 						end
 					end
+					a_file.put_string (")")
 				end
 			else
-
+				-- do nothing.
 			end
+			a_file.put_new_line
 			Result := true
 		end
 
