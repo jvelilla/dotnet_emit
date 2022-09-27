@@ -17,6 +17,7 @@ inherit
 		rename
 			make as make_container
 		redefine
+			il_src_dump,
 			adorn_generics
 		end
 
@@ -114,13 +115,60 @@ feature -- Element change
 
 feature -- Output
 
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
+		do
+			il_src_dump_class_header(a_file)
+			if attached extend_from as l_extend_form then
+				a_file.put_string (" extends ")
+				a_file.put_string ({QUALIFIERS}.name ("", l_extend_form, False))
+				a_file.put_string (l_extend_form.adorn_generics (False))
+			end
+			a_file.put_string (" {")
+			if pack > 0 or else size > 0 then
+				a_file.put_new_line
+				if pack > 0 then
+					a_file.put_string (" .pack ")
+					a_file.put_integer (pack)
+				end
+				if size >= 0 then
+					a_file.put_string (" .size ")
+					a_file.put_integer (size)
+				end
+			end
+			a_file.put_new_line
+			Result := Precursor(a_file)
+			a_file.put_new_line
+			across properties as p loop
+				Result := p.il_src_dump(a_file)
+			end
+			a_file.put_string ("}")
+			a_file.put_new_line
+			Result := True
+		end
+
+	il_src_dump_class_header (a_file: FILE_STREAM)
+		do
+			a_file.put_string (".class")
+			if attached {CLS_CLASS} parent as l_parent then
+				a_file.put_string (" nested")
+			end
+			flags.il_src_dump_before_flags (a_file)
+			flags.il_src_dump_after_flags (a_file)
+			a_file.put_string (" '")
+			a_file.put_string (name)
+			a_file.put_string ("'")
+			a_file.put_string (adorn_generics (True))
+		end
+
+
 	adorn_generics (a_names: BOOLEAN): STRING_32
 		local
 			l_count: INTEGER
 			l_type: CLS_TYPE
-			l_file: FILE
+			l_file: FILE_STREAM
+			bool: BOOLEAN
 		do
-			create {RAW_FILE} l_file.make_open_temporary
+			create l_file.make_temp
 			create Result.make_empty
 			if not generics.is_empty then
 				Result.append ("<")
@@ -131,9 +179,17 @@ feature -- Output
 					else
 						l_type := it
 						l_type.show_type := True
+						bool := l_type.il_src_dump (l_file)
+					end
+					if @ it.target_index + 1 /= @ it.last_index then
+						l_file.put_string (",")
+					else
+						l_file.put_string (">")
 					end
 				end
 			end
+			Result := l_file.text
+			l_file.close
 		end
 
 end

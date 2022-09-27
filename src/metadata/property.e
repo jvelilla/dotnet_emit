@@ -50,4 +50,11 @@ feature -- Enums
     Has_default: INTEGER = 0x1000
 
 
+feature -- Output
+
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
+		do
+			
+		end
+
 end

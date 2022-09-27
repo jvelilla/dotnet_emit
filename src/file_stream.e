@@ -8,7 +8,8 @@ class
 
 create
 	make,
-	make_binary
+	make_binary,
+	make_temp
 
 feature {NONE} -- Initialiation
 
@@ -28,7 +29,13 @@ feature {NONE} -- Initialiation
 			on_debug := False
 		end
 
-	output_stream: FILE
+	make_temp
+		do
+			create debug_output.make_empty
+			on_debug := True
+		end
+
+	output_stream: detachable FILE
 			-- Stream to write the content.
 
 feature -- Access
@@ -60,7 +67,9 @@ feature -- Element change
 
 	put_integer (i: INTEGER)
 		do
-			output_stream.put_integer (i)
+			if attached output_stream as l_stream then
+				l_stream.put_integer (i)
+			end
 			if on_debug then
 				debug_output.append_integer (i)
 			end
@@ -68,7 +77,9 @@ feature -- Element change
 
 	put_integer_64 (i: INTEGER_64)
 		do
-			output_stream.put_integer_64 (i)
+			if attached output_stream as l_stream then
+				l_stream.put_integer_64 (i)
+			end
 			if on_debug then
 				debug_output.append_integer_64 (i)
 			end
@@ -76,7 +87,9 @@ feature -- Element change
 
 	put_string (s: READABLE_STRING_8)
 		do
-			output_stream.put_string (s)
+			if attached output_stream as l_stream then
+				l_stream.put_string (s)
+			end
 			if on_debug then
 				debug_output.append_string (s)
 			end
@@ -84,7 +97,9 @@ feature -- Element change
 
 	put_new_line
 		do
-			output_stream.put_new_line
+			if attached output_stream as l_stream then
+				l_stream.put_new_line
+			end
 			if on_debug then
 				debug_output.append ("%N")
 			end
@@ -92,11 +107,21 @@ feature -- Element change
 
 	flush
 		do
-			output_stream.put_new_line
+			if attached output_stream as l_stream then
+				l_stream.flush
+			end
 		end
 
 	close
 		do
-			output_stream.close
+			if attached output_stream as l_stream then
+				l_stream.close
+			end
 		end
+
+	text: STRING
+		do
+			Result := debug_output
+		end
+
 end

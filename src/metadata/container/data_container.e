@@ -163,6 +163,7 @@ feature -- Output
 				Result := method.il_src_dump(a_file)
 			end
 			across children as l_child loop
+				Result := l_child.il_src_dump (a_file)
 			end
 		end
 
