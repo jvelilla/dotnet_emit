@@ -218,13 +218,59 @@ feature -- Output
 			when {VALUE_MODE}.None then
 				-- do nothing
 			when {VALUE_MODE}.Enum then
-				-- To be implemented
+				a_file.put_string (" = ")
+				il_src_dump_type_name (a_file, size)
+				a_file.put_string ("(")
+				a_file.put_integer_64 (enum_value)
+				a_file.put_string (")")
 			when {VALUE_MODE}.Bytes then
-				-- To be implemented	
+				if not byte_value.is_empty then
+					a_file.put_string(" at $")
+					a_file.put_string(name)
+					a_file.put_string(".data cil $")
+					a_file.put_string(name)
+					a_file.put_string(" = bytearray (")
+
+					across byte_value as ic loop
+						a_file.put_integer_64 (ic)
+						a_file.put_string (format_integer(2,'0').formatted(ic))
+						if @ ic.target_index = @ ic.last_index then
+							a_file.put_new_line
+							a_file.put_string ("%T")
+						end
+					end
+				end
 			else
 
 			end
 			Result := true
+		end
+
+
+	il_src_dump_type_name (a_file: FILE_STREAM; a_size: VALUE_SIZE)
+		do
+			inspect a_size
+			when {VALUE_SIZE}.i8 then
+				a_file.put_string (" int8")
+			when {VALUE_SIZE}.i16 then
+				a_file.put_string (" int16")
+			when {VALUE_SIZE}.i32 then
+				a_file.put_string (" int32")
+			when {VALUE_SIZE}.i64 then
+				a_file.put_string (" int64")
+			else
+				a_file.put_string (" int32")
+			end
+		end
+
+feature {NONE} -- Utils
+
+	format_integer (w: INTEGER; a_char: CHARACTER): FORMAT_INTEGER
+		do
+			create Result.make(w)
+			Result.set_fill(a_char)
+		ensure
+			is_class: class
 		end
 
 end
