@@ -41,7 +41,7 @@ feature -- Access
 				, 1, 1)
 
 			create ps.make ("pS", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.static))
-			create str.make ("pS", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.static))
+			create str.make ("Str", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.static))
 
 			working.add (i8_cls)
 			working.add (ps)
@@ -98,6 +98,8 @@ feature -- Access
 			create ins.make ({CIL_OPCODES}.i_ldsflda,{OPERAND_FACTORY}.complex_operand (create {FIELD_NAME}.make (str)))
 			start.add_instruction (ins)
 			create ins.make ({CIL_OPCODES}.i_call,{OPERAND_FACTORY}.complex_operand (create {METHOD_NAME}.make (signature_ep)))
+			start.add_instruction (ins)
+			create ins.make ({CIL_OPCODES}.i_pop, Void)
 			start.add_instruction (ins)
 			create ins.make ({CIL_OPCODES}.i_ret, Void)
 			start.add_instruction (ins)

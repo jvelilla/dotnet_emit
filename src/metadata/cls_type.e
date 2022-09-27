@@ -160,7 +160,7 @@ feature -- Output
 				a_file.put_string (" []")
 			elseif array_level /= 0 then
 				a_file.put_string (" [")
-				across 0 |..| array_level as  i loop
+				across 0 |..| (array_level - 1) as  i loop
 					if i /= 0 then
 						a_file.put_string (", 0...")
 					else
@@ -170,7 +170,7 @@ feature -- Output
 				a_file.put_string ("]")
 			end
 			if pointer_level > 0 then
-				across 0 |..| pointer_level as  i loop
+				across 0 |..| (pointer_level-1) as  i loop
 					a_file.put_string (" *")
 				end
 			end
