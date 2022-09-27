@@ -11,6 +11,8 @@ inherit
 	VALUE
 		rename
 			make as make_value
+		redefine
+			il_src_dump
 		end
 
 create
@@ -32,5 +34,25 @@ feature -- Access
 
 	field: FIELD
 		-- The field reference.		
+
+
+feature -- Output
+
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
+		do
+			if field.type.tp = {BASIC_TYPE}.cls then
+				if attached field.type.type_ref as l_type_ref and then
+					l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value /= 0
+				then
+					a_file.put_string ("valuetype ")
+				else
+					a_file.put_string ("class ")
+				end
+			end
+			Result := field.type.il_src_dump (a_file)
+			a_file.put_string (" ")
+			a_file.put_string ({QUALIFIERS}.name (field.name, field.parent, False))
+			Result := True
+		end
 
 end

@@ -236,7 +236,7 @@ feature -- Output
 					across byte_value as ic loop
 						a_file.put_string (ic.to_hex_string)
 						a_file.put_string (" ")
-						if @ ic.target_index = @ ic.last_index then
+						if @ ic.target_index \\ 8 = 0 and then @ ic.target_index /= @ ic.last_index then
 							a_file.put_new_line
 							a_file.put_string ("%T")
 						end
