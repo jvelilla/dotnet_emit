@@ -93,6 +93,14 @@ feature -- Element Change
 			show_type_set: show_type = a_val
 		end
 
+	set_pointer_level (a_val: INTEGER)
+			-- Pointer indirection count
+		do
+			pointer_level := a_val
+		ensure
+			pointer_level_set: pointer_level= a_val
+		end
+
 feature -- Status Report
 
 	is_void: BOOLEAN

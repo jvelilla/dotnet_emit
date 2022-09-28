@@ -207,7 +207,7 @@ feature {NONE} -- Implementation
 										-- TODO check the l_index, since
 										-- the C++ code use a 0 based to access ldlocs.
 
-									ins.set_opcode(ldargs[l_index])
+									ins.set_opcode(ldargs[l_index + 1])
 									ins.set_operand({OPERAND_FACTORY}.default_operand)
 								else
 									if l_index < 128 and then l_index >= -128 then
