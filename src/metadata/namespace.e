@@ -34,7 +34,14 @@ feature -- Output
 
 	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
-			-- To be implemented.
+			a_file.put_string (".namespace '")
+			a_file.put_string (name)
+			a_file.put_string ("' {")
+			a_file.put_new_line
+			Result := Precursor(a_file)
+			a_file.put_string ("}")
+			a_file.put_new_line
+			Result := True
 		end
 
 end

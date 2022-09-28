@@ -242,7 +242,7 @@ feature -- Output
 					if a_names and then l_type.tp /= {BASIC_TYPE}.var and then
 						l_type.tp /= {BASIC_TYPE}.mvar
 					then
-						Result := l_type.il_src_dump (a_file)
+						Result := it.il_src_dump (a_file)
 					end
 					if @ it.target_index + 1 < @ it.last_index then
 						a_file.put_string (", ")

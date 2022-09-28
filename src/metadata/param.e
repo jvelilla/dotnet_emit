@@ -11,6 +11,8 @@ inherit
 	VALUE
 		rename
 			make as make_value
+		redefine
+			il_src_dump
 		end
 
 create
@@ -36,6 +38,16 @@ feature --Change Element
 			-- Set index of argument to `a_index`.
 		do
 			index := a_index
+		end
+
+feature -- Output
+
+	il_src_dump (a_file: FILE_STREAM): BOOLEAN
+		do
+			a_file.put_string ("'")
+			a_file.put_string (name)
+			a_file.put_string ("'")
+			Result := True
 		end
 
 end

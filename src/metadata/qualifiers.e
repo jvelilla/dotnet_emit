@@ -112,8 +112,8 @@ feature -- Static features
 				if pos /= 0 then
 					a_rv.append (l_parent.name)
 					if attached {CLS_CLASS} l_parent and then
-						l_parent.parent = Void or else
-						not attached {CLS_CLASS}l_parent.parent
+						(attached l_parent.parent or else
+						not attached {CLS_CLASS}l_parent.parent)
 					then
 						if a_type then
 							a_rv.append ("%/0xf8/")
