@@ -14,6 +14,9 @@ feature {NONE} -- Initialization
 	make
 		do
 			create objects
+			create tables.make({PE_TABLE_CONSTANTS}.max_tables)
+			create lib_path.make_empty
+			create sizes.make_filled (0, 1, {PE_TABLE_CONSTANTS}.max_tables + {PE_TABLE_CONSTANTS}.extra_indexes)
 		end
 
 
@@ -36,11 +39,22 @@ feature {NONE} -- Implemenation
 	guid_pos: NATURAL
 
 	objects: PE_OBJECT
---        DNLTable tables_[MaxTables];
---        size_t sizes_[MaxTables + ExtraIndexes];
---        std::string libPath_;
+
+	tables: DNL_TABLE
+		-- build with Max_Tables
+
+	sizes: ARRAY [NATURAL_32]
+		-- Max_Tables + Extra_Indexes
+
+	lib_path: STRING_32
 
 
+feature -- Operations
+
+	managed_load (a_name: STRING_32; a_major, a_minor, a_build, a_revision: INTEGER)
+		do
+
+		end
 
 feature -- Constants
 
