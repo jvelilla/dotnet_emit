@@ -1,5 +1,8 @@
 note
-	description: "Summary description for {PE_LIB}."
+	description: "[
+		    Main class to instantiate
+    		the creation procedure creates a working assembly, you put all your code and data into that
+	]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -154,6 +157,29 @@ feature -- Operations
 				-- since we can create it directly.
 				-- In C++ it's needed since the class it's responsible to Manage the Memory
 			create Result.make (a_method_sig, a_flags, a_entry)
+		end
+
+feature -- Assembly
+
+	load_assembly (a_assembly_name: STRING_32; a_major, a_minor, a_build, a_revision: INTEGER)
+			-- Load data out of an assembly.
+		do
+			if attached find_assembly(a_assembly_name) as l_assembly then
+			end
+		end
+
+
+	find_assembly(a_name: STRING_32): detachable ASSEMBLY_DEF
+			-- Find an assembly
+		local
+			found: BOOLEAN
+		do
+			across assembly_refs as it until found loop
+				if it.name.same_string(a_name) then
+					found := True
+					Result := it
+				end
+			end
 		end
 
 feature -- Output
