@@ -163,8 +163,14 @@ feature -- Assembly
 
 	load_assembly (a_assembly_name: STRING_32; a_major, a_minor, a_build, a_revision: INTEGER)
 			-- Load data out of an assembly.
+		local
+			reader: PE_READER
+			l_assembly: ASSEMBLY_DEF
 		do
-			if attached find_assembly(a_assembly_name) as l_assembly then
+			l_assembly := find_assembly(a_assembly_name)
+			if l_assembly = Void  or else attached l_assembly and then not l_assembly.is_loaded then
+				create reader.make
+				reader.managed_load (a_assembly_name, a_major, a_minor, a_build, a_revision)
 			end
 		end
 

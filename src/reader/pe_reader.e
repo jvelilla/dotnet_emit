@@ -52,8 +52,65 @@ feature {NONE} -- Implemenation
 feature -- Operations
 
 	managed_load (a_name: STRING_32; a_major, a_minor, a_build, a_revision: INTEGER)
+		local
+			str: STRING_32
 		do
+			str := search_on_path (a_name + ".dll")
+			if str.is_empty then
 
+			end
+
+		end
+
+
+	search_on_path (a_name: STRING_32): STRING_32
+		local
+			l_dir: DIRECTORY
+			l_path: STRING_32
+			l_str: STRING_32
+			l_split: LIST [STRING_32]
+			l_index: INTEGER
+			l_name: STRING_32
+			l_found: BOOLEAN
+		do
+			create Result.make_empty
+			create l_dir.make_with_path (create {PATH}.make_current)
+			if l_dir.has_entry (a_name) then
+				Result := a_name
+			else
+					--TODO review this algorithm
+				l_path := lib_path
+				l_index := l_path.index_of (';', 1)
+				from
+					create {ARRAYED_LIST [STRING_32] }l_split.make (0)
+					l_index := l_path.index_of (';', 1)
+				until
+					l_index = 0
+				loop
+					l_split.force (l_path.substring(1, l_index ))
+					-- TODO double check
+					-- the original code seems to be wrong.
+					if l_index < l_path.count then
+						l_path := l_path.substring (l_index, l_path.count)
+					else
+						l_path := ""
+					end
+					l_index := l_path.index_of(';',1)
+				end
+
+				if not l_path.is_empty then
+					l_split.force(l_path)
+				end
+
+				across l_split as s until l_found loop
+					l_name := s + {OPERATING_ENVIRONMENT}.directory_separator.out  + a_name
+					if (create{FILE_UTILITIES}).file_exists(l_name) then
+						l_found := True
+						Result := l_name
+					end
+				end
+
+			end
 		end
 
 feature -- Constants

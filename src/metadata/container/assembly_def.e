@@ -29,6 +29,14 @@ feature {NONE} -- Initialization
 			make_data_container (a_name, create {QUALIFIERS}.make)
 
 			create public_key_token.make_from_array (a_byte)
+			create namespace_cache.make(0)
+			create class_cache.make (0)
+			create snk_file.make_empty
+		ensure
+			snk_file_set: snk_file.is_empty
+			external_set: not is_external
+			loaded_set: not is_loaded
+
 		end
 
 feature -- Access
@@ -49,6 +57,14 @@ feature -- Access
 			-- `is_external'
 
 	public_key_token : ARRAY [NATURAL_8]
+
+	snk_file: STRING_32
+
+	namespace_cache: STRING_TABLE [NAMESPACE]
+
+	class_cache: STRING_TABLE [CLS_CLASS]
+
+	is_loaded: BOOLEAN
 
 
 feature -- Element change
