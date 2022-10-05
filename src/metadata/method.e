@@ -82,14 +82,35 @@ feature -- Change Element
 feature -- Operations
 
 	optimize (a_pe: PE_LIB)
+		local
+			l_rescue: BOOLEAN
 		do
-			calculate_live
-			calculate_max_stack
-			optimize_locals (a_pe)
-			optimize_code (a_pe)
+			if not l_rescue then
+				calculate_live
+				calculate_max_stack
+				optimize_locals (a_pe)
+				optimize_code (a_pe)
+			else
+				-- do nothing.	
+			end
+		rescue
+			if attached exception_manager.last_exception as e then
+				print (if attached e.description as l_description then l_description else "Unkown Exception" end)
+				print ("%N")
+			end
+			l_rescue := True
+			retry
 		end
 
 
+
+feature {NONE} -- Exception Manager
+
+
+	exception_manager: EXCEPTION_MANAGER
+		once
+			create Result
+		end
 
 feature {NONE} -- Implementation
 
@@ -171,7 +192,7 @@ feature {NONE} -- Implementation
 					end
 					if n < 0 then
 							-- TODO reimplement.
-						(create {EXCEPTION}.make_with_tag_and_trace(generator + "calculate_max_stack", "Stack UnderFlow")).raise
+						{EXCEPTIONS}.raise (generator + "calculate_max_stack  Stack UnderFlow")
 					end
 					if ins.is_branch then
 						last_branch := True
@@ -180,7 +201,7 @@ feature {NONE} -- Implementation
 							   l_val /= n
 							then
 									-- TODO reimplement.
-								(create {EXCEPTION}.make_with_tag_and_trace(generator + "MismatchedStack", l_operand.string_value)).raise
+								{EXCEPTIONS}.raise (generator + " MismatchedStack at " + l_operand.string_value)
 							else
 								l_labels.force (n, l_operand.string_value)
 							end
@@ -192,7 +213,7 @@ feature {NONE} -- Implementation
 									l_val /= n
 								then
 										-- TODO reimplement.
-									(create {EXCEPTION}.make_with_tag_and_trace(generator + "MismatchedStack", item)).raise
+									{EXCEPTIONS}.raise (generator + " MismatchedStack at " + item)
 								else
 									l_labels.force (n, item)
 								end
@@ -210,7 +231,7 @@ feature {NONE} -- Implementation
 								l_val /= n
 							then
 									-- TODO reimplement.
-								(create {EXCEPTION}.make_with_tag_and_trace(generator + "MismatchedStack", ins.label)).raise
+								{EXCEPTIONS}.raise (generator + " MismatchedStack at " + ins.label)
 							else
 								l_labels.force (n, ins.label)
 							end
@@ -225,7 +246,7 @@ feature {NONE} -- Implementation
 			if n /= 0 then
 				if n /= 1 or else attached prototype.return_type as l_return_type and then l_return_type.is_void then
 					-- TODO reimplement.
-					(create {EXCEPTION}.make_with_tag_and_trace(generator + "calculate_max_stack", "Stack Not Empty at the end of function")).raise
+					{EXCEPTIONS}.raise (generator + "calculate_max_stack Stack Not Empty at the end of function")
 				end
 			end
 

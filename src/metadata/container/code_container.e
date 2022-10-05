@@ -68,8 +68,8 @@ feature {NONE} -- Implementation
 			across instructions as ins loop
 				if ins.opcode = {CIL_OPCODES}.i_label then
 					if labels.has (ins.label)then
-						-- TODO reimplement
-						(create {EXCEPTION}.make_with_tag_and_trace(generator + "load_labels", "Duplicate label " + ins.label)).raise
+							-- TODO reimplement
+						{EXCEPTIONS}.raise (generator + "load_labels Duplicate label at " + ins.label)
 					else
 						labels.force (ins, ins.label)
 					end
@@ -330,32 +330,33 @@ feature {NONE} -- Implementation
 						   attached {PARAM} l_operand.value as l_value and then
 						   l_value.index > 	65534
 						then
-							-- TODO reimplement.
-							(create {EXCEPTION}.make_with_tag_and_trace(generator + "validate_instructions: IndexOutOfRange", l_value.name)).raise
+								-- TODO reimplement.
+							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
 						end
 					when {CIL_OPCODES}.i_ldloc, {CIL_OPCODES}.i_ldloca, {CIL_OPCODES}.i_stloc then
 						if attached ins.operand as l_operand and then
 						   attached {CLS_LOCAL} l_operand.value as l_value and then
 						   l_value.index > 	65534
 						then
-							-- TODO reimplement.
-							(create {EXCEPTION}.make_with_tag_and_trace(generator + "validate_instructions: IndexOutOfRange", l_value.name)).raise
+								-- TODO reimplement.
+							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
 						end
 					when {CIL_OPCODES}.i_ldarg_s, {CIL_OPCODES}.i_ldarga_s, {CIL_OPCODES}.i_starg_s then
 						if attached ins.operand as l_operand and then
 						   attached {PARAM} l_operand.value as l_value and then
 						   l_value.index > 	255
 						then
-							-- TODO reimplement.
-							(create {EXCEPTION}.make_with_tag_and_trace(generator + "validate_instructions: IndexOutOfRange", l_value.name)).raise
+								-- TODO reimplement.
+							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
+
 						end
 					when {CIL_OPCODES}.i_ldloc_s, {CIL_OPCODES}.i_ldloca_s, {CIL_OPCODES}.i_stloc_s  then
 						if attached ins.operand as l_operand and then
 						   attached {CLS_LOCAL} l_operand.value as l_value and then
 						   l_value.index > 	255
 						then
-							-- TODO reimplement.
-							(create {EXCEPTION}.make_with_tag_and_trace(generator + "validate_instructions: IndexOutOfRange", l_value.name)).raise
+								-- TODO reimplement.
+							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
 						end
 					else
 						-- Do nothing
