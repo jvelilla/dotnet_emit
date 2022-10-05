@@ -52,22 +52,22 @@ feature -- Test
 
 
 			create cls.make ("cls", create {QUALIFIERS}.make_with_flags (
-							{METHOD_ATTRIBUTES}.ansi |
-							{METHOD_ATTRIBUTES}.sealed)
+							{QUALIFIERS_ENUM}.ansi |
+							{QUALIFIERS_ENUM}.sealed)
 							, -1, -1)
 			nmspc.add (cls)
 
 			create i8_cls.make ("int8[]", create {QUALIFIERS}.make_with_flags (
-					{METHOD_ATTRIBUTES}.public |
-					{METHOD_ATTRIBUTES}.explicit |
-					{METHOD_ATTRIBUTES}.ansi |
-					{METHOD_ATTRIBUTES}.sealed |
-					{METHOD_ATTRIBUTES}.value)
+					{QUALIFIERS_ENUM}.public |
+					{QUALIFIERS_ENUM}.explicit |
+					{QUALIFIERS_ENUM}.ansi |
+					{QUALIFIERS_ENUM}.sealed |
+					{QUALIFIERS_ENUM}.value)
 					, 1, 1)
 
 
-			create ps.make ("pS", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.public | {METHOD_ATTRIBUTES}.static))
-			create str.make ("Str", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.public | {METHOD_ATTRIBUTES}.static))
+			create ps.make ("pS", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.public | {QUALIFIERS_ENUM}.static))
+			create str.make ("Str", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.public | {QUALIFIERS_ENUM}.static))
 
 			cls.add (i8_cls)
 			cls.add (ps)
@@ -89,7 +89,7 @@ feature -- Test
 			signature_ep.add_vararg_param (create {PARAM}.make ("A_1", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
 			signature_ep.signature_parent (signature_ex)
 
-			create signature_es.make ("Start", {METHOD_ATTRIBUTES}.managed, cls)
+			create signature_es.make ("Start", {QUALIFIERS_ENUM}.managed, cls)
 			signature_es.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0) )
 
 			create tp1.make_with_container (i8_cls)
@@ -98,11 +98,11 @@ feature -- Test
 			signature_es.add_parameter (param1)
 
 			create start.make (signature_es,
-											create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.Public |
-													{METHOD_ATTRIBUTES}.Static |
-													{METHOD_ATTRIBUTES}.hidebysig |
-													{METHOD_ATTRIBUTES}.Cil |
-													{METHOD_ATTRIBUTES}.managed), False)
+											create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.Public |
+													{QUALIFIERS_ENUM}.Static |
+													{QUALIFIERS_ENUM}.hidebysig |
+													{QUALIFIERS_ENUM}.Cil |
+													{QUALIFIERS_ENUM}.managed), False)
 
 
 			create ins.make ({CIL_OPCODES}.i_ldsflda,{OPERAND_FACTORY}.complex_operand (create {FIELD_NAME}.make (ps)))
@@ -120,15 +120,15 @@ feature -- Test
 
 			cls.add (start)
 
-			create signature_m.make ("$Main", {METHOD_ATTRIBUTES}.managed, working)
+			create signature_m.make ("$Main", {QUALIFIERS_ENUM}.managed, working)
 			signature_m.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
 
 			create main.make (signature_m,
-											create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private |
-													{METHOD_ATTRIBUTES}.Static |
-													{METHOD_ATTRIBUTES}.hidebysig |
-													{METHOD_ATTRIBUTES}.Cil |
-													{METHOD_ATTRIBUTES}.managed), True)
+											create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.private |
+													{QUALIFIERS_ENUM}.Static |
+													{QUALIFIERS_ENUM}.hidebysig |
+													{QUALIFIERS_ENUM}.Cil |
+													{QUALIFIERS_ENUM}.managed), True)
 
 			working.add (main)
 

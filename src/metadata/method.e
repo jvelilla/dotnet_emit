@@ -33,7 +33,7 @@ feature {NONE} --Initialization
 			pinvoke_type := {INVOKE_TYPE}.Stdcall
 			create {ARRAYED_LIST [CLS_LOCAL]} var_list.make (0)
 			create pinvoke_name.make_empty
-			if not (flags.flags & {METHOD_ATTRIBUTES}.Static /= 0) then
+			if not (flags.flags & {QUALIFIERS_ENUM}.Static /= 0) then
 				prototype.instance(True)
 			end
 		end
@@ -72,6 +72,12 @@ feature -- Change Element
 			instructions.force (a_instruction)
 		end
 
+	add_local (a_local: CLS_LOCAL)
+			-- A a local variable `a_local`.
+		do
+			a_local.set_index (var_list.count)
+			var_list.force (a_local)
+		end
 
 feature -- Operations
 
@@ -93,6 +99,9 @@ feature {NONE} -- Implementation
 			done, skipping: BOOLEAN
 		do
 			from
+				create labels_reached.make (0)
+				labels_reached.compare_objects
+				done := False
 			until
 				done
 			loop
@@ -104,16 +113,33 @@ feature {NONE} -- Implementation
 					elseif not skipping then
 						ic.set_live (True)
 						if ic.is_branch then
-							-- TODO implement
+
+							if attached {OPERAND} ic.operand as l_operand and then
+								labels_reached.has (l_operand.string_value)
+							then
+								done := False
+								labels_reached.force (l_operand.string_value)
+							end
+							if ic.opcode = {CIL_OPCODES}.i_br then
+								skipping := True
+							end
 						elseif
 							ic.opcode = {CIL_OPCODES}.i_switch
 						then
 							if not ic.switches.is_empty then
-								-- TODO implement
+								across  ic.switches as switch loop
+									if labels_reached.has (switch) then
+										done := False
+										labels_reached.force (switch)
+									end
+								end
 							end
 						end
 					elseif ic.opcode = {CIL_OPCODES}.i_label then
-						-- TODO implement
+						if labels_reached.has (ic.label) then
+							ic.set_live(True)
+							skipping := False
+						end
 					end
 				end
 
@@ -128,6 +154,8 @@ feature {NONE} -- Implementation
 			skipping: BOOLEAN
 
 		do
+			create l_labels.make (0)
+			labels.compare_objects
 			max_stack := 0
 			across instructions as ins loop
 
@@ -143,14 +171,50 @@ feature {NONE} -- Implementation
 					end
 					if n < 0 then
 							-- TODO reimplement.
-						(create {EXCEPTION}.make_with_tag_and_trace(generator + "calculate_max_stack", "Stack Under Flow")).raise
+						(create {EXCEPTION}.make_with_tag_and_trace(generator + "calculate_max_stack", "Stack UnderFlow")).raise
 					end
 					if ins.is_branch then
-						-- TODO implement.
+						last_branch := True
+						if attached {OPERAND }ins.operand as l_operand then
+							if attached l_labels.item (l_operand.string_value) as l_val and then
+							   l_val /= n
+							then
+									-- TODO reimplement.
+								(create {EXCEPTION}.make_with_tag_and_trace(generator + "MismatchedStack", l_operand.string_value)).raise
+							else
+								l_labels.force (n, l_operand.string_value)
+							end
+						end
 					elseif ins.opcode = {CIL_OPCODES}.i_switch then
-						-- TODO implement
+						if not ins.switches.is_empty then
+							across ins.switches as item loop
+								if attached l_labels.item (item) as l_val and then
+									l_val /= n
+								then
+										-- TODO reimplement.
+									(create {EXCEPTION}.make_with_tag_and_trace(generator + "MismatchedStack", item)).raise
+								else
+									l_labels.force (n, item)
+								end
+							end
+						end
 					elseif ins.opcode = {CIL_OPCODES}.i_label then
-						-- TODO implement
+						if last_branch then
+							if attached l_labels.item (ins.label) as l_val then
+								n := l_val
+							else
+								n := 0
+							end
+						else
+							if attached l_labels.item (ins.label) as l_val and then
+								l_val /= n
+							then
+									-- TODO reimplement.
+								(create {EXCEPTION}.make_with_tag_and_trace(generator + "MismatchedStack", ins.label)).raise
+							else
+								l_labels.force (n, ins.label)
+							end
+						end
 					elseif ins.opcode = {CIL_OPCODES}.i_comment then
 						-- Placeholder.
 					else
@@ -207,6 +271,7 @@ feature -- Output
 			else
 				a_file.put_string (" ")
 			end
+
 			Result := prototype.il_src_dump (a_file, invoke_mode /= {INVOKE_MODE}.PInvoke, False,  invoke_mode = {INVOKE_MODE}.PInvoke)
 			flags.il_src_dump_after_flags (a_file)
 			if invoke_mode /= {INVOKE_MODE}.PInvoke then
@@ -240,7 +305,7 @@ feature -- Output
 						   l_type.tp = {BASIC_TYPE}.cls
 						then
 							if attached {DATA_CONTAINER} l_type.type_ref as l_class and then
-							(l_class.flags.flags & {METHOD_ATTRIBUTES}.value) /= 0
+							(l_class.flags.flags & {QUALIFIERS_ENUM}.value) /= 0
 							then
 								a_file.put_string ("valuetype ")
 							else

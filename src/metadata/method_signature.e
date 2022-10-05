@@ -185,7 +185,7 @@ feature -- Output
     		if attached return_type as l_ret_type and then
     			l_ret_type.tp = {BASIC_TYPE}.cls
     		then
-    			if attached l_ret_type.type_ref as l_type_ref and then (l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value) /= 0  then
+    			if attached l_ret_type.type_ref as l_type_ref and then (l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value) /= 0  then
     				a_file.put_string ("valuetype ")
     			else
     				a_file.put_string ("class ")
@@ -211,7 +211,7 @@ feature -- Output
 					if attached {CLS_CLASS} container as l_container and then
 						not l_container.generics.is_empty
 					then
-						if (l_container.flags.flags & {METHOD_ATTRIBUTES}.value) /= 0 then
+						if (l_container.flags.flags & {QUALIFIERS_ENUM}.value) /= 0 then
 							a_file.put_string ("valuetype ")
 						else
 							a_file.put_string ("class ")
@@ -231,7 +231,7 @@ feature -- Output
 			across params as it loop
 				if attached {CLS_TYPE} it.type as l_type and then  l_type.tp = {BASIC_TYPE}.cls then
 					if attached l_type.type_ref as l_type_ref and then
-						(l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value) /= 0 then
+						(l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value) /= 0 then
 						a_file.put_string ("valuetype ")
 					else
 						a_file.put_string ("class ")
@@ -250,7 +250,7 @@ feature -- Output
 				end
 			end
 			if not a_pinvoke and then (flags & {METHOD_SIGNATURE_ATTRIBUTES}.vararg /= 0) then
-				if not ((flags & {METHOD_ATTRIBUTES}.managed) /= 0) then
+				if not ((flags & {QUALIFIERS_ENUM}.managed) /= 0) then
 					a_file.put_string (", ...")
 					if not vararg_params.is_empty then
 						a_file.put_string (", ")

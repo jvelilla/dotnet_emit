@@ -57,7 +57,7 @@ feature -- Operations
 		do
 			str := search_on_path (a_name + ".dll")
 			if str.is_empty then
-
+				str := search_for_managed_file (a_name, a_major, a_minor, a_build, a_revision)
 			end
 
 		end
@@ -109,8 +109,19 @@ feature -- Operations
 						Result := l_name
 					end
 				end
+			end
+		end
+
+	search_for_managed_file (a_name: STRING; a_major, a_minor, a_build, a_revision: INTEGER): STRING_32
+		local
+			l_windir: STRING_32
+		do
+			 -- TODO check this only works on windows.
+			l_windir := {EXECUTION_ENVIRONMENT}.item ("windir")
+			if attached l_windir then
 
 			end
+			create Result.make_empty
 		end
 
 feature -- Constants

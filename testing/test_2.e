@@ -33,15 +33,15 @@ feature -- Access
 			working := lib_entry.working_assembly
 
 			create i8_cls.make ("int8[]", create {QUALIFIERS}.make_with_flags (
-					{METHOD_ATTRIBUTES}.private |
-					{METHOD_ATTRIBUTES}.explicit |
-					{METHOD_ATTRIBUTES}.ansi |
-					{METHOD_ATTRIBUTES}.sealed |
-					{METHOD_ATTRIBUTES}.value)
+					{QUALIFIERS_ENUM}.private |
+					{QUALIFIERS_ENUM}.explicit |
+					{QUALIFIERS_ENUM}.ansi |
+					{QUALIFIERS_ENUM}.sealed |
+					{QUALIFIERS_ENUM}.value)
 				, 1, 1)
 
-			create ps.make ("pS", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.static))
-			create str.make ("Str", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.static))
+			create ps.make ("pS", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.private | {QUALIFIERS_ENUM}.static))
+			create str.make ("Str", create {CLS_TYPE}.make_with_container (i8_cls), create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.private | {QUALIFIERS_ENUM}.static))
 
 			working.add (i8_cls)
 			working.add (ps)
@@ -80,15 +80,15 @@ feature -- Access
 
 
 
-			create signature_m.make ("$Main", {METHOD_ATTRIBUTES}.managed, working)
+			create signature_m.make ("$Main", {QUALIFIERS_ENUM}.managed, working)
 			signature_m.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
 
 			create start.make (signature_m,
-											create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private |
-													{METHOD_ATTRIBUTES}.Static |
-													{METHOD_ATTRIBUTES}.hidebysig |
-													{METHOD_ATTRIBUTES}.Cil |
-													{METHOD_ATTRIBUTES}.managed), True)
+											create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.private |
+													{QUALIFIERS_ENUM}.Static |
+													{QUALIFIERS_ENUM}.hidebysig |
+													{QUALIFIERS_ENUM}.Cil |
+													{QUALIFIERS_ENUM}.managed), True)
 
 			working.add_code_container (start)
 

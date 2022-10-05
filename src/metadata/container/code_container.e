@@ -150,7 +150,7 @@ feature {NONE} -- Implementation
 										-- TODO check the l_index, since
 										-- the C++ code use a 0 based to access ldlocs.
 
-									ins.set_opcode(ldlocs[l_index])
+									ins.set_opcode(ldlocs[l_index + 1])
 									ins.set_operand({OPERAND_FACTORY}.default_operand)
 								elseif l_index < 128 and then l_index >= -128 then
 									ins.set_opcode({CIL_OPCODES}.i_ldloc_s)
@@ -164,7 +164,7 @@ feature {NONE} -- Implementation
 										-- TODO check the l_index, since
 										-- the C++ code use a 0 based to access ldlocs.	
 
-									ins.set_opcode(stlocs[l_index])
+									ins.set_opcode(stlocs[l_index + 1])
 									ins.set_operand({OPERAND_FACTORY}.default_operand)
 								elseif l_index < 128 and then l_index >= -128 then
 									ins.set_opcode({CIL_OPCODES}.i_stloc_s)

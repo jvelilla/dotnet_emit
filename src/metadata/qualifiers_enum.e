@@ -5,7 +5,7 @@ note
 
 
 class
-	METHOD_ATTRIBUTES
+	QUALIFIERS_ENUM
 
 feature -- Access
 

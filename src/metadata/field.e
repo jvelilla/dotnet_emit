@@ -185,9 +185,9 @@ feature -- Output
 		do
 			a_file.put_string (".field")
 			if attached parent as l_parent and then
-				l_parent.flags.flags & {METHOD_ATTRIBUTES}.explicit /= 0 or else
+				l_parent.flags.flags & {QUALIFIERS_ENUM}.explicit /= 0 or else
 				attached parent as l_parent and then
-				l_parent.flags.flags & {METHOD_ATTRIBUTES}.sequential /= 0 and then explicit_offset /= 0
+				l_parent.flags.flags & {QUALIFIERS_ENUM}.sequential /= 0 and then explicit_offset /= 0
 			then
 				a_file.put_string (" [")
 				a_file.put_integer_64 (explicit_offset)
@@ -198,7 +198,7 @@ feature -- Output
 
 			if type.tp = {BASIC_TYPE}.cls then
 				if attached {DATA_CONTAINER} type.type_ref as l_type_ref and then
-					l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value /= 0
+					l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value /= 0
 				then
 					a_file.put_string (" valuetype ")
 					Result := type.il_src_dump (a_file)

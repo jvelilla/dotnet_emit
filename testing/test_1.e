@@ -30,10 +30,10 @@ feature -- Access
 			signature_rep.add_parameter (create {PARAM}.make ("ch", create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0)))
 			lib_entry.add_pinvoke_reference (signature_rep, "msvcrt.dll", true)
 
-			create signature_m.make ("$Main", {METHOD_ATTRIBUTES}.managed, working)
+			create signature_m.make ("$Main", {QUALIFIERS_ENUM}.managed, working)
 			signature_m.set_return_type(create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
 
-			create start.make (signature_m, create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.private | {METHOD_ATTRIBUTES}.Static | {METHOD_ATTRIBUTES}.hidebysig | {METHOD_ATTRIBUTES}.Cil | {METHOD_ATTRIBUTES}.managed), True)
+			create start.make (signature_m, create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.private | {QUALIFIERS_ENUM}.Static | {QUALIFIERS_ENUM}.hidebysig | {QUALIFIERS_ENUM}.Cil | {QUALIFIERS_ENUM}.managed), True)
 
 			working.add_code_container (start)
 

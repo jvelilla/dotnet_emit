@@ -146,7 +146,7 @@ feature -- Operations
 		local
 			l_method: METHOD
 		do
-			create l_method.make (a_method_sig, create {QUALIFIERS}.make_with_flags ({METHOD_ATTRIBUTES}.pinvokefunc | {METHOD_ATTRIBUTES}.public), False)
+			create l_method.make (a_method_sig, create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.pinvokefunc | {QUALIFIERS_ENUM}.public), False)
 			l_method.set_pinvoke(a_dll_name, if iscdecl then {INVOKE_TYPE}.Cdecl else {INVOKE_TYPE}.Stdcall end)
 			p_invoke_signatures.force (l_method, a_method_sig.name)
 		end

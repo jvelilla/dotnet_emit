@@ -7,7 +7,8 @@ class
 	INSTRUCTION
 
 create
-	make
+	make,
+	make_with_text
 
 feature {NONE} -- Initialization
 
@@ -17,6 +18,15 @@ feature {NONE} -- Initialization
 			opcode := a_op
 			operand := a_operand
 			create text.make_empty
+			seh_type := {CIL_SEH}.seh_try
+		end
+
+
+	make_with_text (a_op: CIL_OPCODES; a_text: STRING_32)
+		do
+			create {ARRAYED_LIST [STRING_32]} switches.make (0)
+			opcode := a_op
+			create text.make_from_string_general (a_text)
 			seh_type := {CIL_SEH}.seh_try
 		end
 
@@ -48,6 +58,7 @@ feature -- Access
 			-- true if it is a begin tag.
 
 	text: STRING_32
+			-- text, e.g for a comment.
 
 	label: STRING
 			-- Label name associated with the instruction.
@@ -81,9 +92,21 @@ feature -- Status Report
 		end
 
 	stack_usage: INTEGER
+		local
+			l_sig: METHOD_SIGNATURE
+			n: INTEGER
 		do
 			inspect opcode
 			when {CIL_OPCODES}.i_SEH then
+				if seh_begin and then
+					(seh_type = {CIL_SEH}.seh_filter or else
+					 seh_type = {CIL_SEH}.seh_filter_handler or else
+					 seh_type = {CIL_SEH}.seh_catch)
+				then
+					Result := 1 -- for the object.
+				else
+					Result := 0
+				end
 			when
 				{CIL_OPCODES}.i_leave,
        		 	{CIL_OPCODES}.i_leave_s,
@@ -99,10 +122,25 @@ feature -- Status Report
         		{CIL_OPCODES}.i_callvirt,
         		{CIL_OPCODES}.i_newobj
         	then
-        		-- TODO implement
-        		if attached operand as l_operand then
+        		if attached {OPERAND} operand as l_operand and then
+        			attached {METHOD_NAME} l_operand.value as l_value
+        		then
+        			l_sig := l_value.signature
+        			n := if attached {CLS_TYPE} l_sig.return_type as l_return_type and then
+					   		l_return_type.is_void
+						 then
+						 	0
+        			 	 else
+        					1
+        				 end
+					n := n - (l_sig.params.count + l_sig.vararg_params.count)
+					if opcode /= {CIL_OPCODES}.i_newobj and then
+					  ( l_sig.flags & {METHOD_SIGNATURE_ATTRIBUTES}.instance_flag /= 0)
+					then
+					  n := n - 1
+					end
         		end
-
+        		Result := n +  instructions.at (opcode.index + 1).stack_usage
 			else
 				Result := instructions.at (opcode.index + 1).stack_usage
 			end
@@ -215,6 +253,7 @@ feature -- Output
 				a_file.flush
 			elseif opcode = {CIL_OPCODES}.i_comment  then
 				a_file.put_string ("// ")
+				a_file.put_string (text)
 				a_file.put_new_line
 				a_file.flush
 			elseif opcode = {CIL_OPCODES}.i_switch  then

@@ -42,7 +42,7 @@ feature -- Output
 		do
 			if field.type.tp = {BASIC_TYPE}.cls then
 				if attached field.type.type_ref as l_type_ref and then
-					l_type_ref.flags.flags & {METHOD_ATTRIBUTES}.value /= 0
+					l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value /= 0
 				then
 					a_file.put_string ("valuetype ")
 				else

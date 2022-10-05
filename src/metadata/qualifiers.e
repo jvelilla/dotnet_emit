@@ -42,7 +42,7 @@ feature -- Access
 
 	after_flags : INTEGER
 		do
-			Result := {METHOD_ATTRIBUTES}.preservesig | {METHOD_ATTRIBUTES}.cil | {METHOD_ATTRIBUTES}.managed | {METHOD_ATTRIBUTES}.runtime
+			Result := {QUALIFIERS_ENUM}.preservesig | {QUALIFIERS_ENUM}.cil | {QUALIFIERS_ENUM}.managed | {QUALIFIERS_ENUM}.runtime
 		ensure
 			instance_free: class
 		end
