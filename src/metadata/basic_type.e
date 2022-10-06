@@ -7,18 +7,18 @@ once class
 	BASIC_TYPE
 
 create
-	cls, -- type is a reference to a class
-	method, -- type is a reference to a method signature
-	var, -- type is a generic variable
-	mvar, -- type is a generic method param
+	class_ref, -- type is a reference to a class
+	method_ref, -- type is a reference to a method signature
+	type_var, -- type is a generic variable
+	method_param, -- type is a generic method param
 	Void_, Bool, Char, i8, u8, i16, u16, i32, u32, i64, u64, inative, unative, r32, r64, object, string -- various CIL types
 
 feature {NONE} -- Creation
 
-	cls once index := 0 end
-	method once index := 1 end
-	var once index := 2 end
-	mvar once index := 3 end
+	class_ref once index := 0 end
+	method_ref once index := 1 end
+	type_var once index := 2 end
+	method_param once index := 3 end
 	Void_ once index := 4 end
 	Bool once index := 5 end
 	Char once index := 6 end
@@ -45,10 +45,10 @@ feature -- Access
 			-- All known Basic Types
 		once
 			Result := <<
-					{BASIC_TYPE}.cls,
-					{BASIC_TYPE}.method,
-					{BASIC_TYPE}.var,
-					{BASIC_TYPE}.mvar,
+					{BASIC_TYPE}.class_ref,
+					{BASIC_TYPE}.method_ref,
+					{BASIC_TYPE}.type_var,
+					{BASIC_TYPE}.method_param,
 					{BASIC_TYPE}.Void_,
 					{BASIC_TYPE}.Bool,
 					{BASIC_TYPE}.Char,

@@ -196,7 +196,7 @@ feature -- Output
 			flags.il_src_dump_before_flags(a_file)
 			flags.il_src_dump_after_flags(a_file)
 
-			if type.tp = {BASIC_TYPE}.cls then
+			if type.basic_type = {BASIC_TYPE}.class_ref then
 				if attached {DATA_CONTAINER} type.type_ref as l_type_ref and then
 					l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value /= 0
 				then

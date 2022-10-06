@@ -55,8 +55,8 @@ feature -- Test
 			nmspc.add (cls)
 
 			create signature_es.make ("Start", {QUALIFIERS_ENUM}.managed, cls)
-			signature_es.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0) )
-			create param1.make ("strn", create {CLS_TYPE}.make ({BASIC_TYPE}.string, 0))
+			signature_es.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_) )
+			create param1.make ("strn", create {CLS_TYPE}.make ({BASIC_TYPE}.string))
 			signature_es.add_parameter (param1)
 
 			-- add a reference to the assembly (not implemented)
@@ -66,7 +66,7 @@ feature -- Test
 			-- there is an argument matcher in the library, set up a vector of types describing
 			-- the arguments and it will try to find a matching overload.
 
-			create tp.make ({BASIC_TYPE}.string, 0)
+			create tp.make ({BASIC_TYPE}.string)
 			create {ARRAYED_LIST [CLS_TYPE]} type_list.make (0)
 			type_list.force (tp)
 

@@ -323,7 +323,7 @@ feature -- Output
 						a_file.put_integer (it.index)
 						a_file.put_string ("]%T")
 						if attached {CLS_TYPE} it.type as l_type and then
-						   l_type.tp = {BASIC_TYPE}.cls
+						   l_type.basic_type = {BASIC_TYPE}.class_ref
 						then
 							if attached {DATA_CONTAINER} l_type.type_ref as l_class and then
 							(l_class.flags.flags & {QUALIFIERS_ENUM}.value) /= 0

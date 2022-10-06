@@ -40,8 +40,8 @@ feature -- Test
 			nmspc.add (cls)
 
 			create signatures.make ("Start", {METHOD_SIGNATURE_ATTRIBUTES}.managed, cls)
-			signatures.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
-			create param1.make ("strn", create {CLS_TYPE}.make ({BASIC_TYPE}.String, 0))
+			signatures.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_))
+			create param1.make ("strn", create {CLS_TYPE}.make ({BASIC_TYPE}.String))
 			signatures.add_parameter (param1)
 
 
@@ -55,7 +55,7 @@ feature -- Test
 																	 False)
 
 
-			create counter.make ("counter", create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0))
+			create counter.make ("counter", create {CLS_TYPE}.make ({BASIC_TYPE}.i32))
 			start.add_local (counter)
 			counter_operand := {OPERAND_FACTORY}.complex_operand (counter)
 
@@ -85,7 +85,7 @@ feature -- Test
 
 
 			create signaturem.make ("$Main", {METHOD_SIGNATURE_ATTRIBUTES}.managed, working)
-			signaturem.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
+			signaturem.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_))
 
 
 

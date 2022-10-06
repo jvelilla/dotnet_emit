@@ -217,7 +217,7 @@ feature {NONE} -- Implementation
 										l_operand.type = {OPERAND_TYPE}.t_value and then
 										attached l_op.value as l_val and then
 										attached l_val.type as l_type  and then
-										l_type.tp = {BASIC_TYPE}.mvar
+										l_type.basic_type = {BASIC_TYPE}.method_param
 									then
 										ins.set_operand({OPERAND_FACTORY}.integer_operand (l_index, {OPERAND_SIZE}.i32))
 									end
@@ -230,7 +230,7 @@ feature {NONE} -- Implementation
 									l_operand.type = {OPERAND_TYPE}.t_value and then
 									attached l_op.value as l_val and then
 									attached l_val.type as l_type  and then
-									l_type.tp = {BASIC_TYPE}.mvar
+									l_type.basic_type = {BASIC_TYPE}.method_param
 								then
 									ins.set_operand({OPERAND_FACTORY}.integer_operand (l_index, {OPERAND_SIZE}.i32))
 								end
@@ -242,7 +242,7 @@ feature {NONE} -- Implementation
 									l_operand.type = {OPERAND_TYPE}.t_value and then
 									attached l_op.value as l_val and then
 									attached l_val.type as l_type  and then
-									l_type.tp = {BASIC_TYPE}.mvar
+									l_type.basic_type = {BASIC_TYPE}.method_param
 								then
 									ins.set_operand({OPERAND_FACTORY}.integer_operand (l_index, {OPERAND_SIZE}.i32))
 								end

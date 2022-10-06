@@ -79,18 +79,18 @@ feature -- Test
 			str.add_initializer (str_init)
 
 			create signature_ex.make ("printf", {METHOD_SIGNATURE_ATTRIBUTES}.vararg, Void)
-			signature_ex.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0))
-			signature_ex.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
+			signature_ex.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32))
+			signature_ex.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make_with_pointer_level ({BASIC_TYPE}.Void_, 1)))
 			lib_entry.add_pinvoke_reference (signature_ex, "msvcrt.dll", true)
 
 			create signature_ep.make ("printf", {METHOD_SIGNATURE_ATTRIBUTES}.vararg, Void)
-			signature_ep.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0))
-			signature_ep.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
-			signature_ep.add_vararg_param (create {PARAM}.make ("A_1", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
+			signature_ep.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32))
+			signature_ep.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make_with_pointer_level ({BASIC_TYPE}.Void_, 1)))
+			signature_ep.add_vararg_param (create {PARAM}.make ("A_1", create {CLS_TYPE}.make_with_pointer_level ({BASIC_TYPE}.Void_, 1)))
 			signature_ep.signature_parent (signature_ex)
 
 			create signature_es.make ("Start", {QUALIFIERS_ENUM}.managed, cls)
-			signature_es.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0) )
+			signature_es.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_) )
 
 			create tp1.make_with_container (i8_cls)
 			create param1.make ("strng", tp1)
@@ -121,7 +121,7 @@ feature -- Test
 			cls.add (start)
 
 			create signature_m.make ("$Main", {QUALIFIERS_ENUM}.managed, working)
-			signature_m.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
+			signature_m.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_))
 
 			create main.make (signature_m,
 											create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.private |

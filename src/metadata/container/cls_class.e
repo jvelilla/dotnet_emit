@@ -173,7 +173,7 @@ feature -- Output
 			if not generics.is_empty then
 				Result.append ("<")
 				across generics as it loop
-					if a_names and then it.tp = {BASIC_TYPE}.var then
+					if a_names and then it.basic_type = {BASIC_TYPE}.type_var then
 						Result.append_character ('A' + (it.var_num // 26))
 						Result.append_character ('A' + (it.var_num \\ 26))
 					else

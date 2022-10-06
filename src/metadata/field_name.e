@@ -40,7 +40,7 @@ feature -- Output
 
 	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
-			if field.type.tp = {BASIC_TYPE}.cls then
+			if field.type.basic_type = {BASIC_TYPE}.class_ref then
 				if attached field.type.type_ref as l_type_ref and then
 					l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value /= 0
 				then

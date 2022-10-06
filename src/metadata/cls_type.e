@@ -22,16 +22,16 @@ feature {NONE} --Initialization
 
 	make_with_pointer_level (a_type: BASIC_TYPE; a_pointer_level: INTEGER)
 		do
-			tp := a_type
-			if tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar then
+			basic_type := a_type
+			if basic_type = {BASIC_TYPE}.type_var or else basic_type = {BASIC_TYPE}.method_param then
 				var_num := a_pointer_level
 			else
 				pointer_level := a_pointer_level
 			end
 		ensure
-			tp_set: tp = a_type
-			pointer_level_set: not (tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar ) implies pointer_level = a_pointer_level
-			pointer_level_defaul: (tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar ) implies pointer_level = 0
+			basic_type_set: basic_type = a_type
+			pointer_level_set: not (basic_type = {BASIC_TYPE}.type_var or else basic_type = {BASIC_TYPE}.method_param ) implies pointer_level = a_pointer_level
+			pointer_level_defaul: (basic_type = {BASIC_TYPE}.type_var or else basic_type = {BASIC_TYPE}.method_param ) implies pointer_level = 0
 			array_level_set: array_level = 0
 			by_ref_set: not by_ref
 			type_ref_void:  type_ref = Void
@@ -39,17 +39,17 @@ feature {NONE} --Initialization
 			pe_index_set: pe_index = 0
 			pinned_set: not pinned
 			show_type_set: not show_type
-			var_num_default: not (tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar ) implies var_num = 0
-			var_num_set: tp = (tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar ) implies var_num = a_pointer_level
+			var_num_default: not (basic_type = {BASIC_TYPE}.type_var or else basic_type = {BASIC_TYPE}.method_param ) implies var_num = 0
+			var_num_set: basic_type = (basic_type = {BASIC_TYPE}.type_var or else basic_type = {BASIC_TYPE}.method_param ) implies var_num = a_pointer_level
 
 		end
 
 	make_with_container (a_container: DATA_CONTAINER)
 		do
-			tp := {BASIC_TYPE}.cls
+			basic_type := {BASIC_TYPE}.class_ref
 			type_ref := a_container
 		ensure
-			tp_set: tp = {BASIC_TYPE}.cls
+			tp_set: basic_type = {BASIC_TYPE}.class_ref
 			pointer_level_set: pointer_level = 0
 			array_level_set: array_level = 0
 			by_ref_set: not by_ref
@@ -74,9 +74,8 @@ feature -- Access
 
 	array_level: INTEGER
 
-	tp: BASIC_TYPE
+	basic_type: BASIC_TYPE
 		--The type of the CLS_TYPE object
-		-- TODO refactor this tp name to basic_type.
 
 	type_ref: detachable DATA_CONTAINER
 		-- The class reference for class type objects.
@@ -111,7 +110,7 @@ feature -- Status Report
 
 	is_void: BOOLEAN
 		do
-			Result := tp = {BASIC_TYPE}.Void_ and then pointer_level = 0
+			Result := basic_type = {BASIC_TYPE}.Void_ and then pointer_level = 0
 		end
 
 feature --Access Instance Free
@@ -134,7 +133,7 @@ feature -- Output
 		local
 			l_name: STRING_32
 		do
-			if tp = {BASIC_TYPE}.cls then
+			if basic_type = {BASIC_TYPE}.class_ref then
 				if show_type then
 					if attached type_ref as l_type_ref and then
 						(l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value) /= 0
@@ -156,19 +155,19 @@ feature -- Output
 						-- TODO implement.
 					end
 				end
-			elseif tp = {BASIC_TYPE}.var then
+			elseif basic_type = {BASIC_TYPE}.type_var then
 				a_file.put_string ("!")
 				a_file.put_integer (var_num)
-			elseif tp = {BASIC_TYPE}.mvar then
+			elseif basic_type = {BASIC_TYPE}.method_param then
 				a_file.put_string ("!!")
 				a_file.put_integer (var_num)
-			elseif tp = {BASIC_TYPE}.method then
+			elseif basic_type = {BASIC_TYPE}.method_ref then
 				a_file.put_string ("method ")
 				if attached method_ref as l_method_ref then
 					Result := l_method_ref.il_src_dump (a_file, false, true, true)
 				end
 			else
-				a_file.put_string (type_names.at (tp.index + 1))
+				a_file.put_string (type_names.at (basic_type.index + 1))
 			end
 			if array_level = 1 then
 				a_file.put_string (" []")

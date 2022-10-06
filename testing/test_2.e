@@ -62,8 +62,8 @@ feature -- Access
 			-- we have to first make a pinvoke reference WITHOUT extra args
 
 			create signature_ex.make ("printf", {METHOD_SIGNATURE_ATTRIBUTES}.vararg, Void)
-			signature_ex.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0))
-			signature_ex.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
+			signature_ex.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32))
+			signature_ex.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make_with_pointer_level ({BASIC_TYPE}.Void_, 1)))
 			lib_entry.add_pinvoke_reference (signature_ex, "msvcrt.dll", true)
 
 
@@ -71,9 +71,9 @@ feature -- Access
 			--  including the ones we are adding as variable length
 			--  this is the one we use in the call
 			create signature_ep.make ("printf", {METHOD_SIGNATURE_ATTRIBUTES}.vararg, Void)
-			signature_ep.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0))
-			signature_ep.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
-			signature_ep.add_vararg_param (create {PARAM}.make ("A_1", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 1)))
+			signature_ep.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.i32))
+			signature_ep.add_parameter (create {PARAM}.make ("format", create {CLS_TYPE}.make_with_pointer_level ({BASIC_TYPE}.Void_, 1)))
+			signature_ep.add_vararg_param (create {PARAM}.make ("A_1", create {CLS_TYPE}.make_with_pointer_level ({BASIC_TYPE}.Void_, 1)))
 
 			--  note the reference to the pinvoke signature
 			signature_ep.signature_parent (signature_ex)
@@ -81,7 +81,7 @@ feature -- Access
 
 
 			create signature_m.make ("$Main", {QUALIFIERS_ENUM}.managed, working)
-			signature_m.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
+			signature_m.set_return_type (create {CLS_TYPE}.make ({BASIC_TYPE}.Void_))
 
 			create start.make (signature_m,
 											create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.private |

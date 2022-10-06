@@ -26,12 +26,12 @@ feature -- Access
 			working := lib_entry.working_assembly
 
 			create signature_rep.make("putchar", 0, Void)
-			signature_rep.set_return_type(create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
-			signature_rep.add_parameter (create {PARAM}.make ("ch", create {CLS_TYPE}.make ({BASIC_TYPE}.i32, 0)))
+			signature_rep.set_return_type(create {CLS_TYPE}.make ({BASIC_TYPE}.Void_))
+			signature_rep.add_parameter (create {PARAM}.make ("ch", create {CLS_TYPE}.make ({BASIC_TYPE}.i32)))
 			lib_entry.add_pinvoke_reference (signature_rep, "msvcrt.dll", true)
 
 			create signature_m.make ("$Main", {QUALIFIERS_ENUM}.managed, working)
-			signature_m.set_return_type(create {CLS_TYPE}.make ({BASIC_TYPE}.Void_, 0))
+			signature_m.set_return_type(create {CLS_TYPE}.make ({BASIC_TYPE}.Void_))
 
 			create start.make (signature_m, create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.private | {QUALIFIERS_ENUM}.Static | {QUALIFIERS_ENUM}.hidebysig | {QUALIFIERS_ENUM}.Cil | {QUALIFIERS_ENUM}.managed), True)
 

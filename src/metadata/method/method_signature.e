@@ -236,9 +236,37 @@ feature -- Status Report
 		end
 
 	matches_type (a_type: CLS_TYPE; a_other: CLS_TYPE): BOOLEAN
-			-- Does `a_type` matches `a_other`?
+		local
+			done: BOOLEAN
 		do
-			-- TODO implement
+			if a_other.basic_type = {BASIC_TYPE}.type_var then
+				-- nothing to do, it matches.
+			elseif  a_other.basic_type = {BASIC_TYPE}.method_param then
+				-- nothing to do, it matches.
+			elseif a_type.basic_type = a_other.basic_type then
+
+					--  this may need to deal with boxed types a little better
+				if a_type.basic_type = {BASIC_TYPE}.class_ref and then
+				  a_type.type_ref /= a_other.type_ref  -- TODO check how to compare DATA_CONTAINER.
+				then
+					done := True
+					Result := False
+				end
+			else
+				done := True
+				Result := False
+			end
+			if not done then
+				if (a_type.pointer_level /= a_other.pointer_level and then
+				    a_other.pointer_level /= 1 and then a_other.basic_type /= {BASIC_TYPE}.Void_) or else
+				    (a_type.array_level /= a_other.array_level)
+				then
+					Result := False
+				else
+					Result := True
+				end
+
+			end
 		end
 
 	matches (a_args: LIST [CLS_TYPE]): BOOLEAN
@@ -262,7 +290,7 @@ feature -- Output
     			a_file.put_string ("instance ")
     		end
     		if attached return_type as l_ret_type and then
-    			l_ret_type.tp = {BASIC_TYPE}.cls
+    			l_ret_type.basic_type = {BASIC_TYPE}.class_ref
     		then
     			if attached l_ret_type.type_ref as l_type_ref and then (l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value) /= 0  then
     				a_file.put_string ("valuetype ")
@@ -308,7 +336,7 @@ feature -- Output
 			a_file.put_string (adorn_generics(a_file, false))
 			a_file.put_string ("(")
 			across params as it loop
-				if attached {CLS_TYPE} it.type as l_type and then  l_type.tp = {BASIC_TYPE}.cls then
+				if attached {CLS_TYPE} it.type as l_type and then  l_type.basic_type = {BASIC_TYPE}.class_ref then
 					if attached l_type.type_ref as l_type_ref and then
 						(l_type_ref.flags.flags & {QUALIFIERS_ENUM}.value) /= 0 then
 						a_file.put_string ("valuetype ")
@@ -318,8 +346,8 @@ feature -- Output
 				end
 				if attached {CLS_TYPE} it.type as l_type  then
 					Result := l_type.il_src_dump (a_file)
-					if a_names and then l_type.tp /= {BASIC_TYPE}.var and then
-						l_type.tp /= {BASIC_TYPE}.mvar
+					if a_names and then l_type.basic_type /= {BASIC_TYPE}.type_var and then
+						l_type.basic_type /= {BASIC_TYPE}.method_param
 					then
 						Result := it.il_src_dump (a_file)
 					end
