@@ -10,11 +10,17 @@ class
 
 create
 	make,
+	make_with_pointer_level,
 	make_with_container
 
 feature {NONE} --Initialization
 
-	make (a_type: BASIC_TYPE; a_pointer_level: INTEGER)
+	make (a_type: BASIC_TYPE)
+		do
+			make_with_pointer_level (a_type, 0)
+		end
+
+	make_with_pointer_level (a_type: BASIC_TYPE; a_pointer_level: INTEGER)
 		do
 			tp := a_type
 			if tp = {BASIC_TYPE}.var or else tp = {BASIC_TYPE}.mvar then

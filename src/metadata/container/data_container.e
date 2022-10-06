@@ -47,6 +47,7 @@ feature -- Access
 		-- Check the class QUALIFIERS
 
 	instantiated: BOOLEAN
+		-- use to tell if the class has been instantiated, for example it might be used after a forward reference is resolved.
 
 	pe_index: NATURAL
 		-- generic index into the table or stream.
@@ -151,6 +152,13 @@ feature --Element Change
 			end
 		end
 
+	set_instantiated
+			-- Set instantiated to true.
+		do
+			instantiated := True
+		ensure
+			is_instantiated: instantiated = True
+		end
 
 feature -- Output
 

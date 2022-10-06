@@ -35,6 +35,9 @@ feature {NONE} -- Initialization
 			create using_list.make (0)
 			create container_stack.make
 
+				-- Create the working assembly.
+				-- Note that this will ALWAYS be the fisrt
+				-- assembly in the list.
 			create l_assembly_ref.make (a_name, False, create {ARRAY [NATURAL_8]}.make_filled (0, 1, 8))
 			assembly_refs.force (l_assembly_ref)
 		ensure

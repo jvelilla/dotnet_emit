@@ -106,7 +106,7 @@ feature -- Access
 			Result := internal_definitions // 2;
 		end
 
-feature -- Change Element
+feature -- Element change
 
 	increment_definitions
 			-- Increment definitions count.
@@ -156,7 +156,6 @@ feature -- Change Element
 			end
 		end
 
-
 	signature_parent (a_parent: METHOD_SIGNATURE)
 			-- the parent declaration `a_parent` for a call site signature with vararg
          	-- params (the methoddef version of the signature)
@@ -166,6 +165,47 @@ feature -- Change Element
 			method_parent_set: attached method_parent as l_method_parent implies l_method_parent = a_parent
 		end
 
+
+	set_container (a_container: like container)
+			-- Set `container` with `a_container`
+		do
+			container := a_container
+		ensure
+			container_set: container = a_container
+		end
+
+	set_name (a_name: STRING_32)
+			-- Set `name` with `a_name`.
+		do
+			name := a_name
+		ensure
+			name_set: name = a_name
+		end
+
+	set_array_object (a_type: like array_object)
+			-- Set `array_object` with `a_type`
+		do
+			array_object := a_type
+		ensure
+			array_object_set:  array_object = a_type
+		end
+
+	set_generic_parent (a_sig: like generic_parent)
+			-- Set `generic_parent` with `a_sig`
+		do
+			generic_parent := a_sig
+		ensure
+			generic_parent_set: generic_parent = a_sig
+		end
+
+feature -- Status Report
+
+	get_param (i: INTEGER; by_ordinal: BOOLEAN): PARAM
+			-- Get a parameter.
+		do
+			-- Not Implemented
+			create Result.make ("Void", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_))
+		end
 
 feature -- Output
 
