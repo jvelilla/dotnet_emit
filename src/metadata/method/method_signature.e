@@ -81,8 +81,10 @@ feature -- Access
 	params: LIST [PARAM]
 
 	vararg_params: LIST [PARAM]
+			-- vararg parameters.
 
 	ref: BOOLEAN
+		-- is ref?
 
 	pe_index: NATURAL
 
@@ -198,13 +200,50 @@ feature -- Element change
 			generic_parent_set: generic_parent = a_sig
 		end
 
+	set_vararg_flag
+			-- Make it a vararg signature.
+		do
+			flags := flags | {METHOD_SIGNATURE_ATTRIBUTES}.vararg
+		end
+
+	set_pe_index (a_index: like pe_index)
+			-- Set `pe_index` to `a_index`.
+		do
+			pe_index := a_index
+		ensure
+			pe_index_set: pe_index = a_index
+		end
+
 feature -- Status Report
 
 	get_param (i: INTEGER; by_ordinal: BOOLEAN): PARAM
 			-- Get a parameter.
+		require
+			valid_index: i > 0 and then i <= params.count
 		do
-			-- Not Implemented
-			create Result.make ("Void", create {CLS_TYPE}.make ({BASIC_TYPE}.Void_))
+			Result := params [i]
+-- TODO check 			
+--			if by_ordinal then
+--				Result := params.at (i)
+--			else
+--				across params as ic until found loop
+--					if ic.index = i then
+--						found := True
+--						Result := ic
+--					end
+--				end
+--			end
+		end
+
+	matches_type (a_type: CLS_TYPE; a_other: CLS_TYPE): BOOLEAN
+			-- Does `a_type` matches `a_other`?
+		do
+			-- TODO implement
+		end
+
+	matches (a_args: LIST [CLS_TYPE]): BOOLEAN
+		do
+			-- TODO implement
 		end
 
 feature -- Output
@@ -266,7 +305,7 @@ feature -- Output
 				end
 			end
 
-			a_file.put_string (adorn_generics(false))
+			a_file.put_string (adorn_generics(a_file, false))
 			a_file.put_string ("(")
 			across params as it loop
 				if attached {CLS_TYPE} it.type as l_type and then  l_type.tp = {BASIC_TYPE}.cls then
@@ -309,7 +348,18 @@ feature -- Output
 			Result := True
 		end
 
-	adorn_generics(a_names: BOOLEAN): STRING_32
+	il_signature_dump (a_file: FILE_STREAM)
+		do
+			-- TODO implement.
+		end
+
+
+	pe_dump (a_stream: FILE_STREAM; as_type: BOOLEAN)
+		do
+			--TODO implement
+		end
+
+	adorn_generics(a_stream: FILE_STREAM; a_names: BOOLEAN): STRING_32
 		do
 			--TODO implement.
 			create Result.make_empty

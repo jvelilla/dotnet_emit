@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {METHOD_SIGNATURE_ATTRIBUTES}."
+	description: "Method signatures constants."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
