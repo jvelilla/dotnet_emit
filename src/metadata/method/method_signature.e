@@ -270,8 +270,41 @@ feature -- Status Report
 		end
 
 	matches (a_args: LIST [CLS_TYPE]): BOOLEAN
+		local
+			l_tpa: CLS_TYPE
+			l_tpb: CLS_TYPE
+			l_exit: BOOLEAN
+			l_count: INTEGER
 		do
-			-- TODO implement
+
+			l_count := a_args.count
+				-- this is only designed for managed functions ...
+			if a_args.count = params.count or else
+				( params.count > 0 and then a_args.count >= params.count -1 and then
+				flags & {METHOD_SIGNATURE_ATTRIBUTES}.vararg /= 0)
+			then
+				across 1 |..| l_count  as ic  until l_exit loop
+
+						-- TODO double check this implementation.
+					if attached params.at (ic).type as l_type then
+						l_tpb := l_type
+						l_tpa := a_args [ic]
+
+						if not matches_type (l_tpa, l_tpb) then
+							l_exit := True
+							Result := False
+						end
+					else
+						l_exit := True
+						Result := False
+					end
+				end
+				if not l_exit then
+					Result := True
+				end
+			else
+				Result := False
+			end
 		end
 
 feature -- Output
