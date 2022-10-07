@@ -91,6 +91,10 @@ feature -- Element change
 
 	set_extend_from (an_extend_from: like extend_from)
 			-- Assign `extend_from' with `an_extend_from'.
+			--| set the class we are extending from, if this is unset
+			--| a system class will be chosen based on whether or not the class is a valuetype
+			--| this may be unset when reading in an assembly, in that case ExtendsName
+			--| may give the name of a class which is being extended from
 		do
 			extend_from := an_extend_from
 		ensure
@@ -117,7 +121,7 @@ feature -- Output
 
 	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		do
-			il_src_dump_class_header(a_file)
+			il_src_dump_class_header (a_file)
 			if attached extend_from as l_extend_form then
 				a_file.put_string (" extends ")
 				a_file.put_string ({QUALIFIERS}.name ("", l_extend_form, False))
@@ -136,10 +140,10 @@ feature -- Output
 				end
 			end
 			a_file.put_new_line
-			Result := Precursor(a_file)
+			Result := Precursor (a_file)
 			a_file.put_new_line
 			across properties as p loop
-				Result := p.il_src_dump(a_file)
+				Result := p.il_src_dump (a_file)
 			end
 			a_file.put_string ("}")
 			a_file.put_new_line
@@ -159,7 +163,6 @@ feature -- Output
 			a_file.put_string ("'")
 			a_file.put_string (adorn_generics (True))
 		end
-
 
 	adorn_generics (a_names: BOOLEAN): STRING_32
 		local

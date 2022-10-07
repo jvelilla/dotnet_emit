@@ -164,6 +164,33 @@ feature -- Operations
 
 feature -- Assembly
 
+	mscorlib_assembly: ASSEMBLY_DEF
+			-- loads the MSCorLib assembly.
+		local
+			l_result: ASSEMBLY_DEF
+			l_system: NAMESPACE
+			l_object, l_value, l_enum: CLS_CLASS
+		do
+			  -- [mscorlib]System.ParamArrayAttribute
+  			  -- System. + typeNames_[tp_]
+
+  			l_result := find_assembly ("mscorlib")
+  			if l_result = Void then
+				l_result := add_external_assembly ("mscorlib", Void)
+				create l_system.make ("System")
+				l_result.add (l_system)
+				create l_object.make ("Object", create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.public), -1, -1)
+				l_system.add (l_object)
+				create l_value.make ("ValueType", create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.public), -1, -1)
+				l_value.set_extend_from (l_object)
+				l_system.add (l_value)
+				create l_enum.make ("Enum", create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.public), -1, -1)
+				l_enum.set_extend_from (l_value)
+				l_system.add (l_enum)
+  			end
+  			Result := l_result
+		end
+
 	load_assembly (a_assembly_name: STRING_32; a_major, a_minor, a_build, a_revision: INTEGER)
 			-- Load data out of an assembly.
 		local
@@ -177,7 +204,6 @@ feature -- Assembly
 			end
 		end
 
-
 	find_assembly(a_name: STRING_32): detachable ASSEMBLY_DEF
 			-- Find an assembly
 		local
@@ -190,6 +216,15 @@ feature -- Assembly
 				end
 			end
 		end
+
+    add_external_assembly (a_assembly: STRING;  a_token: detachable ARRAY [NATURAL_8]): ASSEMBLY_DEF
+    		-- Add a reference to another assembly
+    		-- this is an empty assembly you can put stuff in if you want to
+    		--| Deprecated
+    	do
+			create Result.make (a_assembly, True, Void)
+			assembly_refs.force (Result)
+    	end
 
 feature -- Output
 

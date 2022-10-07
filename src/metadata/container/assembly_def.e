@@ -22,13 +22,18 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_name: STRING_32; a_external: BOOLEAN; a_byte: ARRAY [NATURAL_8])
+	make (a_name: STRING_32; a_external: BOOLEAN; a_byte: detachable ARRAY [NATURAL_8])
 		require
-			valid_length: a_byte.count = 8
+			valid_length_iff_atached_byte: attached a_byte and then a_byte.count = 8
 		do
 			make_data_container (a_name, create {QUALIFIERS}.make)
 
-			create public_key_token.make_from_array (a_byte)
+			if attached a_byte then
+				create public_key_token.make_from_array (a_byte)
+			else
+				create public_key_token.make_filled (0, 1, 8)
+			end
+
 			create namespace_cache.make(0)
 			create class_cache.make (0)
 			create snk_file.make_empty
@@ -36,7 +41,6 @@ feature {NONE} -- Initialization
 			snk_file_set: snk_file.is_empty
 			external_set: not is_external
 			loaded_set: not is_loaded
-
 		end
 
 feature -- Access
