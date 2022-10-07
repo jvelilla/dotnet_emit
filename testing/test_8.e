@@ -16,6 +16,7 @@ feature -- Test
 			assembly: ASSEMBLY_DEF
 			sig_main: METHOD_SIGNATURE
 			method_main: METHOD
+			mscorlib: ASSEMBLY_DEF
 		do
 			create pe_file.make ("test8", {PE_LIB}.bits32)
 
@@ -32,5 +33,7 @@ feature -- Test
 									 						), True)
 
 			assembly.add (method_main)
+
+			mscorlib := pe_file.mscorlib_assembly
 		end
 end

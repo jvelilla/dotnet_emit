@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-22-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-22-0 http://www.eiffel.com/developers/xml/configuration-1-22-0.xsd" name="dotnet_emit" uuid="6599C89C-B782-45BF-A031-13F5D15C0E85" library_target="dotnet_emit">
-	<target name="dotnet_emit">
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-22-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-22-0 http://www.eiffel.com/developers/xml/configuration-1-22-0.xsd" name="il_emitter" uuid="6599C89C-B782-45BF-A031-13F5D15C0E85" library_target="il_emitter">
+	<target name="il_emitter">
 		<root all_classes="true"/>
 		<file_rule>
 			<exclude>/CVS$</exclude>
