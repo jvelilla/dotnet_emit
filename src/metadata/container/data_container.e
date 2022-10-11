@@ -160,6 +160,14 @@ feature --Element Change
 			is_instantiated: instantiated = True
 		end
 
+feature -- Status Report
+
+	find_container_collection (a_split: LIST [STRING_32]; n: INTEGER; a_generics: detachable LIST [CLS_TYPE]; a_method: BOOLEAN): TUPLE [index: INTEGER; dc: detachable DATA_CONTAINER]
+			-- Find a sub container.
+		do
+			Result := [n, Void]
+		end
+
 feature -- Output
 
 	il_src_dump (a_file: FILE_STREAM): BOOLEAN

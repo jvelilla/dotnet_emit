@@ -150,7 +150,7 @@ feature -- Operations
 			l_method: METHOD
 		do
 			create l_method.make (a_method_sig, create {QUALIFIERS}.make_with_flags ({QUALIFIERS_ENUM}.pinvokefunc | {QUALIFIERS_ENUM}.public), False)
-			l_method.set_pinvoke(a_dll_name, if iscdecl then {INVOKE_TYPE}.Cdecl else {INVOKE_TYPE}.Stdcall end)
+			l_method.set_pinvoke(a_dll_name, if iscdecl then {INVOKE_TYPE}.Cdecl else {INVOKE_TYPE}.Stdcall end, "")
 			p_invoke_signatures.force (l_method, a_method_sig.name)
 		end
 
@@ -225,6 +225,103 @@ feature -- Assembly
 			create Result.make (a_assembly, True, Void)
 			assembly_refs.force (Result)
     	end
+
+
+    find(a_path: STRING_32; a_generics: detachable LIST [CLS_TYPE]; a_assembly: detachable ASSEMBLY_DEF): TUPLE [type: FIND_TYPE; resource: ANY]
+    		-- find `a_path`, return value tells what type of object was found	
+    	local
+    		l_npos: INTEGER
+    		l_assembly_name: STRING_32
+    		l_path : STRING_32
+    		l_assembly: ASSEMBLY_DEF
+    		l_split: LIST [STRING_32]
+    		l_found: LIST [DATA_CONTAINER]
+    		l_found_file: LIST [FIELD]
+    		l_found_method: LIST [METHOD]
+    		l_found_property: LIST [PROPERTY]
+    		n: INTEGER
+    		l_dc: DATA_CONTAINER
+			l_tuple: TUPLE [index: INTEGER; dc: detachable DATA_CONTAINER]
+    	do
+    		create l_path.make_from_string (a_path)
+			l_path.replace_substring_all ("/", ".")
+
+			if not l_path.is_empty and then l_path [1] = '[' then
+				l_npos := l_path.index_of (']', 1)
+				if l_npos /= 0 then
+					l_assembly_name := l_path.substring (2, l_npos - 1)
+					l_path := l_path.substring (l_npos + 1, l_path.count)
+					l_assembly := find_assembly (l_assembly_name)
+				end
+			end
+			l_split := split_path (l_path)
+
+			create {ARRAYED_LIST [DATA_CONTAINER]} l_found.make (0)
+			create {ARRAYED_LIST [FIELD]} l_found_file.make (0)
+			create {ARRAYED_LIST [METHOD]} l_found_method.make (0)
+			create {ARRAYED_LIST [PROPERTY]} l_found_property.make (0)
+
+			across assembly_refs as ic loop
+				if not (attached a_assembly) or else
+				   attached a_assembly and then a_assembly.is_equal(ic) -- TODO check
+				then
+					n := 0
+					l_tuple := ic.find_container_collection (l_split, n, a_generics, false)
+				end
+			end
+
+			Result := [{FIND_TYPE}.s_notfound, create {ANY}]
+    	end
+
+feature {ANY} -- Implementation
+
+	split_path (a_path: STRING_32): LIST [STRING_32]
+		local
+			l_last: STRING_32
+			l_path: STRING_32
+			n: INTEGER_32
+			l_split: LIST [STRING_32]
+		do
+			l_last := ""
+			create {ARRAYED_LIST [STRING_32]} Result.make (0)
+			create l_path.make_from_string (a_path)
+			n := l_path.index_of (':', 1)
+			if n /= 0 and then n < l_path.count - 2 and then l_path [n + 1] = ':' then
+				l_last := l_path.substring (n + 2, l_path.count)
+				l_path := l_path.substring (1, n - 1)
+			end
+			n := l_path.index_of ('.', 1)
+			from
+			until
+				n = 0
+			loop
+				Result.force (l_path.substring (1, n - 1))
+				if l_path.count > n + 1 then
+					l_path := l_path.substring (n + 1, l_path.count)
+				else
+					l_path := ""
+				end
+				n := l_path.index_of ('.', 1)
+			end
+			if not l_path.is_empty then
+				Result.force (l_path)
+			end
+			if not l_last.is_empty then
+				Result.force (l_last)
+			end
+
+			if Result.count > 2 then
+				if Result [Result.count].same_string ("ctor") or else Result [Result.count].same_string ("cctor")then
+					if Result [Result.count - 1].is_empty then
+						Result [Result.count - 1] := "." + Result [Result.count]
+						Result.prune (Result[Result.count])
+					end
+				end
+			end
+
+			l_split := split_path (l_path)
+
+		end
 
 feature -- Output
 

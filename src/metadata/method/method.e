@@ -31,11 +31,21 @@ feature {NONE} --Initialization
 			entry_point := a_entry
 			invoke_mode := {INVOKE_MODE}.CIL
 			pinvoke_type := {INVOKE_TYPE}.Stdcall
+			create import_name.make_empty
 			create {ARRAYED_LIST [CLS_LOCAL]} var_list.make (0)
 			create pinvoke_name.make_empty
 			if not (flags.flags & {QUALIFIERS_ENUM}.Static /= 0) then
 				prototype.instance(True)
 			end
+		ensure
+			import_name_set: import_name.is_empty
+			pinvoke_name_set: pinvoke_name.is_empty
+			invoke_mode_set: invoke_mode = {INVOKE_MODE}.CIL
+			pinvoke_type_set: pinvoke_type = {INVOKE_TYPE}.Stdcall
+			var_list_set: var_list.is_empty
+			max_stack_set: max_stack = 100
+			entry_point_Set: entry_point = a_entry
+			-- prototype set.
 		end
 
 feature -- Access
@@ -56,14 +66,22 @@ feature -- Access
 
 	rendering: detachable PE_METHOD
 
+	import_name: STRING_32
+
 feature -- Change Element
 
-	set_pinvoke(a_name: STRING_32; a_type: INVOKE_TYPE)
+	set_pinvoke(a_name: STRING_32; a_type: INVOKE_TYPE; a_import_name: STRING_32)
 			--  Set Pinvoke DLL name
 		do
 			invoke_mode := {INVOKE_MODE}.PInvoke
 			pinvoke_name := a_name
 			pinvoke_type := a_type
+			import_name := a_import_name
+		ensure
+			invoke_mode_set: invoke_mode = {INVOKE_MODE}.PInvoke
+			pinvoke_name_set: pinvoke_name = a_name
+			pinvoke_type_set: pinvoke_type = a_type
+			import_name_set: import_name = a_import_name
 		end
 
 	add_instruction (a_instruction: INSTRUCTION)
