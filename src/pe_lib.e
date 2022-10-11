@@ -318,9 +318,6 @@ feature {ANY} -- Implementation
 					end
 				end
 			end
-
-			l_split := split_path (l_path)
-
 		end
 
 feature -- Output

@@ -24,7 +24,7 @@ feature {NONE} -- Initialization
 
 	make (a_name: STRING_32; a_external: BOOLEAN; a_byte: detachable ARRAY [NATURAL_8])
 		require
-			valid_length_iff_atached_byte: attached a_byte and then a_byte.count = 8
+			valid_length_iff_atached_byte: attached a_byte implies a_byte.count = 8
 		do
 			make_data_container (a_name, create {QUALIFIERS}.make)
 

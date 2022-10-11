@@ -167,7 +167,7 @@ feature -- Status Report
 		local
 			exit: BOOLEAN
 		do
-			if attached a_generics then
+			if a_generics = Void then
 				if attached {LIST [DATA_CONTAINER]} sorted_children.at (a_name) as l_items and then
 					l_items.count > 0
 				then
@@ -193,6 +193,7 @@ feature -- Status Report
 			count: INTEGER
 			rv, dc_current: DATA_CONTAINER
 			i: INTEGER
+			exit: BOOLEAN
 		do
 			n := 0
 			count := 1
@@ -204,11 +205,21 @@ feature -- Status Report
 			from
 				i := 1
 			until
-				i = a_split.count
+				exit or else i > a_split.count
 			loop
-
+					-- TODO check the index.
+				if attached dc_current then
+					dc_current := dc_current.find_container_string (a_split[i], if i = a_split.count - count then a_generics else Void end)
+				end
+				if dc_current = Void then
+					exit := True
+				else
+					rv := dc_current
+					i := i + 1
+					n := n + 1
+				end
 			end
-			Result := [n, Void]
+			Result := [n, rv]
 		end
 
 feature -- Output
