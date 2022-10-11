@@ -17,6 +17,7 @@ feature -- Test
 			sig_main: METHOD_SIGNATURE
 			method_main: METHOD
 			mscorlib: ASSEMBLY_DEF
+			l_result: TUPLE [type: FIND_TYPE; resource: detachable ANY]
 		do
 			create pe_file.make ("test8", {PE_LIB}.bits32)
 
@@ -35,5 +36,7 @@ feature -- Test
 			assembly.add (method_main)
 
 			mscorlib := pe_file.mscorlib_assembly
+
+			l_result := pe_file.find ("system", Void, Void)
 		end
 end

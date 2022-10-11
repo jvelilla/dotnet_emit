@@ -227,7 +227,7 @@ feature -- Assembly
     	end
 
 
-    find(a_path: STRING_32; a_generics: detachable LIST [CLS_TYPE]; a_assembly: detachable ASSEMBLY_DEF): TUPLE [type: FIND_TYPE; resource: ANY]
+    find(a_path: STRING_32; a_generics: detachable LIST [CLS_TYPE]; a_assembly: detachable ASSEMBLY_DEF): TUPLE [type: FIND_TYPE; resource: detachable ANY]
     		-- find `a_path`, return value tells what type of object was found	
     	local
     		l_npos: INTEGER
@@ -236,13 +236,14 @@ feature -- Assembly
     		l_assembly: ASSEMBLY_DEF
     		l_split: LIST [STRING_32]
     		l_found: LIST [DATA_CONTAINER]
-    		l_found_file: LIST [FIELD]
+    		l_found_field: LIST [FIELD]
     		l_found_method: LIST [METHOD]
     		l_found_property: LIST [PROPERTY]
+    		l_tuple: TUPLE [index: INTEGER; dc: detachable DATA_CONTAINER]
     		n: INTEGER
-    		l_dc: DATA_CONTAINER
-			l_tuple: TUPLE [index: INTEGER; dc: detachable DATA_CONTAINER]
+    		exit: BOOLEAN
     	do
+	    	Result := [{FIND_TYPE}.s_notfound, Void]
     		create l_path.make_from_string (a_path)
 			l_path.replace_substring_all ("/", ".")
 
@@ -257,7 +258,7 @@ feature -- Assembly
 			l_split := split_path (l_path)
 
 			create {ARRAYED_LIST [DATA_CONTAINER]} l_found.make (0)
-			create {ARRAYED_LIST [FIELD]} l_found_file.make (0)
+			create {ARRAYED_LIST [FIELD]} l_found_field.make (0)
 			create {ARRAYED_LIST [METHOD]} l_found_method.make (0)
 			create {ARRAYED_LIST [PROPERTY]} l_found_property.make (0)
 
@@ -265,12 +266,97 @@ feature -- Assembly
 				if not (attached a_assembly) or else
 				   attached a_assembly and then a_assembly.is_equal(ic) -- TODO check
 				then
-					n := 0
 					l_tuple := ic.find_container_collection (l_split, a_generics, false)
+					if attached l_tuple.dc as l_dc then
+						if l_tuple.index = l_split.count then
+							l_found.force (l_dc)
+						elseif l_tuple.index = l_split.count - 1 and then
+							attached {CLS_CLASS} l_dc or else
+							attached {CIL_ENUM} l_dc or else
+							attached {ASSEMBLY_DEF} l_dc
+						then
+							across l_dc.fields as field loop
+									-- TODO double check the index since C++ is 0 based.
+								if field.name.same_string (l_split [l_tuple.index]) then
+									l_found_field.force (field)
+								end
+							end
+							across l_dc.methods as cc loop
+								if attached {METHOD}cc as l_method and then
+								 	l_method.prototype.name.same_string (l_split[n])
+								then
+									l_found_method.force (l_method)
+								end
+							end
+							if attached {CLS_CLASS} l_dc as l_class then
+								across l_class.properties as cc loop
+									l_found_property.force (cc)
+								end
+							end
+						end
+					end
 				end
 			end
 
-			Result := [{FIND_TYPE}.s_notfound, create {ANY}]
+			across using_list as u loop
+				l_tuple := u.find_container_collection (l_split, a_generics, false)
+				if attached l_tuple.dc as l_dc then
+					if l_tuple.index = l_split.count then
+						l_found.force (l_dc)
+					elseif l_tuple.index = l_split.count - 1 and then
+						(attached {CLS_CLASS} l_dc or else
+						 attached {CIL_ENUM} l_dc)
+					then
+						across l_dc.fields as field loop
+								-- TODO double check the index since C++ is 0 based.
+							if field.name.same_string (l_split [l_tuple.index]) then
+								l_found_field.force (field)
+							end
+						end
+						across l_dc.methods as cc loop
+							if attached {METHOD}cc as l_method and then
+							 	l_method.prototype.name.same_string (l_split[n])
+							then
+								l_found_method.force (l_method)
+							end
+						end
+						if attached {CLS_CLASS} l_dc as l_class then
+							across l_class.properties as cc loop
+								l_found_property.force (cc)
+							end
+						end
+					end
+				end
+			end
+
+			n := l_found.count + l_found_field.count + l_found_method.count + l_found_property.count
+			if n = 0 then
+				exit := True
+				Result := [{FIND_TYPE}.s_notfound, Void]
+			elseif not exit and then n > 1 then
+				exit := True
+				Result := [{FIND_TYPE}.s_ambiguous, Void]
+			elseif not exit and then not l_found.is_empty then
+				Result.resource := l_found [1]
+				if attached {NAMESPACE} l_found [1] then
+					Result.type := {FIND_TYPE}.s_namespace
+				elseif attached {CLS_CLASS} l_found [1] then
+					Result.type := {FIND_TYPE}.s_class
+				elseif attached {CIL_ENUM} l_found [1] then
+					Result.type := {FIND_TYPE}.s_enum
+				end
+				exit := True
+			elseif not exit and then not l_found_method.is_empty then
+				Result := [{FIND_TYPE}.s_method, l_found_method [1]]
+				exit := True
+			elseif not exit and then not l_found_field.is_empty then
+				Result := [{FIND_TYPE}.s_field, l_found_field [1]]
+				exit := True
+			elseif not exit and then not l_found_property.is_empty then
+				Result := [{FIND_TYPE}.s_property, l_found_property [1]]
+				exit := True
+			end
+
     	end
 
 feature {ANY} -- Implementation
