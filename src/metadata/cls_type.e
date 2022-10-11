@@ -88,6 +88,91 @@ feature -- Access
 	show_type: BOOLEAN assign set_show_type
 
 
+feature -- Status Report
+
+	matches (a_other: CLS_TYPE): BOOLEAN
+			-- Current type and `a_other` are an exact match?
+		local
+			n1, n2: INTEGER
+			l_transfer: BOOLEAN
+		do
+			Result := True
+			if not (basic_type = a_other.basic_type) then
+				Result := False
+			end
+			if Result and then
+				array_level /= a_other.array_level
+			then
+				Result := False
+			end
+			if Result and then
+				pointer_level /= a_other.pointer_level
+			then
+				Result := False
+			end
+			if Result and then
+				by_ref /= a_other.by_ref
+			then
+				Result := False
+			end
+			if Result and then
+				basic_type = {BASIC_TYPE}.class_ref and then
+				not matches_type_ref (a_other.type_ref)
+			then
+				if attached {DATA_CONTAINER} type_ref as l_type_ref and then
+					attached {DATA_CONTAINER} a_other.type_ref as l_other_type_ref
+				then
+					n1 := l_type_ref.name.substring_index ("_empty", 1)
+					n2 := l_other_type_ref.name.substring_index ("_empty", 1)
+					if n1 /= 0 or else n2 /= 0 then
+						l_transfer := False
+						if n1 = 0 then
+							n1 := l_type_ref.name.substring_index ("_array_", 1)
+						else
+							l_transfer := True
+							n2 := l_other_type_ref.name.substring_index ("_array_", 1)
+						end
+						if n1 /= n2 then
+							Result := False
+						end
+						if Result and then
+							l_type_ref.name.substring(1, n1) /= l_other_type_ref.name.substring(1, n2)
+						then
+							Result := False
+						end
+						if Result and then
+							l_transfer
+						then
+							type_ref := a_other.type_ref  -- TODO add a setter so we can add a postcondition.
+						end
+					end
+				end
+			end
+		end
+
+
+	matches_type_ref (a_other: detachable DATA_CONTAINER): BOOLEAN
+			-- TODO double check this implementation
+		do
+			if
+				attached type_ref as l_type_Ref and then
+			    attached a_other as l_other
+			then
+				 -- TODO need to check how to
+				 -- compare DATA_CONTAINER instances.
+				Result :=  l_type_ref.is_equal(l_other)
+			else
+				if type_ref = Void and then
+					a_other = Void
+				then
+					Result := True
+				else
+					Result := False
+				end
+			end
+		end
+
+
 
 feature -- Element Change
 

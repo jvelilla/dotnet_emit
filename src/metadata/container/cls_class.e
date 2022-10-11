@@ -117,6 +117,35 @@ feature -- Element change
 			pack_assigned: pack = a_pack
 		end
 
+
+feature -- Status Report
+
+	matches_generic (a_generics: detachable LIST [CLS_TYPE]): BOOLEAN
+		local
+			exit: BOOLEAN
+			i: INTEGER
+		do
+			if attached a_generics then
+
+				if generics.count = a_generics.count then
+					from
+						i := 1
+					until
+						exit or else i > generics.count
+					loop
+						if not generics.at (i).matches (a_generics.at (i)) then
+							exit := True
+						end
+						i := i + 1
+					end
+					if i > generics.count then
+						Result := True
+					end
+				end
+
+			end
+		end
+
 feature -- Output
 
 	il_src_dump (a_file: FILE_STREAM): BOOLEAN

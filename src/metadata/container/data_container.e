@@ -162,9 +162,52 @@ feature --Element Change
 
 feature -- Status Report
 
-	find_container_collection (a_split: LIST [STRING_32]; n: INTEGER; a_generics: detachable LIST [CLS_TYPE]; a_method: BOOLEAN): TUPLE [index: INTEGER; dc: detachable DATA_CONTAINER]
-			-- Find a sub container.
+	find_container_string (a_name: STRING_32; a_Generics: detachable LIST [CLS_TYPE]): detachable DATA_CONTAINER
+			-- Find a subcontainer.
+		local
+			exit: BOOLEAN
 		do
+			if attached a_generics then
+				if attached {LIST [DATA_CONTAINER]} sorted_children.at (a_name) as l_items and then
+					l_items.count > 0
+				then
+					Result := l_items.first
+				end
+			else
+				across sorted_children as ic until exit
+				loop
+					if attached {CLS_CLASS} @ ic as l_class then
+						if l_class.matches_generic (a_generics) then
+							Result := l_class
+							exit := True
+						end
+					end
+				end
+			end
+		end
+
+	find_container_collection (a_split: LIST [STRING_32]; a_generics: detachable LIST [CLS_TYPE]; a_method: BOOLEAN): TUPLE [index: INTEGER; dc: detachable DATA_CONTAINER]
+			-- Find a sub container.
+		local
+			n: INTEGER
+			count: INTEGER
+			rv, dc_current: DATA_CONTAINER
+			i: INTEGER
+		do
+			n := 0
+			count := 1
+			if a_method then
+				count := count + 1
+			end
+			dc_current := Current
+			rv := dc_current
+			from
+				i := 1
+			until
+				i = a_split.count
+			loop
+
+			end
 			Result := [n, Void]
 		end
 

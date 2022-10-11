@@ -266,7 +266,7 @@ feature -- Assembly
 				   attached a_assembly and then a_assembly.is_equal(ic) -- TODO check
 				then
 					n := 0
-					l_tuple := ic.find_container_collection (l_split, n, a_generics, false)
+					l_tuple := ic.find_container_collection (l_split, a_generics, false)
 				end
 			end
 
