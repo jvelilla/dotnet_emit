@@ -273,13 +273,13 @@ feature -- Assembly
 						then
 							across l_dc.fields as field loop
 									-- TODO double check the index since C++ is 0 based.
-								if field.name.same_string (l_split [l_tuple.index]) then
+								if field.name.same_string (l_split [l_tuple.index + 1]) then
 									l_found_field.force (field)
 								end
 							end
 							across l_dc.methods as cc loop
 								if attached {CIL_METHOD} cc as l_method and then
-									l_method.prototype.name.same_string (l_split [n])
+									l_method.prototype.name.same_string (l_split [l_tuple.index + 1])
 								then
 									l_found_method.force (l_method)
 								end
