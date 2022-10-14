@@ -467,11 +467,26 @@ feature {NONE} -- Implementation
 								{EXCEPTIONS}.raise (generator + "validate_seh_tags: InvalidSEHEpilogue")
 							end
 						when {CIL_SEH}.seh_catch, {CIL_SEH}.seh_filter_handler then
+							if l_old = Void or else l_old.opcode /= {CIL_INSTRUCTION_OPCODES}.i_leave and then l_old.opcode /=  {CIL_INSTRUCTION_OPCODES}.i_leave_s then
+								{EXCEPTIONS}.raise (generator + "validate_seh_tags: InvalidSEHEpilogue")
+							end
 						when {CIL_SEH}.seh_filter then
+							if l_old = Void or else l_old.opcode /= {CIL_INSTRUCTION_OPCODES}.i_endfilter then
+								{EXCEPTIONS}.raise (generator + "validate_seh_tags: InvalidSEHEpilogue")
+							end
 						when {CIL_SEH}.seh_fault then
+							if l_old = Void or else l_old.opcode /= {CIL_INSTRUCTION_OPCODES}.i_endfault then
+								{EXCEPTIONS}.raise (generator + "validate_seh_tags: InvalidSEHEpilogue")
+							end
 						when {CIL_SEH}.seh_finally then
+							if l_old = Void or else l_old.opcode /= {CIL_INSTRUCTION_OPCODES}.i_endfinally then
+								{EXCEPTIONS}.raise (generator + "validate_seh_tags: InvalidSEHEpilogue")
+							end
 						end
 					end
+				elseif ins.opcode = {CIL_INSTRUCTION_OPCODES}.i_label and then ins.opcode = {CIL_INSTRUCTION_OPCODES}.i_comment then
+					l_old1 := l_old
+					l_old := ins
 				end
 
 			end
