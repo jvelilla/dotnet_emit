@@ -66,7 +66,7 @@ feature {NONE} -- Implementation
 	load_labels
 		do
 			across instructions as ins loop
-				if ins.opcode = {CIL_OPCODES}.i_label then
+				if ins.opcode = {CIL_INSTRUCTION_OPCODES}.i_label then
 					if labels.has (ins.label)then
 							-- TODO reimplement
 						{EXCEPTIONS}.raise (generator + "load_labels Duplicate label at " + ins.label)
@@ -83,17 +83,17 @@ feature {NONE} -- Implementation
 		local
 			done: BOOLEAN
 			n: INTEGER_64
-			ops: ARRAY[CIL_OPCODES]
+			ops: ARRAY[CIL_INSTRUCTION_OPCODES]
 		do
-			ops := <<{CIL_OPCODES}.i_ldc_i4_M1_, {CIL_OPCODES}.i_ldc_i4_0, {CIL_OPCODES}.i_ldc_i4_1,
-                     {CIL_OPCODES}.i_ldc_i4_2,  {CIL_OPCODES}.i_ldc_i4_3, {CIL_OPCODES}.i_ldc_i4_4,
-                     {CIL_OPCODES}.i_ldc_i4_5,  {CIL_OPCODES}.i_ldc_i4_6, {CIL_OPCODES}.i_ldc_i4_7,
-                     {CIL_OPCODES}.i_ldc_i4_8 >>
+			ops := <<{CIL_INSTRUCTION_OPCODES}.i_ldc_i4_M1_, {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_0, {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_1,
+                     {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_2,  {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_3, {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_4,
+                     {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_5,  {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_6, {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_7,
+                     {CIL_INSTRUCTION_OPCODES}.i_ldc_i4_8 >>
 
 			across instructions as ins loop
 				inspect ins.opcode
 				when
-					{CIL_OPCODES}.i_ldc_i4
+					{CIL_INSTRUCTION_OPCODES}.i_ldc_i4
 				then
 					if attached ins.operand as l_op and then l_op.type = {CIL_OPERAND_TYPE}.t_int  then
 						done := True
@@ -104,7 +104,7 @@ feature {NONE} -- Implementation
 						else
 							done := False
 							if n < 128 and then n>= -128 then
-								ins.set_opcode({CIL_OPCODES}.i_ldc_i4_s)
+								ins.set_opcode({CIL_INSTRUCTION_OPCODES}.i_ldc_i4_s)
 							end
 						end
 						if done then
@@ -121,31 +121,31 @@ feature {NONE} -- Implementation
 			-- Optimize load local variable onto the stack.
 		local
 			l_index: INTEGER
-			ldlocs: ARRAY [CIL_OPCODES]
-			stlocs: ARRAY [CIL_OPCODES]
+			ldlocs: ARRAY [CIL_INSTRUCTION_OPCODES]
+			stlocs: ARRAY [CIL_INSTRUCTION_OPCODES]
 		do
 			-- TODO double check what's the best way to representt these arrays.
 			-- Potential issue: indexes
 			-- Memory issue, maybe we can create them iff we need them.
 
 
-			ldlocs := <<{CIL_OPCODES}.i_ldloc_0, {CIL_OPCODES}.i_ldloc_1,
-						{CIL_OPCODES}.i_ldloc_2, {CIL_OPCODES}.i_ldloc_3>>
+			ldlocs := <<{CIL_INSTRUCTION_OPCODES}.i_ldloc_0, {CIL_INSTRUCTION_OPCODES}.i_ldloc_1,
+						{CIL_INSTRUCTION_OPCODES}.i_ldloc_2, {CIL_INSTRUCTION_OPCODES}.i_ldloc_3>>
 
 
-			stlocs := <<{CIL_OPCODES}.i_stloc_0, {CIL_OPCODES}.i_stloc_1,
-						{CIL_OPCODES}.i_stloc_2, {CIL_OPCODES}.i_stloc_3>>
+			stlocs := <<{CIL_INSTRUCTION_OPCODES}.i_stloc_0, {CIL_INSTRUCTION_OPCODES}.i_stloc_1,
+						{CIL_INSTRUCTION_OPCODES}.i_stloc_2, {CIL_INSTRUCTION_OPCODES}.i_stloc_3>>
 
 
 			across instructions as  ins loop
 				inspect ins.opcode
-				when {CIL_OPCODES}.i_ldloc, {CIL_OPCODES}.i_ldloca, {CIL_OPCODES}.i_stloc then
+				when {CIL_INSTRUCTION_OPCODES}.i_ldloc, {CIL_INSTRUCTION_OPCODES}.i_ldloca, {CIL_INSTRUCTION_OPCODES}.i_stloc then
 					if attached ins.operand as l_op then
 						if attached {CIL_LOCAL} l_op.value as l_loc then
 							-- TODO implement
 							l_index := l_loc.index
 							inspect ins.opcode
-							when {CIL_OPCODES}.i_ldloc then
+							when {CIL_INSTRUCTION_OPCODES}.i_ldloc then
 								if l_index < 4 then
 										-- TODO check the l_index, since
 										-- the C++ code use a 0 based to access ldlocs.
@@ -153,13 +153,13 @@ feature {NONE} -- Implementation
 									ins.set_opcode(ldlocs[l_index + 1])
 									ins.set_operand({CIL_OPERAND_FACTORY}.default_operand)
 								elseif l_index < 128 and then l_index >= -128 then
-									ins.set_opcode({CIL_OPCODES}.i_ldloc_s)
+									ins.set_opcode({CIL_INSTRUCTION_OPCODES}.i_ldloc_s)
 								end
-							when {CIL_OPCODES}.i_ldloca then
+							when {CIL_INSTRUCTION_OPCODES}.i_ldloca then
 								if l_index < 128 and then l_index >= -128 then
-									ins.set_opcode({CIL_OPCODES}.i_ldloca_s)
+									ins.set_opcode({CIL_INSTRUCTION_OPCODES}.i_ldloca_s)
 								end
-							when {CIL_OPCODES}.i_stloc then
+							when {CIL_INSTRUCTION_OPCODES}.i_stloc then
 								if l_index < 4 then
 										-- TODO check the l_index, since
 										-- the C++ code use a 0 based to access ldlocs.	
@@ -167,7 +167,7 @@ feature {NONE} -- Implementation
 									ins.set_opcode(stlocs[l_index + 1])
 									ins.set_operand({CIL_OPERAND_FACTORY}.default_operand)
 								elseif l_index < 128 and then l_index >= -128 then
-									ins.set_opcode({CIL_OPCODES}.i_stloc_s)
+									ins.set_opcode({CIL_INSTRUCTION_OPCODES}.i_stloc_s)
 								end
 							else
 								-- do nothing.
@@ -185,24 +185,24 @@ feature {NONE} -- Implementation
 		local
 			v: CIL_VALUE
 			l_index: INTEGER
-			ldargs: ARRAY [CIL_OPCODES]
+			ldargs: ARRAY [CIL_INSTRUCTION_OPCODES]
 		do
 				-- TODO double check what's the best way to represent this array.
 				-- Potential issue: indexes
 				-- Memory issue, maybe we can create it iff we need it.
 
-			ldargs := <<{CIL_OPCODES}.i_ldarg_0, {CIL_OPCODES}.i_ldarg_1,
-						{CIL_OPCODES}.i_ldarg_2, {CIL_OPCODES}.i_ldarg_3>>
+			ldargs := <<{CIL_INSTRUCTION_OPCODES}.i_ldarg_0, {CIL_INSTRUCTION_OPCODES}.i_ldarg_1,
+						{CIL_INSTRUCTION_OPCODES}.i_ldarg_2, {CIL_INSTRUCTION_OPCODES}.i_ldarg_3>>
 
 			across instructions as  ins loop
 				inspect ins.opcode
-				when {CIL_OPCODES}.i_ldarg, {CIL_OPCODES}.i_ldarga, {CIL_OPCODES}.i_starg then
+				when {CIL_INSTRUCTION_OPCODES}.i_ldarg, {CIL_INSTRUCTION_OPCODES}.i_ldarga, {CIL_INSTRUCTION_OPCODES}.i_starg then
 					if attached ins.operand as l_op then
 						if attached {CIL_PARAM} l_op.value as l_param then
 							-- TODO implement
 							l_index := l_param.index
 							inspect ins.opcode
-							when {CIL_OPCODES}.i_ldarg then
+							when {CIL_INSTRUCTION_OPCODES}.i_ldarg then
 								if l_index < 4 then
 										-- TODO check the l_index, since
 										-- the C++ code use a 0 based to access ldlocs.
@@ -211,7 +211,7 @@ feature {NONE} -- Implementation
 									ins.set_operand({CIL_OPERAND_FACTORY}.default_operand)
 								else
 									if l_index < 128 and then l_index >= -128 then
-										ins.set_opcode({CIL_OPCODES}.i_ldarg_s)
+										ins.set_opcode({CIL_INSTRUCTION_OPCODES}.i_ldarg_s)
 									end
 									if attached ins.operand as l_operand and then
 										l_operand.type = {CIL_OPERAND_TYPE}.t_value and then
@@ -222,9 +222,9 @@ feature {NONE} -- Implementation
 										ins.set_operand({CIL_OPERAND_FACTORY}.integer_operand (l_index, {CIL_OPERAND_SIZE}.i32))
 									end
 								end
-							when {CIL_OPCODES}.i_ldarga then
+							when {CIL_INSTRUCTION_OPCODES}.i_ldarga then
 								if l_index < 128 and then l_index >= -128 then
-									ins.set_opcode({CIL_OPCODES}.i_ldarga_s)
+									ins.set_opcode({CIL_INSTRUCTION_OPCODES}.i_ldarga_s)
 								end
 								if attached ins.operand as l_operand and then
 									l_operand.type = {CIL_OPERAND_TYPE}.t_value and then
@@ -234,9 +234,9 @@ feature {NONE} -- Implementation
 								then
 									ins.set_operand({CIL_OPERAND_FACTORY}.integer_operand (l_index, {CIL_OPERAND_SIZE}.i32))
 								end
-							when {CIL_OPCODES}.i_starg then
+							when {CIL_INSTRUCTION_OPCODES}.i_starg then
 								if l_index < 128 and then l_index >= -128 then
-									ins.set_opcode({CIL_OPCODES}.i_starg_s)
+									ins.set_opcode({CIL_INSTRUCTION_OPCODES}.i_starg_s)
 								end
 								if attached ins.operand as l_operand and then
 									l_operand.type = {CIL_OPERAND_TYPE}.t_value and then
@@ -281,7 +281,7 @@ feature {NONE} -- Implementation
 		do
 			create l_tags.make (0)
 			across instructions as ins loop
-				if ins.opcode = {CIL_OPCODES}.i_SEH then
+				if ins.opcode = {CIL_INSTRUCTION_OPCODES}.i_SEH then
 					l_tags.force (ins)
 				end
 			end
@@ -325,7 +325,7 @@ feature {NONE} -- Implementation
 					-- TODO implement
 				else
 					inspect ins.opcode
-					when {CIL_OPCODES}.i_ldarg, {CIL_OPCODES}.i_ldarga, {CIL_OPCODES}.i_starg  then
+					when {CIL_INSTRUCTION_OPCODES}.i_ldarg, {CIL_INSTRUCTION_OPCODES}.i_ldarga, {CIL_INSTRUCTION_OPCODES}.i_starg  then
 						if attached ins.operand as l_operand and then
 						   attached {CIL_PARAM} l_operand.value as l_value and then
 						   l_value.index > 	65534
@@ -333,7 +333,7 @@ feature {NONE} -- Implementation
 								-- TODO reimplement.
 							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
 						end
-					when {CIL_OPCODES}.i_ldloc, {CIL_OPCODES}.i_ldloca, {CIL_OPCODES}.i_stloc then
+					when {CIL_INSTRUCTION_OPCODES}.i_ldloc, {CIL_INSTRUCTION_OPCODES}.i_ldloca, {CIL_INSTRUCTION_OPCODES}.i_stloc then
 						if attached ins.operand as l_operand and then
 						   attached {CIL_LOCAL} l_operand.value as l_value and then
 						   l_value.index > 	65534
@@ -341,7 +341,7 @@ feature {NONE} -- Implementation
 								-- TODO reimplement.
 							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
 						end
-					when {CIL_OPCODES}.i_ldarg_s, {CIL_OPCODES}.i_ldarga_s, {CIL_OPCODES}.i_starg_s then
+					when {CIL_INSTRUCTION_OPCODES}.i_ldarg_s, {CIL_INSTRUCTION_OPCODES}.i_ldarga_s, {CIL_INSTRUCTION_OPCODES}.i_starg_s then
 						if attached ins.operand as l_operand and then
 						   attached {CIL_PARAM} l_operand.value as l_value and then
 						   l_value.index > 	255
@@ -350,7 +350,7 @@ feature {NONE} -- Implementation
 							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
 
 						end
-					when {CIL_OPCODES}.i_ldloc_s, {CIL_OPCODES}.i_ldloca_s, {CIL_OPCODES}.i_stloc_s  then
+					when {CIL_INSTRUCTION_OPCODES}.i_ldloc_s, {CIL_INSTRUCTION_OPCODES}.i_ldloca_s, {CIL_INSTRUCTION_OPCODES}.i_stloc_s  then
 						if attached ins.operand as l_operand and then
 						   attached {CIL_LOCAL} l_operand.value as l_value and then
 						   l_value.index > 	255

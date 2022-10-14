@@ -15,13 +15,14 @@ feature  -- Initialization
 			-- Run application.
 		do
 			test_2;
-			(create {TEST_1}).test;
-			(create {TEST_2}).test;
-			(create {TEST_3}).test;
-			(create {TEST_4}).test;
-			(create {TEST_5}).test;
-			(create {TEST_6}).test;
-			(create {TEST_7}).test;
+			test_3;
+--			(create {TEST_1}).test;
+--			(create {TEST_2}).test;
+--			(create {TEST_3}).test;
+--			(create {TEST_4}).test;
+--			(create {TEST_5}).test;
+--			(create {TEST_6}).test;
+--			(create {TEST_7}).test;
 			(create {TEST_8}).test;
 
 		end
@@ -48,6 +49,16 @@ feature  -- Initialization
 		do
 			l_list := (create {PE_LIB}.make("",0)).split_path("System::Console.WriteLine")
 			l_list := (create {PE_LIB}.make("",0)).split_path("System.IO.FileStream..ctor")
+		end
+
+	test_3
+		local
+			l_seh: CIL_SEH
+			l_special: ARRAYED_LIST [CIL_SEH]
+		do
+			l_seh := {CIL_SEH}.seh_try
+			create {ARRAYED_LIST [CIL_SEH]}l_special.make_from_iterable ({CIL_SEH}.instances)
+			print ("Position" + l_special.area.index_of (l_seh, l_special.area.lower).out)
 		end
 
 note
