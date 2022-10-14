@@ -51,13 +51,13 @@ feature -- Element Change
 
 feature -- Optimization
 
-	optimize_code (a_pe: PE_LIB)
+	optimize_code
 		do
 			load_labels
-			optimize_ldc(a_pe)
-			optimize_ldloc(a_pe)
-			optimize_ldarg(a_pe)
-			optimize_branch(a_pe)
+			--optimize_ldc
+			--optimize_ldloc
+			--optimize_ldarg
+			optimize_branch
 			labels.wipe_out
 		end
 
@@ -78,7 +78,7 @@ feature {NONE} -- Implementation
 		end
 
 
-	optimize_ldc (a_pe: PE_LIB)
+	optimize_ldc
 			-- Optimize load constants instructions.
 		local
 			done: BOOLEAN
@@ -117,7 +117,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	optimize_ldloc (a_pe: PE_LIB)
+	optimize_ldloc
 			-- Optimize load local variable onto the stack.
 		local
 			l_index: INTEGER
@@ -180,7 +180,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	optimize_ldarg (a_pe: PE_LIB)
+	optimize_ldarg
 			-- Optimize load argument on the stack.
 		local
 			v: CIL_VALUE
@@ -258,7 +258,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	optimize_branch (a_pe: PE_LIB)
+	optimize_branch
 		local
 			done: BOOLEAN
 		do
@@ -275,9 +275,10 @@ feature {NONE} -- Implementation
 
 
 	validate_seh
-			-- validate Structured Exception Handling.
+			-- Validate Structured Exception Handling.
 		local
 			l_tags: ARRAYED_LIST [CIL_INSTRUCTION]
+			l_res: INTEGER
 		do
 			create l_tags.make (0)
 			across instructions as ins loop
@@ -287,7 +288,7 @@ feature {NONE} -- Implementation
 			end
 			if not l_tags.is_empty then
 				has_seh := True
-				validate_seh_tags (l_tags, 0)
+				l_res := validate_seh_tags (l_tags, 1)
 				validate_seh_filters(l_tags)
 				validate_seh_epilogues
 			end
@@ -365,19 +366,115 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	validate_seh_tags(tags: LIST [CIL_INSTRUCTION]; a_offset: INTEGER)
+	validate_seh_tags (tags: LIST [CIL_INSTRUCTION]; a_offset: INTEGER): INTEGER
+		local
+			l_offset_in: INTEGER
+			l_offset: INTEGER
+			l_start: CIL_INSTRUCTION
+			l_type: CIL_SEH
+			l_exit: BOOLEAN
 		do
-			-- TODO implement
+				-- TODO test
+			l_offset_in := a_offset
+			l_offset := a_offset
+			l_start := tags [l_offset]
+			l_offset := l_offset + 1
+			if l_start.seh_type /= {CIL_SEH}.seh_try then
+				{EXCEPTIONS}.raise (generator + "validate_seh_tags: Expected SEH Try")
+			end
+			if not l_start.seh_begin then
+				{EXCEPTIONS}.raise (generator + "validate_seh_tags: Expected SEH Try")
+			end
+			from
+			until
+				l_offset > tags.count or else not tags[l_offset].seh_begin
+			loop
+				l_offset := validate_seh_tags (tags, l_offset)
+			end
+			if l_offset > tags.count then
+				{EXCEPTIONS}.raise (generator + "validate_seh_tags: OrphanedSEHTag")
+			end
+			if tags[l_offset].seh_type /= {CIL_SEH}.seh_try then
+				{EXCEPTIONS}.raise (generator + "validate_seh_tags: MismatchedSEHTag")
+			end
+			if tags[l_offset].seh_begin then
+				{EXCEPTIONS}.raise (generator + "validate_seh_tags: MismatchedSEHTag")
+			end
+			l_offset := l_offset + 1
+			if not tags[l_offset].seh_begin or else (tags[l_offset].seh_type = {CIL_SEH}.seh_try) then
+				{EXCEPTIONS}.raise (generator + "validate_seh_tags: ExpectedSEHHandler")
+			end
+
+			from
+			until
+				l_offset > tags.count or l_exit
+			loop
+				if not tags[l_offset].seh_begin then
+					l_exit := True
+					Result := l_offset
+				end
+				if not l_exit then
+					l_type := tags[l_offset].seh_type
+					l_offset := l_offset + 1
+					from
+					until
+						l_offset > tags.count or else not tags[l_offset].seh_begin
+					loop
+						l_offset := validate_seh_tags (tags, l_offset)
+					end
+					if l_offset > tags.count then
+						{EXCEPTIONS}.raise (generator + "validate_seh_tags: OrphanedSEHTag")
+					end
+					if tags [l_offset].seh_type /= l_type then
+						{EXCEPTIONS}.raise (generator + "validate_seh_tags: MismatchedSEHTag")
+					end
+					l_offset := l_offset + 1
+				end
+			end
+			Result := l_offset
 		end
 
 	validate_seh_filters(tags: LIST [CIL_INSTRUCTION])
+		local
+			l_check: BOOLEAN
 		do
-			-- TODO implement
+				-- TODO test
+			across tags as tag loop
+				if not tag.seh_begin and then tag.seh_type = {CIL_SEH}.seh_filter then
+					l_check := True
+				end
+				if l_check then
+					l_check := False
+					if not tag.seh_begin or else tag.seh_type /= {CIL_SEH}.seh_filter_handler then
+						{EXCEPTIONS}.raise (generator + "validate_seh_tags: InvalidSEHFilrer")
+					end
+				end
+			end
 		end
 
 	validate_seh_epilogues
+		local
+			l_old, l_old1: CIL_INSTRUCTION
 		do
-			-- TODO implement
+			-- we aren't checking the 'pop' here as it is up to the user when to handle that
+ 		   	-- but it will be caught in the normal process of level matching...
+			across instructions as ins loop
+				if ins.opcode = {CIL_INSTRUCTION_OPCODES}.i_seh then
+					if not ins.seh_begin then
+						inspect ins.seh_type
+						when {CIL_SEH}.seh_try then
+							if l_old = Void or else l_old.opcode /= {CIL_INSTRUCTION_OPCODES}.i_leave and then l_old.opcode /=  {CIL_INSTRUCTION_OPCODES}.i_leave_s then
+								{EXCEPTIONS}.raise (generator + "validate_seh_tags: InvalidSEHEpilogue")
+							end
+						when {CIL_SEH}.seh_catch, {CIL_SEH}.seh_filter_handler then
+						when {CIL_SEH}.seh_filter then
+						when {CIL_SEH}.seh_fault then
+						when {CIL_SEH}.seh_finally then
+						end
+					end
+				end
+
+			end
 		end
 
 

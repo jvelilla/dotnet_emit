@@ -99,15 +99,16 @@ feature -- Change Element
 
 feature -- Operations
 
-	optimize (a_pe: PE_LIB)
+	--optimize (a_pe: PE_LIB)
+	  optimize
 		local
 			l_rescue: BOOLEAN
 		do
 			if not l_rescue then
-				calculate_live
-				calculate_max_stack
-				optimize_locals (a_pe)
-				optimize_code (a_pe)
+				--calculate_live
+				--calculate_max_stack
+				--optimize_locals
+				optimize_code
 			else
 				-- do nothing.	
 			end
@@ -270,7 +271,7 @@ feature {NONE} -- Implementation
 
 		end
 
-	optimize_locals (a_pe: PE_LIB)
+	optimize_locals 
 		local
 			l_sorter: SORTER [CIL_LOCAL]
 			comparator: PREDICATE [CIL_LOCAL, CIL_LOCAL]
