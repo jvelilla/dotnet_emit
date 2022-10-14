@@ -617,4 +617,23 @@ feature -- Access
 			instance_free: class
 		end
 
+
+	next (a_value: CIL_INSTRUCTION_OPCODES): CIL_INSTRUCTION_OPCODES
+			-- next value relative to a_value.
+			-- if a_value is the last item, return the first one.
+		local
+			l_array: ARRAYED_LIST [CIL_INSTRUCTION_OPCODES]
+			l_index: INTEGER
+		do
+			create {ARRAYED_LIST [CIL_INSTRUCTION_OPCODES]}l_array.make_from_iterable ({CIL_INSTRUCTION_OPCODES}.instances)
+			l_index := l_array.index_of (a_value, l_array.lower)
+			if l_index = l_array.count then
+				Result := l_array.at (l_array.lower)
+			else
+				Result := l_array.at (l_index + 1)
+			end
+		ensure
+			instance_free: class
+		end
+
 end
