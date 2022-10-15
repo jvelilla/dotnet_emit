@@ -44,6 +44,10 @@ feature {NONE} -- Initialization
 				-- assembly in the list.
 			create l_assembly_ref.make (a_name, False, create {ARRAY [NATURAL_8]}.make_filled (0, 1, 8))
 			assembly_refs.force (l_assembly_ref)
+			create module_guid.make_filled (0, 1, 16)
+			create {ARRAYED_LIST [CIL_METHOD]} all_method.make (0)
+			create source_file.make_empty
+			create lib_path.make_empty
 		ensure
 			valid_obj_input_size: obj_input_size = 0
 			valid_obj_input_pos: obj_input_pos = 0
@@ -53,7 +57,6 @@ feature {NONE} -- Initialization
 			assembly_name_empty: assembly_name.is_empty
 			assembly_refs_set: assembly_refs.count = 1
 			using_list_empty: using_list.is_empty
-			input_stream_void: input_stream = Void
 			file_name_empty: file_name.is_empty
 			unmanaged_routines_empty: unmanaged_routines.is_empty
 			pe_writer_void: pe_writer = Void
@@ -61,7 +64,13 @@ feature {NONE} -- Initialization
 			code_container_void: code_container = Void
 			p_invoke_references_empty: p_invoke_references.is_empty
 			p_invoke_signatures_empty: p_invoke_signatures.is_empty
+			module_guid_set: module_guid.count = 16
+			all_method_set: all_method.is_empty
+			source_file_empty: source_file.is_empty
+			lib_path_empty: lib_path.is_empty
 		end
+
+feature -- Access
 
 	assembly_refs: LIST [CIL_ASSEMBLY_DEF]
 
@@ -75,8 +84,6 @@ feature {NONE} -- Initialization
 	assembly_name: STRING_32
 
 	output_stream: detachable FILE_STREAM
-
-	input_stream: detachable FILE
 
 	file_name: STRING_32
 
@@ -104,9 +111,16 @@ feature {NONE} -- Initialization
 
 	obj_input_cache: INTEGER
 
-feature -- Access
-
 	module_refs: HASH_TABLE [NATURAL, NATURAL]
+
+	module_GUID: ARRAY [NATURAL_8]
+			-- the length should be 16.
+
+	source_file: STRING_32
+
+	all_method: LIST [CIL_METHOD]
+
+	lib_path: STRING_32
 
 
 feature -- Access::CorFlags
@@ -156,12 +170,28 @@ feature -- Operations: PInvoke
 			to_implement ("Add implemenation")
 		end
 
+
+feature -- Operations
+
+	traverse (a_callback: CIL_CALLBACK)
+			--  Traverse the declaration tree.
+		do
+			to_implement ("Add implementation")
+		end
+
+
 	allocate_method (a_method_sig: CIL_METHOD_SIGNATURE; a_flags: CIL_QUALIFIERS; a_entry: BOOLEAN): CIL_METHOD
 		do
 				-- TODO double check if we really need this feature.
 				-- since we can create it directly.
 				-- In C++ it's needed since the class it's responsible to Manage the Memory
 			create Result.make (a_method_sig, a_flags, a_entry)
+		end
+
+	find_or_create_generics(a_name: STRING_32; a_generics: LIST [CIL_TYPE]): detachable CIL_CLASS
+		do
+			-- Note: return detachable to aovid create a fake object class.
+			to_implement ("Add implementation")
 		end
 
 feature -- Assembly
@@ -382,13 +412,27 @@ feature -- Assembly
 
 		end
 
+	find_method (a_path: STRING_32; a_args: LIST [CIL_TYPE]; a_rv: detachable CIL_TYPE; a_generics: detachable LIST [CIL_TYPE]; a_assembly: detachable CIL_ASSEMBLY_DEF; a_match_args: BOOLEAN): TUPLE [type: CIL_FIND_TYPE; res: detachable CIL_METHOD]
+			-- find a method, with overload matching.
+		do
+			to_implement ("Add implementation")
+			Result := [{CIL_FIND_TYPE}.s_notfound, Void]
+		end
+
 	set_lib_path (a_paths: STRING_32)
 			-- Set the paths where assemblies are looked for. More than one path can be separated by ';'.
 		do
 			to_implement("Add implemenatation")
 		end
 
+feature -- Element Change
 
+	add_using (a_path: STRING_32): BOOLEAN
+			-- add to the search path, returns true if it finds a namespace at `a_path`.
+			-- in any assembly.
+		do
+			to_implement ("Add implementation")
+		end
 
 feature {ANY} -- Implementation
 
