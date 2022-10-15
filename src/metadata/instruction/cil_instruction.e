@@ -227,13 +227,13 @@ feature -- Element change
 			-- Add a label for a SWITCH instruction
 			-- Labels MUST be added in order.
 		do
-			to_implement ("Add implementation")
+			switches.force (a_label)
 		end
 
 	null_operand
-			-- An `empty` operand
+			-- An `empty` operand.
 		do
-			to_implement ("Add implemenation")
+			operand := {CIL_OPERAND_FACTORY}.default_operand
 		end
 
 feature -- Output
