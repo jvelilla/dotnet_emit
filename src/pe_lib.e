@@ -10,6 +10,10 @@ note
 class
 	PE_LIB
 
+inherit
+
+	REFACTORING_HELPER
+
 create
 	make
 
@@ -79,6 +83,7 @@ feature {NONE} -- Initialization
 	unmanaged_routines: STRING_TABLE [STRING_32]
 
 	core_flags: INTEGER
+			-- the core flags.
 
 	pe_writer: detachable PE_WRITER
 
@@ -103,29 +108,6 @@ feature -- Access
 
 	module_refs: HASH_TABLE [NATURAL, NATURAL]
 
---	        ///** Get the working assembly
---        // This is the one with your code and data, that gets written to the output
---        AssemblyDef *WorkingAssembly() const { return assemblyRefs_.front(); }
-
-	working_assembly: CIL_ASSEMBLY_DEF
-			-- Get the working assembly
-			-- This is the one with your code and data, that gets written to the output
-		do
-			Result := assembly_refs.first
-		end
-
-feature -- Access::FindType
-
-		-- TODO check if we can use once classes
-
-	s_notfound: INTEGER = 0
-	s_ambiguous: INTEGER = 1
-	s_namespace: INTEGER = 2
-	s_class: INTEGER = 3
-	s_enum: INTEGER = 4
-	s_field: INTEGER = 5
-	s_property: INTEGER = 6
-	s_method: INTEGER = 7
 
 feature -- Access::CorFlags
 
@@ -140,15 +122,38 @@ feature -- Access::CorFlags
 			-- Set this if you want to force 32 bits - you will possibly need it
 			-- for pinvokes
 
-feature -- Operations
+feature -- Operations: PInvoke
 
 	add_pinvoke_reference (a_method_sig: CIL_METHOD_SIGNATURE; a_dll_name: STRING_32; iscdecl: BOOLEAN)
+			-- References as always added to this object.
 		local
 			l_method: CIL_METHOD
 		do
 			create l_method.make (a_method_sig, create {CIL_QUALIFIERS}.make_with_flags ({CIL_QUALIFIERS_ENUM}.pinvokefunc | {CIL_QUALIFIERS_ENUM}.public), False)
 			l_method.set_pinvoke (a_dll_name, if iscdecl then {CIL_INVOKE_TYPE}.Cdecl else {CIL_INVOKE_TYPE}.Stdcall end, "")
 			p_invoke_signatures.force (l_method, a_method_sig.name)
+		end
+
+	add_pinvoke_with_varargs (a_signature: CIL_METHOD_SIGNATURE)
+		do
+			to_implement("Add implementation")
+		end
+
+	remove_pinvoke_reference (a_name: STRING_32)
+			-- Remove pinvoke reference associated with `a_name', if present.
+		do
+			p_invoke_references.remove (a_name)
+		end
+
+
+	find_pinvoke (a_name: STRING_32): detachable CIL_METHOD
+		do
+			to_implement("Add implemenation")
+		end
+
+	find_pinvoke_with_varargs (a_name: STRING_32; a_vargs: LIST [CIL_PARAM]): detachable CIL_METHOD_SIGNATURE
+		do
+			to_implement ("Add implemenation")
 		end
 
 	allocate_method (a_method_sig: CIL_METHOD_SIGNATURE; a_flags: CIL_QUALIFIERS; a_entry: BOOLEAN): CIL_METHOD
@@ -160,6 +165,27 @@ feature -- Operations
 		end
 
 feature -- Assembly
+
+	working_assembly: CIL_ASSEMBLY_DEF
+			-- Get the working assembly
+			-- This is the one with your code and data, that gets written to the output
+		do
+			Result := assembly_refs.first
+		end
+
+	empty_working_assembly (a_assembly_name: STRING_32): CIL_ASSEMBLY_DEF
+			-- 	Replace the working assembly with an empty one.
+			--  Data is not deleted and still remains a part of the PELib instance.
+		do
+			create Result.make (a_assembly_name, False, Void)
+			if attached assembly_refs.first as l_first then
+				assembly_refs.prune (l_first)
+				assembly_refs.put_i_th (Result, assembly_refs.lower)
+			else
+				assembly_refs.force (Result)
+			end
+		end
+
 
 	mscorlib_assembly: CIL_ASSEMBLY_DEF
 			-- loads the MSCorLib assembly.
@@ -203,6 +229,7 @@ feature -- Assembly
 
 	find_assembly (a_name: STRING_32): detachable CIL_ASSEMBLY_DEF
 			-- Find an assembly
+			--| in the already loaded set.
 		local
 			found: BOOLEAN
 		do
@@ -354,6 +381,14 @@ feature -- Assembly
 			end
 
 		end
+
+	set_lib_path (a_paths: STRING_32)
+			-- Set the paths where assemblies are looked for. More than one path can be separated by ';'.
+		do
+			to_implement("Add implemenatation")
+		end
+
+
 
 feature {ANY} -- Implementation
 
