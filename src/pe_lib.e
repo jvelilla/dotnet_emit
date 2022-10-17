@@ -170,12 +170,42 @@ feature -- Operations: PInvoke
 
 	find_pinvoke (a_name: STRING_32): detachable CIL_METHOD
 		do
-			to_implement("Add implemenation")
+			if attached {CIL_METHOD} p_invoke_signatures.item (a_name) as l_method then
+				Result := l_method
+			end
 		end
 
 	find_pinvoke_with_varargs (a_name: STRING_32; a_vargs: LIST [CIL_PARAM]): detachable CIL_METHOD_SIGNATURE
+		local
+			i: INTEGER
+			exit: BOOLEAN
 		do
-			to_implement ("Add implemenation")
+			if attached {LIST [CIL_METHOD_SIGNATURE]} p_invoke_references.item (a_name) as l_list then
+				across l_list as ic until exit loop
+					if a_vargs.count = ic.vararg_params.count then
+						from
+							i := 1
+						until
+							i > l_list.count or else exit
+						loop
+								-- -- TODO double check this condition.
+							if attached {CIL_TYPE} ic.vararg_params[i].type as l_type1 and then
+								attached {CIL_TYPE} a_vargs [i].type as l_type2 and then
+								not l_type1.matches (l_type2)
+							then
+
+								exit := True
+							else
+								i := i + 1
+							end
+							if i > l_list.count and then not exit then
+								Result := l_list [i-1]
+								exit := True
+							end
+						end
+					end
+				end
+			end
 		end
 
 
