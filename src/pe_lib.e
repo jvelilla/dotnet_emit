@@ -149,8 +149,16 @@ feature -- Operations: PInvoke
 		end
 
 	add_pinvoke_with_varargs (a_signature: CIL_METHOD_SIGNATURE)
+		local
+			list: LIST [CIL_METHOD_SIGNATURE]
 		do
-			to_implement("Add implementation")
+			if attached {LIST [CIL_METHOD_SIGNATURE]}p_invoke_references.item (a_signature.name) as l_list then
+				l_list.force (a_signature)
+			else
+				create {ARRAYED_LIST [CIL_METHOD_SIGNATURE]} list.make (1)
+				list.force (a_signature)
+				p_invoke_references.force (list, a_signature.name)
+			end
 		end
 
 	remove_pinvoke_reference (a_name: STRING_32)
@@ -430,8 +438,19 @@ feature -- Element Change
 	add_using (a_path: STRING_32): BOOLEAN
 			-- add to the search path, returns true if it finds a namespace at `a_path`.
 			-- in any assembly.
+		local
+			l_split: LIST [STRING_32]
+			l_container: CIL_DATA_CONTAINER
+			l_res: TUPLE [index: INTEGER; dc: detachable CIL_DATA_CONTAINER]
 		do
-			to_implement ("Add implementation")
+			l_split := split_path (a_path)
+			across assembly_refs as elem loop
+				l_res := elem.find_container_collection (l_split, Void, False)
+				if l_res.index = l_split.count and then attached {CIL_NAMESPACE} l_res.dc as l_namespace then
+					using_list.force (l_namespace)
+					Result := True
+				end
+			end
 		end
 
 feature {ANY} -- Implementation
