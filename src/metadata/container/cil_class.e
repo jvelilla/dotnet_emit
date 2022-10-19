@@ -155,7 +155,7 @@ feature -- Element change
 	add_property(a_property: CIL_PROPERTY; a_add: BOOLEAN)
 			-- Add a property `a_property` to this container.
 		do
-			to_implement ("Add implementation")
+			to_implement ("Add implemenation")
 		end
 
 feature -- Status Report

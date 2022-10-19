@@ -198,7 +198,6 @@ feature --Element Change
 			pe_index_set: pe_index = a_index
 		end
 
-
 	wipe_out,clear
 			-- Remove all the items of
 			-- children
