@@ -10,6 +10,10 @@ note
 class
 	CIL_CODE_CONTAINER
 
+inherit
+
+	REFACTORING_HELPER
+
 create
 	make
 
@@ -20,6 +24,12 @@ feature {NONE} --Initialization
 			flags := a_flags
 			create labels.make (0)
 			create {ARRAYED_LIST [CIL_INSTRUCTION]} instructions.make (0)
+		ensure
+			flags_set: flags = a_flags
+			labels_empty: labels.is_empty
+			instructions_empty: instructions.is_empty
+			not_has_seh: not has_seh
+			parent_void: parent = Void
 		end
 
 feature -- Access
@@ -47,6 +57,8 @@ feature -- Element Change
 			parent := a_item
 		end
 
+
+
 feature -- Optimization
 
 	optimize_code
@@ -58,6 +70,7 @@ feature -- Optimization
 			optimize_branch
 			labels.wipe_out
 		end
+
 
 feature {NONE} -- Implementation
 
