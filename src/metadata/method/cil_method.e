@@ -84,11 +84,6 @@ feature -- Change Element
 			import_name_set: import_name = a_import_name
 		end
 
-	add_instruction (a_instruction: CIL_INSTRUCTION)
-			-- Add an instruction `a_instruction` to the listo of instructions.
-		do
-			instructions.force (a_instruction)
-		end
 
 	add_local (a_local: CIL_LOCAL)
 			-- A a local variable `a_local`.
@@ -271,7 +266,7 @@ feature {NONE} -- Implementation
 
 		end
 
-	optimize_locals 
+	optimize_locals
 		local
 			l_sorter: SORTER [CIL_LOCAL]
 			comparator: PREDICATE [CIL_LOCAL, CIL_LOCAL]
