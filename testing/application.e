@@ -14,6 +14,7 @@ feature  -- Initialization
 	make
 			-- Run application.
 		do
+			test;
 			test_2;
 			test_3;
 			(create {TEST_1}).test;
@@ -24,7 +25,6 @@ feature  -- Initialization
 			(create {TEST_6}).test;
 			(create {TEST_7}).test;
 			(create {TEST_8}).test;
-
 		end
 
 
@@ -40,6 +40,14 @@ feature  -- Initialization
 				end
 				print (i.out)
 			end
+
+			across list as i until found loop
+				if i = 6 then
+					list.prune (i)
+				end
+			end
+
+			list.do_all (agent (item: INTEGER) do print ("%N" + item.out) end)
 		end
 
 

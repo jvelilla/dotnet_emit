@@ -158,15 +158,6 @@ feature -- Element change
 			to_implement ("Add implementation")
 		end
 
-
-feature -- Operations
-
-	traverse (a_callback: CIL_CALLBACK): BOOLEAN
-			-- Traverse the declaration tree.
-		do
-			to_implement ("Add implementation")
-		end
-
 feature -- Status Report
 
 	matches_generic (a_generics: detachable LIST [CIL_TYPE]): BOOLEAN
