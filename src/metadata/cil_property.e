@@ -117,7 +117,7 @@ feature -- Element Change
 			-- If you had other arguments you should push them before the call.
 		do
 			if attached getter as l_getter then
-				to_implement ("Add Code Container add instruction support.")
+				a_code.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_call, {CIL_OPERAND_FACTORY}.complex_operand (create {CIL_METHOD_NAME}.make (l_getter.prototype))))
 			end
 		end
 
@@ -126,7 +126,9 @@ feature -- Element Change
 			-- If you had other arguments you should push them before the call
 			-- then push the value you want to set
 		do
-			to_implement ("Add implementation")
+			if attached setter as l_setter then
+				a_code.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_call, {CIL_OPERAND_FACTORY}.complex_operand (create {CIL_METHOD_NAME}.make (l_setter.prototype))))
+			end
 		end
 
 	set_getter (a_getter: like getter)
