@@ -4,6 +4,6 @@ note
 	revision: "$Revision$"
 
 class
-	TABLE_ENTRY_BASE
+	PE_TABLE_ENTRY_BASE
 
 end

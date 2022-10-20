@@ -18,7 +18,6 @@ inherit
 			make as make_container
 		redefine
 			il_src_dump,
-			adorn_generics,
 			traverse
 		end
 

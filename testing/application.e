@@ -14,6 +14,13 @@ feature  -- Initialization
 	make
 			-- Run application.
 		do
+
+		 print (escaped_string("Do you wish to send anyway?") )
+		 io.put_new_line
+		 print (escaped_string("In the last decade, the German word %"über%" has come to be used frequently in colloquial English."))
+
+
+			test4;
 			test;
 			test_2;
 			test_3;
@@ -48,6 +55,12 @@ feature  -- Initialization
 			end
 
 			list.do_all (agent (item: INTEGER) do print ("%N" + item.out) end)
+
+			across list as i loop
+				print ("%NCursor index" + (@ i.cursor_index).out)
+				print (" - Value: " + i.out)
+			end
+
 		end
 
 
@@ -67,6 +80,118 @@ feature  -- Initialization
 			l_seh := {CIL_SEH}.seh_try
 			create {ARRAYED_LIST [CIL_SEH]}l_special.make_from_iterable ({CIL_SEH}.instances)
 			print ("Position" + l_special.area.index_of (l_seh, l_special.area.lower).out)
+		end
+
+	test4
+		local
+			str: STRING_32
+			cursor: STRING_ITERATION_CURSOR
+			l_exit: BOOLEAN
+		do
+			str := "Eiffel Programming Language"
+			create cursor.make (str)
+
+			across cursor as ic loop
+				print (ic.code.out)
+				io.put_new_line
+			end
+			print("%N===============%N")
+			across str as i until l_exit loop
+				print (i.code.out)
+				io.put_new_line
+				if i = 'P' then
+					l_exit:= True
+				end
+			end
+			print({UTF_CONVERTER}.string_32_to_utf_8_string_8 ("Do you wish to send anyway?"))
+			IO.put_new_line
+			print({UTF_CONVERTER}.string_32_to_utf_8_string_8 ("In the last decade, the German word %"über%" has come to be used frequently in colloquial English."))
+		end
+
+
+	escaped_string (string_value: STRING_32): STRING_32
+		local
+			l_doit: BOOLEAN
+			l_ret_val: STRING_32
+			l_item: INTEGER_32
+			l_ch: CHARACTER_32
+			l_a: CHARACTER_32
+			l_b: CHARACTER_32
+			l_f: CHARACTER_32
+			l_n: CHARACTER_32
+			l_r: CHARACTER_32
+			l_v: CHARACTER_32
+			l_t: CHARACTER_32
+			l_0: CHARACTER_32
+		do
+			l_a := '%A'
+			l_b := '%B'
+			l_f := '%F'
+			l_n := '%N'
+			l_r := '%R'
+			l_v := '%V'
+			l_t := '%T'
+			l_0 := '0'
+
+			create l_ret_val.make_empty
+			across string_value as i until l_doit loop
+				if i.code < 32 or else i.code > 126 or else i= '\' or else i = '"' then
+					l_doit := True
+				end
+			end
+			if l_doit then
+				across string_value as i loop
+					l_item := i.code &  0xff
+					if l_item < 32 then
+
+						if l_a.code = l_item then
+							l_ch := 'a'
+							l_item := l_ch.code
+						elseif l_b.code = l_item then
+							l_ch := 'b'
+							l_item := l_ch.code
+						elseif l_f.code = l_item then
+							l_ch := 'f'
+							l_item := l_ch.code
+						elseif l_n.code = l_item then
+							l_ch := 'n'
+							l_item := l_ch.code
+						elseif l_r.code = l_item then
+							l_ch := 'r'
+							l_item := l_ch.code
+						elseif l_v.code = l_item then
+							l_ch := 'v'
+							l_item := l_ch.code
+						elseif l_t.code = l_item then
+							l_ch := 't'
+							l_item := l_ch.code
+						end
+
+						if l_item < 32 then
+							l_ret_val.append ("%H0")
+							l_ret_val.append_character ((l_item // 8 + l_0.code).to_character_32)
+							l_ret_val.append_character ( (l_item & 7 + l_0.code).to_character_32)
+						else
+							l_ret_val.append ("%H")
+							l_ret_val.append_character (l_item.to_character_32)
+						end
+					elseif l_item.to_character_32 = '"' or else l_item.to_character_32 = '%H' then
+						l_ret_val.append ("%H")
+						l_ret_val.append_character (l_item.to_character_32)
+					elseif l_item > 126 then
+						l_ret_val.append ("%H")
+						l_ret_val.append_character ((l_item // 64 + l_0.code).to_character_32)
+						l_ret_val.append_character (( (l_item // 8) & 7 + l_0.code).to_character_32)
+						l_ret_val.append_character ( (l_item  & 7 + l_0.code).to_character_32)
+					else
+						l_ret_val.append_character (l_item.to_character_32)
+					end
+				end
+				Result := l_ret_val
+			else
+				Result := string_value
+			end
+
 		end
 
 note

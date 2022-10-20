@@ -319,11 +319,4 @@ feature -- Output
 			end
 		end
 
-	adorn_generics (names: BOOLEAN): STRING_32
-		do
-			to_implement ("Add implementation")
-			create Result.make_empty
-		end
-
-
 end
