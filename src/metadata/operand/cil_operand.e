@@ -55,7 +55,7 @@ feature -- Status Report
 
 	is_nan_or_inf: BOOLEAN
 		do
-			to_implement ("Add implementation")
+			Result := float_value.is_nan or else float_value.is_negative_infinity or else float_value.is_positive_infinity
 		end
 
 feature -- Element change
@@ -237,8 +237,18 @@ feature -- Output
 					create l_buf.make_filled (0, 1, 8)
 					if size = {CIL_OPERAND_SIZE}.r4 then
 						l_sz := 4
-							--  *(float*)buf = floatValue_;
+						l_buf := real32_to_byte (float_value.truncated_to_real)
+					else
+						l_sz := 8
+						l_buf := real64_to_byte (float_value)
 					end
+					a_file.put_string ("(")
+					across 1 |..| l_sz as ic loop
+						a_file.put_string (l_buf[ic].to_hex_string)
+					end
+					a_file.put_string (")")
+				else
+					a_file.put_string (float_value.out)
 				end
 			when {CIL_OPERAND_TYPE}.t_string then
 				a_file.put_string ("%"")
@@ -250,6 +260,42 @@ feature -- Output
 					-- do nothing
 			end
 			Result := True
+		end
+
+
+feature {NONE} -- Implementation
+
+	real32_to_byte(a_val: REAL_32): ARRAY [NATURAL_8]
+		local
+			mp: MANAGED_POINTER
+		do
+			create mp.make (8)
+			float_to_byte (a_val, mp.item)
+			Result := mp.read_array (0, 8)
+		end
+
+	real64_to_byte(a_val: REAL_64): ARRAY [NATURAL_8]
+		local
+			mp: MANAGED_POINTER
+		do
+			create mp.make (8)
+			double_to_byte (a_val, mp.item)
+			Result := mp.read_array (0, 8)
+		end
+
+
+	float_to_byte (a_float: REAL_32; a_buf: POINTER)
+		external
+			"C inline"
+		alias
+			"*(float*)$a_buf = $a_float;"
+		end
+
+	double_to_byte (a_double: REAL_64; a_buf: POINTER)
+		external
+			"C inline"
+		alias
+			"*(double*)$a_buf = $a_double;"
 		end
 
 end
