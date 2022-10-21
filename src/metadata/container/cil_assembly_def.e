@@ -37,6 +37,7 @@ feature {NONE} -- Initialization
 			create namespace_cache.make(0)
 			create class_cache.make (0)
 			create snk_file.make_empty
+			create custom_attributes
 		ensure
 			snk_file_set: snk_file.is_empty
 			external_set: not is_external
@@ -63,12 +64,16 @@ feature -- Access
 	public_key_token : ARRAY [NATURAL_8]
 
 	snk_file: STRING_32
+		-- name of strong name key file
+		-- by default "".
 
 	namespace_cache: STRING_TABLE [CIL_NAMESPACE]
 
 	class_cache: STRING_TABLE [CIL_CLASS]
 
 	is_loaded: BOOLEAN
+
+	custom_attributes: CIL_CUSTOM_ATTRIBUTE_CONTAINER
 
 
 feature -- Element change
@@ -111,6 +116,39 @@ feature -- Element change
 			is_external := an_is_external
 		ensure
 			is_external_assigned: is_external = an_is_external
+		end
+
+	set_version (a_major, a_minor, a_build, a_revision: INTEGER)
+			-- Set assembly definition version
+			-- `major` with `a_major`
+			-- `minor` with `a_minor`
+			-- `build` with `a_build`
+			-- `revision` with `a_revision`
+		do
+			major := a_major
+			minor := a_minor
+			build := a_build
+			revision := a_revision
+		ensure
+			version_set: major = a_major and then
+						 minor = a_minor and then
+						 build = a_build and then
+						 revision = a_revision
+		end
+
+	set_snk_file(a_name: STRING_32)
+			-- Set `snk_file` with `a_name`.
+		do
+			snk_file := a_name
+		ensure
+			snk_file_set: snk_file = a_name
+		end
+
+feature -- Status Report
+
+	lookup_class (a_lib: PE_LIB; a_namespace: STRING_32; a_name: STRING_32): detachable CIL_CLASS
+		do
+			to_implement ("Add implementation")
 		end
 
 feature -- Output

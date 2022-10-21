@@ -270,7 +270,7 @@ feature {NONE} -- Implementation
 			mp: MANAGED_POINTER
 		do
 			create mp.make (8)
-			float_to_byte (a_val, mp.item)
+			mp.put_real_32 (a_val, 0)
 			Result := mp.read_array (0, 8)
 		end
 
@@ -279,23 +279,8 @@ feature {NONE} -- Implementation
 			mp: MANAGED_POINTER
 		do
 			create mp.make (8)
-			double_to_byte (a_val, mp.item)
+			mp.put_real_64 (a_val, 0)
 			Result := mp.read_array (0, 8)
-		end
-
-
-	float_to_byte (a_float: REAL_32; a_buf: POINTER)
-		external
-			"C inline"
-		alias
-			"*(float*)$a_buf = $a_float;"
-		end
-
-	double_to_byte (a_double: REAL_64; a_buf: POINTER)
-		external
-			"C inline"
-		alias
-			"*(double*)$a_buf = $a_double;"
 		end
 
 end
