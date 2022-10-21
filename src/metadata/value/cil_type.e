@@ -336,12 +336,12 @@ feature -- Output
 					Result := l_method_ref.il_src_dump (a_file, false, true, true)
 				end
 			else
-				a_file.put_string (type_names.at (basic_type.index + 1))
+				a_file.put_string (type_names.at ({CIL_BASIC_TYPE}.index_of (basic_type) + 1))
 			end
 			if array_level = 1 then
 				a_file.put_string (" []")
 			elseif array_level /= 0 then
-					-- TODO double check code with Type.cpp code 
+					-- TODO double check code with Type.cpp code
 				a_file.put_string (" [")
 				across 0 |..| (array_level - 1) as  i loop
 					if i /= 0 then

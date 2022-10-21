@@ -542,8 +542,21 @@ feature {NONE} -- Implementation
 feature -- Base types
 
 	base_types (a_types: CELL[INTEGER])
+		local
+			l_op: CIL_OPERAND
 		do
-			to_implement ("Add implementation")
+			if not (a_types.item & {CIL_DATA_CONTAINER}.base_index_system /= 0) then
+				across instructions as ins loop
+					if attached {CIL_OPERAND} ins.operand as l_operand and then
+						l_operand.type = {CIL_OPERAND_TYPE}.t_value and then
+						attached {CIL_VALUE} l_operand.value as l_value
+					 then
+						if attached {CIL_BOXED_TYPE} l_value.type then
+							
+						end
+					end
+				end
+			end
 		end
 
 feature -- Output
