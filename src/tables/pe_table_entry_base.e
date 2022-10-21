@@ -6,4 +6,18 @@ note
 class
 	PE_TABLE_ENTRY_BASE
 
+inherit
+
+	PE_META_BASE
+
+	REFACTORING_HELPER
+
+feature -- Access
+
+	table_index: INTEGER
+		do
+			to_implement ("Add implemenation")
+		end
+
+
 end

@@ -186,8 +186,31 @@ feature -- Status Report
 		end
 
 	transfer_flags: INTEGER
+		local
+			l_pe_flags: INTEGER
 		do
-			to_implement ("Add Implementation")
+			l_pe_flags := {PE_TABLE_ENTRY_FLAGS}.class_
+			if attached {CIL_CLASS} parent as l_parent then
+				if flags.flags & {CIL_QUALIFIERS_ENUM}.public /= 0 then
+					l_pe_flags := l_pe_flags |  {PE_TABLE_ENTRY_FLAGS}.nestedpublic
+				else
+					l_pe_flags := l_pe_flags |  {PE_TABLE_ENTRY_FLAGS}.nestedprivate
+				end
+			else
+				if flags.flags & {CIL_QUALIFIERS_ENUM}.public /= 0 then
+					l_pe_flags := l_pe_flags |  {PE_TABLE_ENTRY_FLAGS}.public
+				end
+			end
+			if flags.flags & {CIL_QUALIFIERS_ENUM}.sequential /= 0 then
+				l_pe_flags := l_pe_flags |  {PE_TABLE_ENTRY_FLAGS}.explicitlayout
+			end
+			if flags.flags & {CIL_QUALIFIERS_ENUM}.sealed /= 0 then
+				l_pe_flags := l_pe_flags |  {PE_TABLE_ENTRY_FLAGS}.sealed
+			end
+			if flags.flags & {CIL_QUALIFIERS_ENUM}.ansi /= 0 then
+				l_pe_flags := l_pe_flags |  {PE_TABLE_ENTRY_FLAGS}.ansiclass
+			end
+			Result := l_pe_flags
 		end
 
 feature -- Operation

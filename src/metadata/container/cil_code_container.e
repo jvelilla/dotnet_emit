@@ -539,6 +539,13 @@ feature {NONE} -- Implementation
 			end
 		end
 
+feature -- Base types
+
+	base_types (a_types: CELL[INTEGER])
+		do
+			to_implement ("Add implementation")
+		end
+
 feature -- Output
 
 	il_src_dump (a_file: FILE_STREAM): BOOLEAN

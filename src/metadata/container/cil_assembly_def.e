@@ -1,9 +1,9 @@
 note
 	description: "[
-		    Base class for assembly definitions
-    		this holds the main assembly ( as a non-external assembly)
-    		or can hold an external assembly
-	]"
+					    Base class for assembly definitions
+			    		this holds the main assembly ( as a non-external assembly)
+			    		or can hold an external assembly
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -13,9 +13,9 @@ class
 inherit
 
 	CIL_DATA_CONTAINER
-	 	rename
-	 		make as make_data_container
-	 	end
+		rename
+			make as make_data_container
+		end
 
 create
 	make
@@ -34,7 +34,7 @@ feature {NONE} -- Initialization
 				create public_key_token.make_filled (0, 1, 8)
 			end
 
-			create namespace_cache.make(0)
+			create namespace_cache.make (0)
 			create class_cache.make (0)
 			create snk_file.make_empty
 			create custom_attributes
@@ -61,11 +61,11 @@ feature -- Access
 	is_external: BOOLEAN assign set_is_external
 			-- `is_external'
 
-	public_key_token : ARRAY [NATURAL_8]
+	public_key_token: ARRAY [NATURAL_8]
 
 	snk_file: STRING_32
-		-- name of strong name key file
-		-- by default "".
+			-- name of strong name key file
+			-- by default "".
 
 	namespace_cache: STRING_TABLE [CIL_NAMESPACE]
 
@@ -74,7 +74,6 @@ feature -- Access
 	is_loaded: BOOLEAN
 
 	custom_attributes: CIL_CUSTOM_ATTRIBUTE_CONTAINER
-
 
 feature -- Element change
 
@@ -131,17 +130,40 @@ feature -- Element change
 			revision := a_revision
 		ensure
 			version_set: major = a_major and then
-						 minor = a_minor and then
-						 build = a_build and then
-						 revision = a_revision
+				minor = a_minor and then
+				build = a_build and then
+				revision = a_revision
 		end
 
-	set_snk_file(a_name: STRING_32)
+	set_snk_file (a_name: STRING_32)
 			-- Set `snk_file` with `a_name`.
 		do
 			snk_file := a_name
 		ensure
 			snk_file_set: snk_file = a_name
+		end
+
+	set_loaded
+			-- Set `is_loaded` to True.
+		do
+			is_loaded := True
+		ensure
+			loaded_set: is_loaded
+		end
+
+	insert_namespaces_table (a_lib: PE_LIB; a_namespaces: STRING_TABLE [CIL_NAMESPACE]; a_name: STRING_32)
+		do
+			to_implement ("Add implementation")
+		end
+
+	insert_namespaces (a_lib: PE_LIB; a_namespace: CIL_NAMESPACE; a_name: STRING_32)
+		do
+			to_implement ("Add implementation")
+		end
+
+	insert_classes (a_lib: PE_LIB; a_namespace: CIL_NAMESPACE; a_name: STRING_32)
+		do
+			to_implement ("Add implementation")
 		end
 
 feature -- Status Report
@@ -153,6 +175,11 @@ feature -- Status Report
 
 feature -- Output
 
+	pe_header_dump (a_strean: FILE_STREAM): BOOLEAN
+		do
+			to_implement ("Add implemenation")
+		end
+
 	il_header_dump (a_file: FILE_STREAM): BOOLEAN
 		do
 			a_file.put_string (".assembly ")
@@ -163,7 +190,7 @@ feature -- Output
 			a_file.put_string ("{")
 			a_file.put_new_line
 			a_file.flush
-			if major /= 0 or else minor /=0 or else build /= 0 or revision /=0  then
+			if major /= 0 or else minor /= 0 or else build /= 0 or revision /= 0 then
 				a_file.put_string ("%T.ver ")
 				a_file.put_integer (major)
 				a_file.put_string (":")
@@ -177,10 +204,10 @@ feature -- Output
 			end
 
 			across 1 |..| 8 as i loop
-				if public_key_token[i] /= 0 then
+				if public_key_token [i] /= 0 then
 					a_file.put_string ("%T.publickeytoken = (")
 					across 1 |..| 8 as j loop
-						a_file.put_string (public_key_token[j].to_hex_string)
+						a_file.put_string (public_key_token [j].to_hex_string)
 						a_file.put_string (" ")
 					end
 					a_file.put_string (")")
@@ -193,4 +220,5 @@ feature -- Output
 			a_file.flush
 			Result := True
 		end
+
 end
