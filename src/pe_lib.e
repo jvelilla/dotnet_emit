@@ -743,12 +743,12 @@ feature {NONE} -- Output Implementation
 				-- Give initial PE Indexes for field resolution..
 			n := working_assembly.number (n)
 
---			create L_pe_writer
+			to_implement("Add Implementation")
 		end
 
 	obj_out: BOOLEAN
 		do
-				-- TODO to implement
+			to_implement ("Add Implementation")
 		end
 
 end
