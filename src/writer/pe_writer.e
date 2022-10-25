@@ -6,16 +6,55 @@ note
 class
 	PE_WRITER
 
+inherit
+
+	REFACTORING_HELPER
+
 create
 	make
 
 feature {NONE} -- Initialization
 
+		--  the maximum number of PE objects we will generate
+		--  this includes the following:
+		--  	.text / cildata
+		--   	.reloc (for the single necessary reloc entry)
+		--    	.rsrc (not implemented yet, will hold version info record)
+
 	make (is_exe: BOOLEAN; is_gui: BOOLEAN; a_snk_file: STRING_32)
+			--
 		do
 			dll := not is_exe
 			gui := is_gui
-
+			file_align := 0x200
+			object_align := 0x2000
+			image_base := 0x400000
+			language := 0x4b0
+			create snk_file.make_from_string (a_snk_file)
+		ensure
+			dll_set: dll = not is_exe
+			gui_set: gui = is_gui
+			object_base_zero: object_base = 0
+			value_base_zero: value_base = 0
+			enum_base_zero: enum_base = 0
+			system_index_zero: system_index = 0
+			entry_point_zero: entry_point = 0
+			param_attribute_type_zero: param_attribute_type = 0
+			param_attribute_data_zero: param_attribute_data = 0
+			file_align_set: file_align = 0x200
+			object_align_set: object_align = 0x2000
+			image_base_set: image_base = 0x400000
+			language_set: language = 0x4b0
+			pe_header_void: pe_header = Void
+			pe_object_void: pe_object = Void
+			cor20_header_void: cor20_header = Void
+			tables_header_void: tables_header = Void
+			snk_file_set: snk_file.same_string_general (a_snk_file)
+			snk_len_zero: snk_len = 0
+			output_file_vooid: output_file = Void
+			pe_base_zero: pe_base = 0
+			cor_base_zero: cor_base = 0
+			snk_base = 0
 		end
 
 feature -- Access
@@ -102,7 +141,7 @@ feature -- Access
 	dll: BOOLEAN assign set_dll
 			-- `dll'
 
-
+	output_file: detachable FILE_STREAM
 
 feature -- Element change
 
@@ -281,6 +320,210 @@ feature -- Element change
 		ensure
 			dll_assigned: dll = a_dll
 		end
+
+feature -- Element Change
+
+	add_table_entry (a_entry: PE_TABLE_ENTRY_BASE): NATURAL
+			-- add an entry to one of the tables
+			-- note the data for the table will be a class inherited from TableEntryBase,
+			--  and this class will self-report the table index to use
+		do
+			to_implement ("Add implementation")
+		end
+
+	add_method (a_method: PE_METHOD)
+			-- add a method entry to the output list.  Note that Index_(D methods won't be added here.
+		do
+			to_implement ("Add implementation")
+		end
+
+feature -- Stream functions
+
+	hash_string (a_utf8: STRING_32): NATURAL
+			-- return the stream index
+			--| TODO add a precondition to verify a_utf8 is a valid UTF_8
+		do
+			to_implement ("Add implementation")
+		end
+
+	hash_us (a_str: STRING_32; a_len: INTEGER): NATURAL
+			-- return the stream index
+		do
+			to_implement ("Add implementation")
+		end
+
+	hash_guid (a_guid: ARRAY [NATURAL_8]): NATURAL
+			-- return the stream index
+		do
+			to_implement ("Add implementation")
+		end
+
+	Hash_Blob (a_blob_data: ARRAY [NATURAL_8]; a_blob_len: NATURAL_8): NATURAL
+			-- return the stream index
+		do
+			to_implement ("Add implementation")
+		end
+
+feature -- Various Operations
+
+	RVA_bytes (a_bytes: ARRAY [NATURAL_8]; a_data: NATURAL): NATURAL
+			--  this is the 'cildata' contents.   Again we emit into the cildata and it returns the offset in
+			--  the cildata to use.  It does NOT return the rva immediately, that is calculated later
+		do
+			to_implement ("Add implementation")
+		end
+
+	set_base_classes (a_object_index: NATURAL; a_value_index: NATURAL; a_enum_index: NATURAL; a_system_index: NATURAL)
+			--  Set the indexes of the various classes which can be extended to make new classes
+			--  these are typically in the typeref table
+			--  Also set the index of the System namespace entry which is t
+
+		do
+			to_implement ("Add implementation")
+		end
+
+	set_param_attribute (a_param_attribute_type: NATURAL; a_param_attribute_data: NATURAL)
+			-- this sets the data for the paramater attribute we support
+			-- we aren't generally supporting attributes in this version but we do need to be able to
+			-- set a single attribute that means a function has a variable length argument list
+		do
+			param_attribute_data := a_param_attribute_data
+			param_attribute_type := a_param_attribute_type
+		ensure
+			param_attribute_data_set: param_attribute_data = a_param_attribute_data
+			param_attribute_type_set: param_attribute_type = a_param_attribute_type
+		end
+
+	create_guid (a_Guid: ARRAY [NATURAL_8])
+		do
+			to_implement ("Add implementation [instance_free]")
+		end
+
+	next_table_index (a_table: INTEGER): NATURAL
+		do
+			to_implement ("Add implementation")
+		end
+
+	write_file (a_corFlags: INTEGER; a_out: FILE_STREAM): BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
+
+	hash_part_of_file (a_context: CIL_SHA1_CONTEXT; a_offset: NATURAL; a_len: NATURAL)
+		do
+			to_implement ("Add implementation")
+		end
+
+	cildata_rva: detachable ARRAY [NATURAL_8]
+			-- TODO double check.
+			-- another thing that makes this lib not thread safe, the RVA for
+			-- the beginning of the .data section gets put here after it is calculated
+			--| defined as
+			--|  static DWord cildata_rva_;
+			--|  DWord =:: four bytes
+
+feature -- Operations
+
+	calculate_objects (a_cor_flags: INTEGER)
+			-- this calculates various addresses and offsets that will be used and referenced
+			-- when we actually generate the data.   This must be kept in sync with the code to
+			-- generate data
+		do
+			to_implement ("Add implementation")
+		end
+
+feature -- Write operations
+
+    	write_mz_data: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+    	write_pe_header: BOOLEAN
+        	do
+    			to_implement("Add implementation")
+    		end
+
+    	write_pe_objects: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+    	write_iat: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+    	write_core_header: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+    	write_hash_data: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+    	write_static_data: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+		write_methods: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+		write_metadata_headers: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+		write_tables: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+		write_strings: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+		write_us: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+ 		write_guid: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+		write_blob: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+ 		write_imports: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+		write_entry_point: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+ 		write_version_info(a_file_name: STRING_32): BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
+    	write_relocs: BOOLEAN
+    		do
+    			to_implement("Add implementation")
+    		end
+
 
 feature -- Constants
 
