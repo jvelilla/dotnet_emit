@@ -31,6 +31,15 @@ feature {NONE} -- Initialization
 			image_base := 0x400000
 			language := 0x4b0
 			create snk_file.make_from_string (a_snk_file)
+			create meta_header.make_from_other (meta_header1)
+			create string_map.make (0)
+			create tables.make ({PE_TABLE_CONSTANTS}.max_tables)
+			create {ARRAYED_LIST [PE_METHOD]}methods.make(0)
+			create rva.make
+			create guid.make
+			create blob.make
+			create us.make
+			create strings.make
 		ensure
 			dll_set: dll = not is_exe
 			gui_set: gui = is_gui
@@ -55,29 +64,26 @@ feature {NONE} -- Initialization
 			pe_base_zero: pe_base = 0
 			cor_base_zero: cor_base = 0
 			snk_base = 0
+			string_map_empty: string_map.is_empty
+			methods_empty: methods.is_empty
 		end
 
 feature -- Access
 
 	snk_base: NATURAL assign set_snk_base
 			-- `snk_base'
-		attribute check False then end end --| Remove line when `snk_base' is initialized in creation procedure.
 
 	cor_base: NATURAL assign set_cor_base
 			-- `cor_base'
-		attribute check False then end end --| Remove line when `cor_base' is initialized in creation procedure.
 
 	pe_base: NATURAL assign set_pe_base
 			-- `pe_base'
-		attribute check False then end end --| Remove line when `pe_base' is initialized in creation procedure.
 
 	snk_len: NATURAL assign set_snk_len
 			-- `snk_len'
-		attribute check False then end end --| Remove line when `snk_len' is initialized in creation procedure.
 
 	snk_file: STRING_32
 			-- `snk_file'
-		attribute check False then end end --| Remove line when `snk_file' is initialized in creation procedure.
 
 	tables_header: detachable DOTNET_META_TABLES_HEADER
 			-- `tables_header'
@@ -94,47 +100,37 @@ feature -- Access
 	language: NATURAL_32
 			-- `language'
 			-- C++ defined as four bytes
-		attribute check False then end end --| Remove line when `language' is initialized in creation procedure.
+			-- DWord language_;
 
 	image_base: NATURAL assign set_image_base
 			-- `image_base'
-		attribute check False then end end --| Remove line when `image_base' is initialized in creation procedure.
 
 	object_align: NATURAL assign set_object_align
 			-- `object_align'
-		attribute check False then end end --| Remove line when `object_align' is initialized in creation procedure.
 
 	file_align: NATURAL assign set_file_align
 			-- `file_align'
-		attribute check False then end end --| Remove line when `file_align' is initialized in creation procedure.
 
 	param_attribute_data: NATURAL assign set_param_attribute_data
 			-- `param_attribute_data'
-		attribute check False then end end --| Remove line when `param_attribute_data' is initialized in creation procedure.
 
 	param_attribute_type: NATURAL assign set_param_attribute_type
 			-- `param_attribute_type'
-		attribute check False then end end --| Remove line when `param_attribute_type' is initialized in creation procedure.
 
 	entry_point: NATURAL assign set_entry_point
 			-- `entry_point'
-		attribute check False then end end --| Remove line when `entry_point' is initialized in creation procedure.
 
 	system_index: NATURAL assign set_system_index
 			-- `system_index'
-		attribute check False then end end --| Remove line when `system_index' is initialized in creation procedure.
 
 	enum_base: NATURAL assign set_enum_base
 			-- `enum_base'
-		attribute check False then end end --| Remove line when `enum_base' is initialized in creation procedure.
 
 	value_base: NATURAL assign set_value_base
 			-- `value_base'
-		attribute check False then end end --| Remove line when `value_base' is initialized in creation procedure.
 
 	object_base: NATURAL assign set_object_base
 			-- `object_base'
-		attribute check False then end end --| Remove line when `object_base' is initialized in creation procedure.
 
 	gui: BOOLEAN assign set_gui
 			-- `gui'
@@ -156,12 +152,79 @@ feature -- Access
 
 	rsa_encoder: detachable CIL_RSA_ENCODER
 
-	mzh_header: detachable ARRAY [NATURAL_8]
+	mzh_header: ARRAY [NATURAL_8]
+			-- MS-DOS header
+		do
+			Result := <<
+					0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00,
+					0x04, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00,
+					0xb8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00,
+
+					0x0e, 0x1f, 0xba, 0x0e, 0x00, 0xb4, 0x09, 0xcd,
+					0x21, 0xb8, 0x01, 0x4c, 0xcd, 0x21, 0x54, 0x68,
+					0x69, 0x73, 0x20, 0x70, 0x72, 0x6f, 0x67, 0x72,
+					0x61, 0x6d, 0x20, 0x63, 0x61, 0x6e, 0x6e, 0x6f,
+					0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6e,
+					0x20, 0x69, 0x6e, 0x20, 0x44, 0x4f, 0x53, 0x20,
+					0x6d, 0x6f, 0x64, 0x65, 0x2e, 0x0d, 0x0d, 0x0a,
+					0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00>>
+		ensure
+			instance_free: class
+		end
+
+	meta_header: DOTNET_META_HEADER
+
+	stream_names: ARRAY [STRING_32]
+		do
+			Result := <<"#~", "#Strings", "#US", "#GUID", "#Blob">>
+		ensure
+			instance_free: class
+		end
+
+	default_us: ARRAY [NATURAL_8]
+			-- defined as static Byte defaultUS_[];
+			--| Byte defined as 1 byte.
+		do
+			Result := <<0, 3, 0x20, 0, 0>>
+			Result.conservative_resize_with_default (0, 1, 8)
+		end
+
+	string_map: STRING_TABLE [NATURAL]
+			-- reflection of the String stream so that we can keep from doing duplicates.
+			-- right now we don't check duplicates on any of the other streams...
+
+	tables: DNL_TABLE
+			-- tables that can appear in a PE file.
+
+	methods: LIST [PE_METHOD]
+
+	strings: PE_POOL
+
+	us: PE_POOL
+
+	blob: PE_POOL
+
+	guid: PE_POOL
+
+	rva: PE_POOL
 
 
---	static struct DotNetMetaHeader *metaHeader_;
---    static const char *streamNames_[];
---    static Byte defaultUS_[];	
+feature {NONE} -- Implemenation
+
+	meta_header1: DOTNET_META_HEADER
+		do
+			create Result
+			Result.set_signature (1)
+			Result.set_major (1)
+			Result.set_minor (0)
+		ensure
+			instance_free: class
+		end
 
 feature -- Element change
 
