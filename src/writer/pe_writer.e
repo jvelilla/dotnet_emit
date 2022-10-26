@@ -91,8 +91,9 @@ feature -- Access
 	pe_header: detachable PE_HEADER
 			-- `pe_header'
 
-	language: NATURAL
+	language: NATURAL_32
 			-- `language'
+			-- C++ defined as four bytes
 		attribute check False then end end --| Remove line when `language' is initialized in creation procedure.
 
 	image_base: NATURAL assign set_image_base
@@ -142,6 +143,25 @@ feature -- Access
 			-- `dll'
 
 	output_file: detachable FILE_STREAM
+
+	assembly_version: detachable ARRAY [NATURAL_16]
+			--| C++ defined as Word assemblyVersion_[4];
+			--| Word is two bytes.
+
+	file_version: detachable ARRAY [NATURAL_16]
+
+	product_version: detachable ARRAY [NATURAL_16]
+
+	stream_headers: detachable ARRAY2 [NATURAL]
+
+	rsa_encoder: detachable CIL_RSA_ENCODER
+
+	mzh_header: detachable ARRAY [NATURAL_8]
+
+
+--	static struct DotNetMetaHeader *metaHeader_;
+--    static const char *streamNames_[];
+--    static Byte defaultUS_[];	
 
 feature -- Element change
 
@@ -434,96 +454,127 @@ feature -- Operations
 
 feature -- Write operations
 
-    	write_mz_data: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_mz_data: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-    	write_pe_header: BOOLEAN
-        	do
-    			to_implement("Add implementation")
-    		end
+	write_pe_header: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-    	write_pe_objects: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_pe_objects: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-    	write_iat: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_iat: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-    	write_core_header: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_core_header: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-    	write_hash_data: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_hash_data: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-    	write_static_data: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_static_data: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-		write_methods: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_methods: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-		write_metadata_headers: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_metadata_headers: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-		write_tables: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_tables: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-		write_strings: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_strings: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-		write_us: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_us: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
- 		write_guid: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_guid: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-		write_blob: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_blob: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
- 		write_imports: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_imports: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-		write_entry_point: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_entry_point: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
- 		write_version_info(a_file_name: STRING_32): BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_version_info (a_file_name: STRING_32): BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
-    	write_relocs: BOOLEAN
-    		do
-    			to_implement("Add implementation")
-    		end
+	write_relocs: BOOLEAN
+		do
+			to_implement ("Add implementation")
+		end
 
+	version_string (a_name: STRING_32; a_value: STRING_32)
+			-- a helper to put a string into the string area of the version information.
+		do
+			to_implement ("Add implementation")
+		end
+
+feature -- Output Helpers
+
+	put (a_data: ANY; a_size: NATURAL)
+		do
+			if attached output_file as l_file then
+					-- outputFile_->write((char *)data, size)
+			end
+		end
+
+	offset: NATURAL_64
+			-- the output position.
+		do
+			to_implement ("Add implementation")
+		end
+
+	seek (a_offset: NATURAL)
+			-- Set the output position.
+		do
+			to_implement ("Add implementation")
+		end
+
+	align (a_offset: NATURAL)
+		do
+			to_implement ("Add implementation")
+		end
 
 feature -- Constants
 
