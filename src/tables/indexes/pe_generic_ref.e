@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {PE_GENERIC_REF}."
+	description: "Define a type of possible index type that occur in the tables we are interested in."
 	date: "$Date$"
 	revision: "$Revision$"
 

@@ -14,8 +14,16 @@ feature -- Access
 
 	table_index: INTEGER
 		do
-			to_implement ("Add implemenation")
+			to_implement ("Add implemenation or make it deferred")
 		end
 
+	render (a_sizes: ARRAY [NATURAL]; a_bytes: ARRAY [NATURAL_8]): NATURAL
+		do
+			to_implement  ("Add implementation")
+		end
 
+	get (a_sizes: ARRAY [NATURAL]; a_bytes: ARRAY [NATURAL_8]): NATURAL
+		do
+			to_implement ("Add implementation")
+		end
 end

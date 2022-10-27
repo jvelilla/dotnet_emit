@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {PE_FIELD_MARSHAL}."
+	description: "Define a type of possible index type that occur in the tables we are interested in."
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -18,7 +18,7 @@ inherit
 
 create
 	make
-	
+
 feature {NONE} -- Initialization
 
 	make

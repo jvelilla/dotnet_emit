@@ -16,7 +16,7 @@ inherit
 			has_index_overflow
 		end
 
-create {PE_INDEX_BASE}
+create 
 	make_with_tag_and_index
 
 create

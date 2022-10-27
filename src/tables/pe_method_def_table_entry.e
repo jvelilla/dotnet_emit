@@ -9,6 +9,10 @@ class
 inherit
 
 	PE_TABLE_ENTRY_BASE
+		redefine
+			render,
+			get
+		end
 
 create
 	make,

@@ -1,6 +1,5 @@
 note
-	description: "Summary description for {PE_CUSTOM_ATTRIBUTE}."
-	author: ""
+	description: "Define a type of possible index type that occur in the tables we are interested in."
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -17,10 +16,8 @@ inherit
 			has_index_overflow
 		end
 
-create {PE_INDEX_BASE}
-	make_with_tag_and_index
-
 create
+	make_with_tag_and_index,
 	make
 
 feature {NONE} -- Initialization
