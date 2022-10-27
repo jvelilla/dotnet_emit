@@ -33,7 +33,7 @@ feature {NONE} -- Initialization
 			create snk_file.make_from_string (a_snk_file)
 			create meta_header.make_from_other (meta_header1)
 			create string_map.make (0)
-			create tables.make ({PE_TABLE_CONSTANTS}.max_tables)
+			create tables.make_filled(create {DNL_TABLE}.make, 1, {PE_TABLE_CONSTANTS}.max_tables)
 			create {ARRAYED_LIST [PE_METHOD]}methods.make(0)
 			create rva.make
 			create guid.make
@@ -198,7 +198,7 @@ feature -- Access
 			-- reflection of the String stream so that we can keep from doing duplicates.
 			-- right now we don't check duplicates on any of the other streams...
 
-	tables: DNL_TABLE
+	tables: ARRAY [DNL_TABLE]
 			-- tables that can appear in a PE file.
 
 	methods: LIST [PE_METHOD]
@@ -410,14 +410,24 @@ feature -- Element Change
 			-- add an entry to one of the tables
 			-- note the data for the table will be a class inherited from TableEntryBase,
 			--  and this class will self-report the table index to use
+		local
+			n: INTEGER
 		do
+			n := a_entry.table_index
 			to_implement ("Add implementation")
 		end
 
 	add_method (a_method: PE_METHOD)
 			-- add a method entry to the output list.  Note that Index_(D methods won't be added here.
 		do
-			to_implement ("Add implementation")
+			if a_method.flags & {PE_METHOD_CONSTANTS}.EntryPoint /= 0 then
+				if entry_point /= 0 then
+					{EXCEPTIONS}.raise (generator + "Multiple entry points")
+				else
+					entry_point := a_method.method_def | ({PE_TABLES}.tMethodDef.value |<< 24)
+				end
+			end
+			methods.force (a_method)
 		end
 
 feature -- Stream functions
@@ -426,7 +436,18 @@ feature -- Stream functions
 			-- return the stream index
 			--| TODO add a precondition to verify a_utf8 is a valid UTF_8
 		do
-			to_implement ("Add implementation")
+			if attached string_map.item (a_utf8) as l_val then
+				Result := l_val
+			else
+				if strings.size = 0 then
+					strings.increment_size
+				end
+					-- TODO check if we really need to do `+ 1`
+				strings.confirm (strings.size + 1)
+				Result := strings.size
+				strings.increment_size_by ((a_utf8.count + 1).to_natural_32)
+				string_map.force (Result, a_utf8)
+			end
 		end
 
 	hash_us (a_str: STRING_32; a_len: INTEGER): NATURAL

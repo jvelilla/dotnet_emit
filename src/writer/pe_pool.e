@@ -48,4 +48,23 @@ feature -- Access
 		ensure
 			new_max_size: base.capacity.to_natural_32 = max_size
 		end
+
+feature -- Element Change
+
+	increment_size
+			-- Increment size by 1.
+		do
+			size := size + 1
+		ensure
+			size_incremented: old size + 1  = size
+		end
+
+	increment_size_by (a_value: NATURAL)
+			-- Increment size by `a_value`.
+		do
+			size := size + a_value
+		ensure
+			size_incremented: old size + a_value  = size
+		end
+
 end

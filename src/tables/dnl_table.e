@@ -14,9 +14,9 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_size: INTEGER)
+	make 
 		do
-			create {ARRAYED_LIST [PE_TABLE_ENTRY_BASE]} table.make (a_size)
+			create {ARRAYED_LIST [PE_TABLE_ENTRY_BASE]} table.make (0)
 		end
 
 feature -- Access
