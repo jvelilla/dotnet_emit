@@ -414,7 +414,12 @@ feature -- Element Change
 			n: INTEGER
 		do
 			n := a_entry.table_index
-			to_implement ("Add implementation")
+			tables [n].table.force (a_entry)
+			debug ("pe_writer")
+				if n = {PE_TABLES}.tmethoddef.value then
+				end
+			end
+			Result := tables[n].table.count.to_natural_32
 		end
 
 	add_method (a_method: PE_METHOD)

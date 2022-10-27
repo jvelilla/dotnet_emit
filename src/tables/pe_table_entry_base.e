@@ -10,8 +10,6 @@ inherit
 
 	PE_META_BASE
 
-	REFACTORING_HELPER
-
 feature -- Access
 
 	table_index: INTEGER
