@@ -11,33 +11,25 @@ inherit
 	PE_TABLE_ENTRY_BASE
 		redefine
 			render,
-			get
+			get,
+			table_index
 		end
 
 create
-	make,
 	make_with_data
 
 
 feature {NONE} -- Initialization
 
-	make
-		do
-			to_implement ("Finish implementation")
-			create name_index.make_empty
-			create signature_index.make
-			create param_list.make
-		end
-
 	make_with_data (a_method: PE_METHOD; a_iflags: INTEGER; a_mflags: INTEGER; a_name_index: NATURAL; a_signature_index: NATURAL; a_param_index: NATURAL )
 		do
-			to_implement ("Finish implementation")
+			rva := 0
 			method := a_method
 			impl_flags := a_iflags
-			--name_index := a_name_index
-			create name_index.make_empty
-			create signature_index.make
-			create param_list.make
+			flags := a_mflags
+			create name_index.make_with_index (a_name_index)
+			create signature_index.make_with_index (a_signature_index)
+			create param_list.make_with_index (a_param_index)
 		ensure
 			method_set: method = a_method
 
@@ -47,7 +39,7 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	method: detachable PE_METHOD
-			-- write for rva
+			-- write for rva.
 
 	rva: INTEGER
 			-- read only.
@@ -56,7 +48,7 @@ feature -- Access
 
 	flags: INTEGER
 
-	name_index: STRING_32
+	name_index: PE_STRING
 
 	signature_index: PE_BLOB
 
@@ -124,6 +116,11 @@ feature -- Enum: flags
 	RequireSecObject: INTEGER = 0x8000
 
 feature -- Operations
+
+	table_index: INTEGER
+		do
+			Result := {PE_TABLES}.tmethoddef.value.to_integer_32
+		end
 
 	render (a_sizes: ARRAY [NATURAL]; a_byte: ARRAY [NATURAL_8]): NATURAL
 		do

@@ -116,7 +116,6 @@ feature -- Operations
 			Result := {PE_TABLES}.ttypedef.value.to_integer_32
 		end
 
-
 	render (a_sizes: ARRAY [NATURAL]; a_bytes: ARRAY [NATURAL_8]): NATURAL
 		do
 			to_implement  ("Add implementation")
