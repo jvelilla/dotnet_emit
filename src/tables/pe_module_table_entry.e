@@ -9,6 +9,10 @@ class
 inherit
 
 	PE_TABLE_ENTRY_BASE
+		redefine
+			render,
+			get
+		end
 
 create
 	make_with_data
@@ -26,5 +30,18 @@ feature -- Access
 	name_index: PE_STRING
 
 	guid_index: PE_GUID
+
+
+feature -- Operations
+
+	render (a_sizes: ARRAY [NATURAL]; a_bytes: ARRAY [NATURAL_8]): NATURAL
+		do
+			to_implement  ("Add implementation")
+		end
+
+	get (a_sizes: ARRAY [NATURAL]; a_bytes: ARRAY [NATURAL_8]): NATURAL
+		do
+			to_implement ("Add implementation")
+		end
 
 end

@@ -1,6 +1,6 @@
 note
 	description: "[
-		Represent tables that can appear in a PE file
+			Represent tables that can appear in a PE file
 		]"
 	author: ""
 	date: "$Date$"
@@ -14,17 +14,15 @@ create
 
 feature {NONE} -- Initialization
 
-	make 
+	make
 		do
 			create {ARRAYED_LIST [PE_TABLE_ENTRY_BASE]} table.make (0)
 		end
 
 feature -- Access
 
-
 	table: LIST [PE_TABLE_ENTRY_BASE]
-		-- vector of tables that can appear in a PE file
-		-- empty tables are elided / pass over?
-
+			-- vector of tables that can appear in a PE file
+			-- empty tables are elided / pass over?
 
 end

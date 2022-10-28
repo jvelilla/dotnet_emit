@@ -17,6 +17,8 @@ feature -- Access
 			to_implement ("Add implemenation or make it deferred")
 		end
 
+feature -- Operations
+
 	render (a_sizes: ARRAY [NATURAL]; a_bytes: ARRAY [NATURAL_8]): NATURAL
 		do
 			to_implement  ("Add implementation")
