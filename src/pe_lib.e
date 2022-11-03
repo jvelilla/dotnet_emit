@@ -738,12 +738,39 @@ feature {NONE} -- Output Implementation
 		local
 			n: NATURAL
 			l_pe_writer: PE_WRITER
+			l_module_index: NATURAL
+			l_type_def: PE_TYPEDEF_OR_REF
+			l_table: PE_TABLE_ENTRY_BASE
+			l_n: NATURAL
+			l_base_types: CELL [INTEGER]
 		do
 			n := 1
 				-- Give initial PE Indexes for field resolution..
 			n := working_assembly.number (n)
 
 			create l_pe_writer.make (a_is_exe, a_is_gui, working_assembly.snk_file)
+
+				-- RK: Unhandled Exception on Mono 3 and 5:
+				-- System.TypeLoadException: Could not load type 'Module' from assembly 'test6, Version=0.0.0.0, Culture=neutral,
+				-- PublicKeyToken=null'.
+				-- [ERROR] FATAL UNHANDLED EXCEPTION: System.TypeLoadException: Could not load type 'Module' from assembly 'test6,
+				-- Version=0.0.0.0, Culture=neutral, PublicKeyToken=null'.
+
+			l_module_index := l_pe_writer.hash_string ({STRING_32} "<Module>")
+				-- RK fix: "<Module>" instead of "Module" fixes the issue
+
+			create l_type_def.make_with_tag_and_index ({PE_TYPEDEF_OR_REF}.typedef, 0)
+
+			create {PE_TYPEDEF_TABLE_ENTRY} l_table.make_with_data (0, l_module_index, 0, l_type_def, 1, 1)
+			l_n := l_pe_writer.add_table_entry (l_table)
+
+			create l_base_types.put (0)
+			working_assembly.base_types (l_base_types)
+			if l_base_types.item /= 0 then
+				if attached mscorlib_assembly then end
+			end
+			to_implement ("Work in progress")
+
 		end
 
 	obj_out: BOOLEAN

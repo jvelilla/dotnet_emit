@@ -415,8 +415,8 @@ feature -- Element Change
 			n := a_entry.table_index
 			tables [n].table.force (a_entry)
 			debug ("pe_writer")
-				if n = {PE_TABLES}.tmethoddef.value then
-				end
+				-- Check C++ code  PEWriter::AddTableEntry
+				to_implement ("Double check if its requried.")
 			end
 			Result := tables [n].table.count.to_natural_32
 		end
@@ -440,7 +440,8 @@ feature -- Stream functions
 			-- return the stream index
 			--| TODO add a precondition to verify a_utf8 is a valid UTF_8
 		do
-			if attached string_map.item (a_utf8) as l_val then
+			if string_map.has (a_utf8) and then
+			   attached string_map.item (a_utf8) as l_val then
 				Result := l_val
 			else
 				if strings.size = 0 then
