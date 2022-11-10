@@ -6,13 +6,19 @@ note
 class
 	PE_OBJECT
 
-create
-	make
+inherit
+
+	ANY
+		redefine
+			default_create
+		end
+
 
 feature {NONE} -- Initialization
 
-	make
+	default_create
 		do
+			Precursor
 			create name.make (8)
 			create reserved.make_filled (0, 1, 3)
 		end

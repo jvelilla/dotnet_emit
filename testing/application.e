@@ -18,8 +18,8 @@ feature -- Initialization
 			l_val: INTEGER
 			l_cell: CELL [INTEGER]
 			l_api: CIL_EMITTER_API
+			time: TIME
 		do
-			print (compute_pe_object_size)
 			(create {TEST_1}).test;
 			(create {TEST_2}).test;
 			(create {TEST_3}).test;
@@ -224,7 +224,7 @@ feature -- Initialization
 			l_obj: PE_OBJECT
 			l_size: INTEGER
 		do
-			create l_obj.make
+			create l_obj
 			create l_internal
 			n := l_internal.field_count (l_obj)
 			across 1 |..| n as ic loop
@@ -240,6 +240,19 @@ feature -- Initialization
 			end
 		end
 
+	number_of_seconds_since_epoch: INTEGER_32
+			-- calculate the number of seconds since epoch in eiffel
+		local
+			l_date_epoch: DATE_TIME
+			l_date_now: DATE_TIME
+			l_diff: INTEGER_32
+		do
+			create l_date_epoch.make_from_epoch (0)
+			create l_date_now.make_now_utc
+			Result := l_date_now.definite_duration (l_date_epoch).seconds_count.to_integer
+		ensure
+			is_class: class
+		end
 
 note
 	copyright: "Copyright (c) 1984-2019, Eiffel Software and others"

@@ -55,7 +55,7 @@ feature {NONE} -- Initialization
 			image_base_set: image_base = 0x400000
 			language_set: language = 0x4b0
 			pe_header_void: pe_header = Void
-			pe_object_void: pe_object = Void
+			pe_object_void: pe_objects = Void
 			cor20_header_void: cor20_header = Void
 			tables_header_void: tables_header = Void
 			snk_file_set: snk_file.same_string_general (a_snk_file)
@@ -91,8 +91,8 @@ feature -- Access
 	cor20_header: detachable DOTNET_COR20_HEADER
 			-- `cor20_header'
 
-	pe_object: detachable PE_OBJECT
-			-- `pe_object'
+	pe_objects: detachable LIST [PE_OBJECT]
+			-- `pe_objects'
 
 	pe_header: detachable PE_HEADER
 			-- `pe_header'
@@ -283,12 +283,12 @@ feature -- Element change
 			cor20_header_assigned: cor20_header = a_cor20_header
 		end
 
-	set_pe_object (a_pe_object: like pe_object)
-			-- Assign `pe_object' with `a_pe_object'.
+	set_pe_object (a_pe_object: like pe_objects)
+			-- Assign `pe_objects' with `a_pe_object'.
 		do
-			pe_object := a_pe_object
+			pe_objects := a_pe_object
 		ensure
-			pe_object_assigned: pe_object = a_pe_object
+			pe_object_assigned: pe_objects = a_pe_object
 		end
 
 	set_pe_header (a_pe_header: like pe_header)
@@ -552,7 +552,10 @@ feature -- Operations
 			pe_header_void: pe_header = Void
 		local
 			l_pe_header: PE_HEADER
+			l_pe_objects: like pe_objects
 		do
+				-- pe_header setup.
+			check pe_header = Void end
 			create l_pe_header
 			l_pe_header.signature := {PE_HEADER_CONSTANTS}.PESIG
 			l_pe_header.cpu_type := {PE_HEADER_CONSTANTS}.pe_intel386.to_integer_16
@@ -578,9 +581,37 @@ feature -- Operations
 			l_pe_header.num_objects := 2
 			l_pe_header.header_size := mzh_header.count + compute_pe_header_size + l_pe_header.num_objects * compute_pe_object_size
 
+			if (l_pe_header.header_size \\ file_align.to_integer_32) /= 0 then
+				l_pe_header.header_size := l_pe_header.header_size + (file_align.to_integer_32 - (l_pe_header.header_size \\ file_align.to_integer_32))
+			end
+
+			l_pe_header.time := number_of_seconds_since_epoch
+
+			pe_header := l_pe_header
+
+			check pe_objects = Void end
+
+			create {ARRAYED_LIST [PE_OBJECT]}l_pe_objects.make_filled (max_pe_objects)
+
+			to_implement ("Work in progress")
 		end
 
 feature {NONE} -- Implementation
+
+	number_of_seconds_since_epoch: INTEGER_32
+			-- calculate the number of seconds since epoch in eiffel
+		local
+			l_date_epoch: DATE_TIME
+			l_date_now: DATE_TIME
+			l_diff: INTEGER_32
+		do
+			create l_date_epoch.make_from_epoch (0)
+			create l_date_now.make_now_utc
+			Result := l_date_now.definite_duration (l_date_epoch).seconds_count.to_integer
+		ensure
+			is_class: class
+		end
+
 
 	compute_pe_header_size: INTEGER
 		local
@@ -612,7 +643,7 @@ feature {NONE} -- Implementation
 			l_obj: PE_OBJECT
 			l_size: INTEGER
 		do
-			create l_obj.make
+			create l_obj
 			create l_internal
 			n := l_internal.field_count (l_obj)
 			across 1 |..| n as ic loop
