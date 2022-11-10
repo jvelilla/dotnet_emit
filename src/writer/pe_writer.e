@@ -415,7 +415,7 @@ feature -- Element Change
 			n := a_entry.table_index
 			tables [n].table.force (a_entry)
 			debug ("pe_writer")
-				-- Check C++ code  PEWriter::AddTableEntry
+					-- Check C++ code  PEWriter::AddTableEntry
 				to_implement ("Double check if its requried.")
 			end
 			Result := tables [n].table.count.to_natural_32
@@ -434,6 +434,13 @@ feature -- Element Change
 			methods.force (a_method)
 		end
 
+feature -- Status Report
+
+	is_entry_point: BOOLEAN
+		do
+			Result := entry_point /= 0
+		end
+
 feature -- Stream functions
 
 	hash_string (a_utf8: STRING_32): NATURAL
@@ -441,7 +448,7 @@ feature -- Stream functions
 			--| TODO add a precondition to verify a_utf8 is a valid UTF_8
 		do
 			if string_map.has (a_utf8) and then
-			   attached string_map.item (a_utf8) as l_val then
+				attached string_map.item (a_utf8) as l_val then
 				Result := l_val
 			else
 				if strings.size = 0 then
@@ -515,7 +522,11 @@ feature -- Various Operations
 
 	write_file (a_corFlags: INTEGER; a_out: FILE_STREAM): BOOLEAN
 		do
-			to_implement ("Add implementation")
+			output_file := a_out
+			if not is_entry_point and not dll then
+				{EXCEPTIONS}.raise (generator + " Missing Entry Point ")
+			end
+			calculate_objects (a_corflags)
 		end
 
 	hash_part_of_file (a_context: CIL_SHA1_CONTEXT; a_offset: NATURAL; a_len: NATURAL)
@@ -537,8 +548,84 @@ feature -- Operations
 			-- this calculates various addresses and offsets that will be used and referenced
 			-- when we actually generate the data.   This must be kept in sync with the code to
 			-- generate data
+		require
+			pe_header_void: pe_header = Void
+		local
+			l_pe_header: PE_HEADER
 		do
-			to_implement ("Add implementation")
+			create l_pe_header
+			l_pe_header.signature := {PE_HEADER_CONSTANTS}.PESIG
+			l_pe_header.cpu_type := {PE_HEADER_CONSTANTS}.pe_intel386.to_integer_16
+			l_pe_header.magic := {PE_HEADER_CONSTANTS}.pe_magicnum.to_natural_8
+			l_pe_header.nt_hdr_size := 0xe0
+				-- optional header size
+			l_pe_header.flags := ({PE_HEADER_CONSTANTS}.pe_file_executable + if dll then {PE_HEADER_CONSTANTS}.pe_file_library else 0 end).to_natural_8
+			l_pe_header.linker_major_version := 6
+			l_pe_header.object_align := object_align.to_integer_32
+			l_pe_header.file_align := file_align.to_integer_32
+			l_pe_header.image_base := image_base.to_integer_32
+			l_pe_header.os_major_version := 4
+			l_pe_header.subsys_major_version := 4
+			l_pe_header.subsystem := (if gui then {PE_HEADER_CONSTANTS}.PE_SUBSYS_WINDOWS else {PE_HEADER_CONSTANTS}.PE_SUBSYS_CONSOLE end).to_integer_16
+			l_pe_header.dll_flags := 0x8540
+				-- magic!
+			l_pe_header.stack_size := 0x100000
+			l_pe_header.stack_commit := 0x1000
+			l_pe_header.heap_size := 0x100000
+			l_pe_header.heap_commit := 0x1000
+			l_pe_header.num_rvas := 16
+
+			l_pe_header.num_objects := 2
+			l_pe_header.header_size := mzh_header.count + compute_pe_header_size + l_pe_header.num_objects * compute_pe_object_size
+
+		end
+
+feature {NONE} -- Implementation
+
+	compute_pe_header_size: INTEGER
+		local
+			l_internal: INTERNAL
+			n: INTEGER
+			l_obj: PE_HEADER
+			l_size: INTEGER
+		do
+			create l_obj
+			create l_internal
+			n := l_internal.field_count (l_obj)
+			across 1 |..| n as ic loop
+				if attached l_internal.field (ic, l_obj) as l_field then
+					if attached {INTEGER_32} l_field then
+						Result := Result + {PLATFORM}.integer_32_bytes
+					elseif attached {INTEGER_16} l_field then
+						Result := Result + {PLATFORM}.integer_16_bytes
+					elseif attached {NATURAL_8} l_field then
+						Result := Result + {PLATFORM}.natural_8_bytes
+					end
+				end
+			end
+		end
+
+	compute_pe_object_size: INTEGER
+		local
+			l_internal: INTERNAL
+			n: INTEGER
+			l_obj: PE_OBJECT
+			l_size: INTEGER
+		do
+			create l_obj.make
+			create l_internal
+			n := l_internal.field_count (l_obj)
+			across 1 |..| n as ic loop
+				if attached l_internal.field (ic, l_obj) as l_field then
+					if attached {INTEGER_32} l_field then
+						Result := Result + {PLATFORM}.integer_32_bytes
+					elseif attached {STRING} l_field as l_str then
+						Result := Result + l_str.capacity
+					elseif attached {ARRAY [INTEGER]} l_field as l_arr then
+						Result := Result + (l_arr.count * {PLATFORM}.integer_32_bytes)
+					end
+				end
+			end
 		end
 
 feature -- Write operations

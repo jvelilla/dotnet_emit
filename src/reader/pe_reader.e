@@ -13,7 +13,7 @@ feature {NONE} -- Initialization
 
 	make
 		do
-			create objects
+			create objects.make
 			create tables.make_filled (create {DNL_TABLE}.make, 1, {PE_TABLE_CONSTANTS}.max_tables)
 			create lib_path.make_empty
 			create sizes.make_filled (0, 1, {PE_TABLE_CONSTANTS}.max_tables + {PE_TABLE_CONSTANTS}.extra_indexes)
