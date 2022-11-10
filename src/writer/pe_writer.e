@@ -88,7 +88,7 @@ feature -- Access
 	tables_header: detachable DOTNET_META_TABLES_HEADER
 			-- `tables_header'
 
-	cor20_header: detachable DOTNET_COR20_HEADER
+	cor20_header: detachable PE_DOTNET_COR20_HEADER
 			-- `cor20_header'
 
 	pe_objects: detachable LIST [PE_OBJECT]
@@ -607,6 +607,13 @@ feature -- Operations
 				l_current_rva := l_current_rva + object_align - (l_current_rva \\ object_align)
 			end
 
+			l_pe_objects [1].virtual_addr := l_current_rva.to_integer_32
+			l_pe_objects [1].raw_ptr := l_pe_header.header_size
+			l_pe_header.code_base := l_current_rva.to_integer_32
+			l_pe_header.iat_rva := l_current_rva.to_integer_32
+			l_pe_header.iat_size := 8
+			--l_pe_header.com_size =
+
 
 
 			to_implement ("Work in progress")
@@ -670,6 +677,28 @@ feature {NONE} -- Implementation
 						Result := Result + l_str.capacity
 					elseif attached {ARRAY [INTEGER]} l_field as l_arr then
 						Result := Result + (l_arr.count * {PLATFORM}.integer_32_bytes)
+					end
+				end
+			end
+		end
+
+
+	compute_pe_dotnet_core20_size: INTEGER
+		local
+			l_internal: INTERNAL
+			n: INTEGER
+			l_obj: PE_DOTNET_COR20_HEADER
+			l_size: INTEGER
+		do
+			create l_obj
+			create l_internal
+			n := l_internal.field_count (l_obj)
+			across 1 |..| n as ic loop
+				if attached l_internal.field (ic, l_obj) as l_field then
+					if attached {NATURAL_16} l_field then
+						Result := Result + {PLATFORM}.natural_16_bytes
+					elseif attached {ARRAY [NATURAL]} l_field as l_arr then
+						Result := Result + (l_arr.count * {PLATFORM}.natural_32_bytes)
 					end
 				end
 			end
