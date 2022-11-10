@@ -553,6 +553,8 @@ feature -- Operations
 		local
 			l_pe_header: PE_HEADER
 			l_pe_objects: like pe_objects
+			l_n: INTEGER
+			l_current_rva: NATURAL
 		do
 				-- pe_header setup.
 			check pe_header = Void end
@@ -592,6 +594,20 @@ feature -- Operations
 			check pe_objects = Void end
 
 			create {ARRAYED_LIST [PE_OBJECT]}l_pe_objects.make_filled (max_pe_objects)
+
+			l_n := 1
+			l_pe_objects[l_n].name := ".text"
+			l_pe_objects[l_n].flags := {PE_HEADER_CONSTANTS}.winf_execute | {PE_HEADER_CONSTANTS}.winf_code | {PE_HEADER_CONSTANTS}.winf_readable
+
+			l_n := l_n + 1
+			l_pe_objects[l_n].name := ".reloc"
+			l_pe_objects[l_n].flags := {PE_HEADER_CONSTANTS}.WINF_INITDATA | {PE_HEADER_CONSTANTS}.WINF_READABLE | {PE_HEADER_CONSTANTS}.WINF_DISCARDABLE
+			l_current_rva := mzh_header.count.to_natural_32 + compute_pe_header_size.to_natural_32 + l_pe_header.num_objects.to_natural_32 * compute_pe_object_size.to_natural_32
+			if (l_current_rva \\ object_align) /= 0 then
+				l_current_rva := l_current_rva + object_align - (l_current_rva \\ object_align)
+			end
+
+
 
 			to_implement ("Work in progress")
 		end
