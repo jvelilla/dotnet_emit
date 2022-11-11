@@ -21,8 +21,9 @@ feature {NONE} -- Initialization
 
 	make (has_seh: BOOLEAN; a_flags: INTEGER; a_method_def: NATURAL; a_max_stack: NATURAL; a_local_count: NATURAL; a_code_size: NATURAL; a_signature: NATURAL)
 		do
-			to_implement ("Add implementation")
+			flags := a_flags
 			create {ARRAYED_LIST[CIL_SEH_DATA]}seh_data.make (0)
+			to_implement ("Work in progress")
 		end
 
 feature -- Access
@@ -39,6 +40,9 @@ feature -- Access
 	code_size: NATURAL
 
 	code: NATURAL_8
+		-- TODO double check
+		-- code: ARRAY [NATURAL_8]
+
 
 	signature_token: NATURAL
 

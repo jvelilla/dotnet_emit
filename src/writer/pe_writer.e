@@ -40,6 +40,7 @@ feature {NONE} -- Initialization
 			create blob.make
 			create us.make
 			create strings.make
+			create rsa_encoder
 		ensure
 			dll_set: dll = not is_exe
 			gui_set: gui = is_gui
@@ -150,7 +151,7 @@ feature -- Access
 
 	stream_headers: detachable ARRAY2 [NATURAL]
 
-	rsa_encoder: detachable CIL_RSA_ENCODER
+	rsa_encoder: CIL_RSA_ENCODER
 
 	mzh_header: ARRAY [NATURAL_8]
 			-- MS-DOS header
@@ -534,7 +535,7 @@ feature -- Various Operations
 			to_implement ("Add implementation")
 		end
 
-	cildata_rva: detachable ARRAY [NATURAL_8]
+	cildata_rva: NATURAL_32
 			-- TODO double check.
 			-- another thing that makes this lib not thread safe, the RVA for
 			-- the beginning of the .data section gets put here after it is calculated
@@ -555,6 +556,8 @@ feature -- Operations
 			l_pe_objects: like pe_objects
 			l_n: INTEGER
 			l_current_rva: NATURAL
+			l_core_20_header: PE_DOTNET_COR20_HEADER
+			l_last_rva: NATURAL
 		do
 				-- pe_header setup.
 			check pe_header = Void end
@@ -593,15 +596,15 @@ feature -- Operations
 
 			check pe_objects = Void end
 
-			create {ARRAYED_LIST [PE_OBJECT]}l_pe_objects.make_filled (max_pe_objects)
+			create {ARRAYED_LIST [PE_OBJECT]} l_pe_objects.make_filled (max_pe_objects)
 
 			l_n := 1
-			l_pe_objects[l_n].name := ".text"
-			l_pe_objects[l_n].flags := {PE_HEADER_CONSTANTS}.winf_execute | {PE_HEADER_CONSTANTS}.winf_code | {PE_HEADER_CONSTANTS}.winf_readable
+			l_pe_objects [l_n].name := ".text"
+			l_pe_objects [l_n].flags := {PE_HEADER_CONSTANTS}.winf_execute | {PE_HEADER_CONSTANTS}.winf_code | {PE_HEADER_CONSTANTS}.winf_readable
 
 			l_n := l_n + 1
-			l_pe_objects[l_n].name := ".reloc"
-			l_pe_objects[l_n].flags := {PE_HEADER_CONSTANTS}.WINF_INITDATA | {PE_HEADER_CONSTANTS}.WINF_READABLE | {PE_HEADER_CONSTANTS}.WINF_DISCARDABLE
+			l_pe_objects [l_n].name := ".reloc"
+			l_pe_objects [l_n].flags := {PE_HEADER_CONSTANTS}.WINF_INITDATA | {PE_HEADER_CONSTANTS}.WINF_READABLE | {PE_HEADER_CONSTANTS}.WINF_DISCARDABLE
 			l_current_rva := mzh_header.count.to_natural_32 + compute_pe_header_size.to_natural_32 + l_pe_header.num_objects.to_natural_32 * compute_pe_object_size.to_natural_32
 			if (l_current_rva \\ object_align) /= 0 then
 				l_current_rva := l_current_rva + object_align - (l_current_rva \\ object_align)
@@ -612,10 +615,45 @@ feature -- Operations
 			l_pe_header.code_base := l_current_rva.to_integer_32
 			l_pe_header.iat_rva := l_current_rva.to_integer_32
 			l_pe_header.iat_size := 8
-			--l_pe_header.com_size =
+			l_pe_header.com_size := compute_pe_dotnet_core20_size
+			l_current_rva := l_current_rva + l_pe_header.com_size.to_natural_32
 
+			check cor20_header = Void end
 
+			create l_core_20_header
+			l_core_20_header.cb := compute_pe_dotnet_core20_size.to_natural_32
+			l_core_20_header.major_runtime_version := 2
+			l_core_20_header.minor_runtime_version := 5
 
+				-- standard CIL expects ONLY bit 0, we are using bit 1 as well
+				-- for interoperability with the microsoft runtimes.
+
+			l_core_20_header.flags := a_cor_flags.to_natural_32
+			l_core_20_header.entry_point_token := entry_point
+
+			if not snk_file.is_empty then
+				to_implement ("Implement snkfile code")
+			end
+
+			cildata_rva := l_current_rva
+			if rva.size /= 0 then
+				l_current_rva := l_current_rva + rva.size
+				if l_current_rva \\ 8 /= 0 then
+					l_current_rva := l_current_rva + 8 - (l_current_rva \\ 8)
+				end
+			end
+
+			l_last_rva := l_current_rva
+
+			across methods as method loop
+				if method.flags & {PE_METHOD_CONSTANTS}.cil /= 0 then
+					if (method.flags & 3) = {PE_METHOD_CONSTANTS}.tinyformat then
+					else
+					end
+					l_current_rva := l_current_rva + method.code_size
+				else
+				end
+			end
 			to_implement ("Work in progress")
 		end
 
@@ -634,7 +672,6 @@ feature {NONE} -- Implementation
 		ensure
 			is_class: class
 		end
-
 
 	compute_pe_header_size: INTEGER
 		local
@@ -681,7 +718,6 @@ feature {NONE} -- Implementation
 				end
 			end
 		end
-
 
 	compute_pe_dotnet_core20_size: INTEGER
 		local
