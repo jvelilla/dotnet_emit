@@ -8,6 +8,8 @@ class
 
 inherit
 
+	PE_TABLE_CONSTANTS
+
 	REFACTORING_HELPER
 
 create
@@ -33,7 +35,7 @@ feature {NONE} -- Initialization
 			create snk_file.make_from_string (a_snk_file)
 			create meta_header.make_from_other (meta_header1)
 			create string_map.make (0)
-			create tables.make_filled (create {DNL_TABLE}.make, 1, {PE_TABLE_CONSTANTS}.max_tables)
+			create tables.make_filled (create {DNL_TABLE}.make, 1, Max_tables)
 			create {ARRAYED_LIST [PE_METHOD]} methods.make (0)
 			create rva.make
 			create guid.make
@@ -41,6 +43,7 @@ feature {NONE} -- Initialization
 			create us.make
 			create strings.make
 			create rsa_encoder
+			create stream_headers.make_filled (0, 5, 2)
 		ensure
 			dll_set: dll = not is_exe
 			gui_set: gui = is_gui
@@ -69,6 +72,12 @@ feature {NONE} -- Initialization
 			methods_empty: methods.is_empty
 		end
 
+feature -- Constant
+
+	RTV_STRING: STRING = "v4.0.30319"
+			--this is a CUSTOM version string for microsoft.
+			--standard CIL differs
+
 feature -- Access
 
 	snk_base: NATURAL assign set_snk_base
@@ -86,7 +95,7 @@ feature -- Access
 	snk_file: STRING_32
 			-- `snk_file'
 
-	tables_header: detachable DOTNET_META_TABLES_HEADER
+	tables_header: detachable PE_DOTNET_META_TABLES_HEADER
 			-- `tables_header'
 
 	cor20_header: detachable PE_DOTNET_COR20_HEADER
@@ -149,7 +158,7 @@ feature -- Access
 
 	product_version: detachable ARRAY [NATURAL_16]
 
-	stream_headers: detachable ARRAY2 [NATURAL]
+	stream_headers: ARRAY2 [NATURAL]
 
 	rsa_encoder: CIL_RSA_ENCODER
 
@@ -558,6 +567,13 @@ feature -- Operations
 			l_current_rva: NATURAL
 			l_core_20_header: PE_DOTNET_COR20_HEADER
 			l_last_rva: NATURAL
+			l_end: INTEGER
+			l_data: CIL_SEH_DATA
+			l_edata: CIL_SEH_DATA
+			l_exit: BOOLEAN
+			l_etiny: BOOLEAN
+			l_tables_header: PE_DOTNET_META_TABLES_HEADER
+			l_counts: ARRAY [NATURAL]
 		do
 				-- pe_header setup.
 			check pe_header = Void end
@@ -591,8 +607,6 @@ feature -- Operations
 			end
 
 			l_pe_header.time := number_of_seconds_since_epoch
-
-			pe_header := l_pe_header
 
 			check pe_objects = Void end
 
@@ -648,10 +662,111 @@ feature -- Operations
 			across methods as method loop
 				if method.flags & {PE_METHOD_CONSTANTS}.cil /= 0 then
 					if (method.flags & 3) = {PE_METHOD_CONSTANTS}.tinyformat then
+						method.set_rva (l_current_rva)
+						l_last_rva := l_current_rva
+						l_current_rva := l_current_rva + 1
 					else
+						if (l_current_rva \\ 4) /= 0 then
+							l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
+						end
+						method.set_rva (l_current_rva)
+						l_last_rva := l_current_rva
+						l_current_rva := l_current_rva + 12
 					end
 					l_current_rva := l_current_rva + method.code_size
+					if not method.seh_data.is_empty then
+						if (l_current_rva \\ 4) /= 0 then
+							l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
+						end
+						l_end := 1
+						l_data := method.seh_data [l_end]
+						from
+						until
+							l_end > method.seh_data.count or else L_exit
+						loop
+							l_edata := method.seh_data [l_end]
+
+							l_etiny := l_edata.try_offset < 65536 and then l_edata.try_length < 256 and then
+								l_edata.handler_offset < 65536 and then l_edata.handler_length < 256
+
+							if not l_etiny then
+								l_exit := true
+							else
+								l_end := l_end + 1
+							end
+						end
+						if l_end > method.seh_data.count and then method.seh_data.count < 21 then
+							l_current_rva := l_current_rva + 4 + (method.seh_data.count * 12).to_natural_32
+						else
+							l_current_rva := l_current_rva + 4 + (method.seh_data.count * 24).to_natural_32
+						end
+					end
 				else
+					method.set_rva (0)
+				end
+			end
+
+			if (l_current_rva \\ 4) /= 0 then
+				l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
+			end
+
+			l_core_20_header.metadata [1] := l_current_rva
+				-- metadata root
+
+			l_current_rva := l_current_rva + 12
+				-- metadata header
+
+			l_current_rva := l_current_rva + 4
+				-- version size
+
+			l_current_rva := l_current_rva + compute_rtv_string_size
+
+			if (l_current_rva \\ 4) /= 0 then
+				l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
+			end
+
+			l_current_rva := l_current_rva + 2
+				-- flags
+
+			l_current_rva := l_current_rva + 2
+				-- streams, will be 5 in our implementation
+				-- check stream_names feature.
+
+			across stream_names as elem loop
+				l_current_rva := l_current_rva + (elem.count + 1).to_natural_32
+				if (l_current_rva \\ 4) /= 0 then
+					l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
+				end
+			end
+
+			stream_headers [1, 1] := l_current_rva - l_core_20_header.metadata [1]
+
+			check tables_header = Void end
+
+			create l_tables_header
+			l_tables_header.major_version := 2
+			l_tables_header.minor_version := 1
+			l_tables_header.mask_sorted := ({INTEGER_64} 0x1600 |<< 32) + 0x3325FA00
+			if strings.size >= 65536 then
+				l_tables_header.heap_offset_sizes := l_tables_header.heap_offset_sizes | 1
+			end
+			if guid.size >= 65536 then
+				l_tables_header.heap_offset_sizes := l_tables_header.heap_offset_sizes | 2
+			end
+			if blob.size >= 65536 then
+				l_tables_header.heap_offset_sizes := l_tables_header.heap_offset_sizes | 4
+			end
+
+			l_n := 0
+			create l_counts.make_filled (0, 1, Max_tables + Extra_indexes)
+			l_counts [t_string] := strings.size
+			l_counts [t_us] := us.size
+			l_counts [t_guid] := guid.size
+			l_counts [t_blob] := blob.size
+
+			across 0 |..| (max_tables - 1) as ic loop
+				if not tables [ic + 1].table.is_empty then
+
 				end
 			end
 			to_implement ("Work in progress")
@@ -738,6 +853,12 @@ feature {NONE} -- Implementation
 					end
 				end
 			end
+		end
+
+	compute_rtv_string_size: NATURAL
+		do
+			to_implement ("To double check")
+			Result := (rtv_string.count + 1).to_natural_32
 		end
 
 feature -- Write operations
