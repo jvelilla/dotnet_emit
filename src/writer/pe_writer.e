@@ -575,6 +575,7 @@ feature -- Operations
 			l_tables_header: PE_DOTNET_META_TABLES_HEADER
 			l_counts: ARRAY [NATURAL]
 			l_buffer: ARRAY [NATURAL_8]
+			l_sect: INTEGER
 		do
 				-- pe_header setup.
 			check pe_header = Void end
@@ -835,6 +836,108 @@ feature -- Operations
 			l_current_rva := l_current_rva + ({PE_IMPORT_DIR}.size_of * 2).to_natural_32 + 8
 
 
+			if (l_current_rva \\ 16) /= 0 then
+				l_current_rva := l_current_rva + 16 - (l_current_rva \\ 16).to_natural_32
+			end
+
+			l_current_rva := l_current_rva + 2 +
+								c_sizeof ((create {C_STRING}.make ("_CorXXXMain")).item).to_natural_32 +
+								c_sizeof ((create {C_STRING}.make ("mscoree.dll")).item).to_natural_32 + 1
+
+			l_pe_header.import_size := l_current_rva.to_integer_32 - l_pe_header.import_rva
+
+			if (l_current_rva \\ 4) /= 0 then
+				l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
+			end
+
+			l_current_rva := l_current_rva + 2
+			l_pe_header.entry_point := l_current_rva.to_integer_32
+			l_current_rva := l_current_rva + 6
+			if snk_len /= 0 then
+				l_core_20_header.strong_name_signature [1] := l_current_rva
+				l_core_20_header.strong_name_signature [2] := snk_len
+				l_current_rva := l_current_rva + snk_len
+			end
+
+			l_sect := 1
+			l_pe_objects [l_sect].virtual_size := l_current_rva.to_integer_32 - l_pe_objects [l_sect].virtual_addr
+			l_n := l_pe_objects [l_sect].virtual_size
+
+			if ((l_n \\ file_align.to_integer_32) /= 0) then
+				l_n := l_n + file_align.to_integer_32 - (l_n \\ file_align.to_integer_32)
+			end
+			l_pe_objects [l_sect].raw_size := l_n
+			l_pe_header.code_size := l_n
+
+
+			if (l_current_rva \\ object_align) /= 0 then
+				l_current_rva := l_current_rva + object_align - (l_current_rva \\ object_align)
+			end
+			l_pe_objects [l_sect + 1].raw_ptr := l_pe_objects [l_sect].raw_ptr + l_pe_objects [l_sect].raw_size
+			l_pe_objects [l_sect + 1].virtual_addr := l_current_rva.to_integer_32
+			l_pe_header.data_base := l_current_rva.to_integer_32
+			l_sect := l_sect + 1
+
+
+--#if 0
+--        peHeader_->resource_rva = currentRVA;
+--        currentRVA += (sizeof(PEResourceDirTable) + sizeof(PEResourceDirEntry)) * 3; /* resource dirs */
+--        currentRVA += sizeof(PEResourceDataEntry);
+
+--        currentRVA += 2; /* size of version info */
+--        currentRVA += 48; /* fixed info */
+--        currentRVA += 68; /* VarFileInfo */
+--        currentRVA += 368 - 72; /* String file info base */
+--        std::string nn = peLib.FileName();
+--        n = nn.find_last_of("\\");
+--        if (n != std::string::npos)
+--            n = nn.size() - n;
+--        else
+--            n = nn.size();
+--        if (n % 4)
+--            n += 4 - (n % 4);
+--        currentRVA += n * 2;
+
+--        char temp[256];
+--        sprintf(temp, "%d.%d.%d.%d", fileVersion[0], fileVersion[1], fileVersion[2], fileVersion[3]);
+--        n = strlen(temp);
+--        if (n % 4)
+--            n += 4 - (n % 4);
+--        n *= 2;
+--        currentRVA += n;
+--        sprintf(temp, "%d.%d.%d.%d", productVersion[0], productVersion[1], productVersion[2], productVersion[3]);
+--        n = strlen(temp);
+--        if (n % 4)
+--            n += 4 - (n % 4);
+--        n *= 2;
+--        currentRVA += n;
+--        sprintf(temp, "%d.%d.%d.%d", assemblyVersion[0], assemblyVersion[1], assemblyVersion[2], assemblyVersion[3]);
+--        n = strlen(temp);
+--        if (n % 4)
+--            n += 4 - (n % 4);
+--        n *= 2;
+--        currentRVA += n;
+
+--        peObjects_[sect].virtual_size = currentRVA - peObjects_[sect].virtual_addr;
+--        peHeader_->resource_size = peObjects_[sect].virtual_size;
+--        n = peObjects_[sect].virtual_size;
+--        if (n % fileAlign);
+--        n += fileAlign - n % fileAlign;
+--        peObjects_[sect].raw_size = n;
+--        peHeader_->data_size += n;
+
+--        if (currentRVA %objectAlign)
+--            currentRVA += objectAlign - currentRVA % objectAlign;
+--        peObjects_[sect + 1].raw_ptr = peObjects_[sect].raw_ptr + peObjects_[sect].raw_size;
+--        peObjects_[sect + 1].virtual_addr = currentRVA;
+--        sect++;
+--#endif
+
+			l_pe_header.fixup_rva := l_current_rva.to_integer_32
+			l_current_rva := l_current_rva + 12
+					-- sizeof relocs
+
+
 			to_implement ("Work in progress")
 		end
 
@@ -854,6 +957,12 @@ feature {NONE} -- Implementation
 			is_class: class
 		end
 
+
+	c_sizeof (a_str: POINTER): INTEGER
+		external "C inline"
+		alias
+			"return (EIF_INTEGER)sizeof($a_str);"
+		end
 
 
 
