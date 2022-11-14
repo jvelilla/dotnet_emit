@@ -610,6 +610,8 @@ feature -- Operations
 
 			l_pe_header.time := number_of_seconds_since_epoch
 
+
+				-- pe_objects setup
 			check pe_objects = Void end
 
 			create {ARRAYED_LIST [PE_OBJECT]} l_pe_objects.make_filled (max_pe_objects)
@@ -634,8 +636,9 @@ feature -- Operations
 			l_pe_header.com_size := {PE_DOTNET_COR20_HEADER}.size_of
 			l_current_rva := l_current_rva + l_pe_header.com_size.to_natural_32
 
-			check cor20_header = Void end
 
+				-- cor20_header setup
+			check cor20_header = Void end
 			create l_core_20_header
 			l_core_20_header.cb := {PE_DOTNET_COR20_HEADER}.size_of.to_natural_32
 			l_core_20_header.major_runtime_version := 2
@@ -743,8 +746,9 @@ feature -- Operations
 
 			stream_headers [1, 1] := l_current_rva - l_core_20_header.metadata [1]
 
-			check tables_header = Void end
 
+				-- tables_header set_up
+			check tables_header = Void end
 			create l_tables_header
 			l_tables_header.major_version := 2
 			l_tables_header.minor_version := 1
@@ -937,8 +941,27 @@ feature -- Operations
 			l_current_rva := l_current_rva + 12
 					-- sizeof relocs
 
+			l_pe_objects [l_sect].virtual_size := l_current_rva.to_integer_32 - l_pe_objects [l_sect].virtual_addr
+			l_pe_header.fixup_size := l_pe_objects [l_sect].virtual_size
+			l_n := l_pe_objects [l_sect].virtual_size
+			if (l_n \\ file_align.to_integer_32) /= 0 then
+				l_n := l_n + file_align.to_integer_32 - (l_n \\ file_align.to_integer_32)
+			end
+			l_pe_objects [l_sect].raw_size := l_n
+			l_pe_header.data_size := l_pe_header.data_size + l_n
 
-			to_implement ("Work in progress")
+			if (l_current_rva \\ object_align) /= 0 then
+				l_current_rva := l_current_rva + object_align - (l_current_rva \\ object_align)
+			end
+			l_pe_objects [l_sect + 1].raw_ptr := l_pe_objects [l_sect].raw_ptr + l_pe_objects[l_sect].raw_size
+			l_pe_objects [l_sect + 1].virtual_addr := l_current_rva.to_integer_32
+			l_pe_header.image_size := l_current_rva.to_integer_32
+
+
+			pe_header := l_pe_header
+			pe_objects := l_pe_objects
+			cor20_header := l_core_20_header
+			tables_header := l_tables_header
 		end
 
 feature {NONE} -- Implementation
