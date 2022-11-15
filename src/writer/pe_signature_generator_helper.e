@@ -73,6 +73,8 @@ feature -- Convert
 	set_object_type (a_object_base: NATURAL_32)
 		do
 			 signature_generator.object_base := a_object_base.to_integer_32
+		ensure
+			instance_free: class
 		end
 
 feature -- Access

@@ -13,6 +13,8 @@ feature {NONE} -- Access
 			-- An signature_generator object.
 		once
 			create Result
+		ensure
+			instance_free: class
 		end
 
 
