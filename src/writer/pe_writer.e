@@ -486,8 +486,39 @@ feature -- Stream functions
 
 	Hash_Blob (a_blob_data: ARRAY [NATURAL_8]; a_blob_len: NATURAL_8): NATURAL
 			-- return the stream index
+		local
+			l_xcount: INTEGER
+			l_rv: NATURAL
+			l_blob_len: NATURAL_8
 		do
-			to_implement ("Add implementation")
+			if blob.size = 0 then
+				blob.increment_size
+			end
+			blob.confirm (a_blob_len + 4)
+			l_rv := blob.size
+			if a_blob_len < 0x80 then
+				blob.base [blob.size.to_integer_32] := a_blob_len
+				blob.increment_size
+			elseif a_blob_len <= 0x3fff then
+				blob.base [blob.size.to_integer_32] := (a_blob_len |>> 8) | 0x80
+				blob.increment_size
+				blob.base [blob.size.to_integer_32] := a_blob_len
+				blob.increment_size
+			else
+				l_blob_len := a_blob_len
+				l_blob_len := (l_blob_len & 0x1fffffff).to_natural_8
+				blob.base [blob.size.to_integer_32] := (l_blob_len |>> 24) | 0xc0
+				blob.increment_size
+				blob.base [blob.size.to_integer_32] := (l_blob_len |>> 16)
+				blob.increment_size
+				blob.base [blob.size.to_integer_32] := (l_blob_len |>> 8)
+				blob.increment_size
+				blob.base [blob.size.to_integer_32] := (l_blob_len |>> 0)
+				blob.increment_size
+			end
+			blob.increment_size_by (l_blob_len)
+			Result := l_rv
+			to_implement ("Work in progress")
 		end
 
 feature -- Various Operations
@@ -610,7 +641,6 @@ feature -- Operations
 
 			l_pe_header.time := number_of_seconds_since_epoch
 
-
 				-- pe_objects setup
 			check pe_objects = Void end
 
@@ -635,7 +665,6 @@ feature -- Operations
 			l_pe_header.iat_size := 8
 			l_pe_header.com_size := {PE_DOTNET_COR20_HEADER}.size_of
 			l_current_rva := l_current_rva + l_pe_header.com_size.to_natural_32
-
 
 				-- cor20_header setup
 			check cor20_header = Void end
@@ -746,7 +775,6 @@ feature -- Operations
 
 			stream_headers [1, 1] := l_current_rva - l_core_20_header.metadata [1]
 
-
 				-- tables_header set_up
 			check tables_header = Void end
 			create l_tables_header
@@ -773,15 +801,15 @@ feature -- Operations
 			across 0 |..| (max_tables - 1) as ic loop
 				if not tables [ic + 1].is_empty then
 					l_counts [ic + 1] := tables [ic + 1].size.to_natural_32
-					l_tables_header.mask_valid := l_tables_header.mask_valid | ({INTEGER_64}1 |<< ic)
+					l_tables_header.mask_valid := l_tables_header.mask_valid | ({INTEGER_64} 1 |<< ic)
 					l_n := l_n + 1
 				end
 			end
 			l_current_rva := l_current_rva + {PE_DOTNET_META_TABLES_HEADER}.size_of.to_natural_32
-					-- tables header
+				-- tables header
 			l_current_rva := l_current_rva + (l_n * {PLATFORM}.natural_32_bytes).to_natural_32
-					--table counts
-					-- Dword is 4 bytes.
+				--table counts
+				-- Dword is 4 bytes.
 
 			across 0 |..| (max_tables - 1) as ic loop
 				if l_counts [ic + 1] /= 0 then
@@ -796,19 +824,19 @@ feature -- Operations
 				l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
 			end
 
-			stream_headers [1,2] := l_current_rva - stream_headers[1,1] - l_core_20_header.metadata [1]
-			stream_headers [2,1] := l_current_rva - l_core_20_header.metadata [1]
+			stream_headers [1, 2] := l_current_rva - stream_headers [1, 1] - l_core_20_header.metadata [1]
+			stream_headers [2, 1] := l_current_rva - l_core_20_header.metadata [1]
 			l_current_rva := l_current_rva + strings.size
 
 			if (l_current_rva \\ 4) /= 0 then
 				l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
 			end
 
-			stream_headers [2,2] := l_current_rva - stream_headers[2,1] - l_core_20_header.metadata [1]
-			stream_headers [3,1] := l_current_rva - l_core_20_header.metadata [1]
+			stream_headers [2, 2] := l_current_rva - stream_headers [2, 1] - l_core_20_header.metadata [1]
+			stream_headers [3, 1] := l_current_rva - l_core_20_header.metadata [1]
 			if us.size = 0 then
 				l_current_rva := l_current_rva + default_us.count.to_natural_32
-						-- US May be empty in our implementation we put an empty string there
+					-- US May be empty in our implementation we put an empty string there
 			else
 				l_current_rva := l_current_rva + us.size
 			end
@@ -818,35 +846,34 @@ feature -- Operations
 				l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
 			end
 
-			stream_headers [3,2] := l_current_rva - stream_headers[3,1] - l_core_20_header.metadata [1]
-			stream_headers [4,1] := l_current_rva - l_core_20_header.metadata [1]
+			stream_headers [3, 2] := l_current_rva - stream_headers [3, 1] - l_core_20_header.metadata [1]
+			stream_headers [4, 1] := l_current_rva - l_core_20_header.metadata [1]
 			l_current_rva := l_current_rva + guid.size
 
 			if (l_current_rva \\ 4) /= 0 then
 				l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
 			end
 
-			stream_headers [4,2] := l_current_rva - stream_headers[4,1] - l_core_20_header.metadata [1]
-			stream_headers [5,1] := l_current_rva - l_core_20_header.metadata [1]
+			stream_headers [4, 2] := l_current_rva - stream_headers [4, 1] - l_core_20_header.metadata [1]
+			stream_headers [5, 1] := l_current_rva - l_core_20_header.metadata [1]
 			l_current_rva := l_current_rva + blob.size
 
 			if (l_current_rva \\ 4) /= 0 then
 				l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
 			end
 
-			stream_headers [5,2] := l_current_rva - stream_headers[5,1] - l_core_20_header.metadata [1]
+			stream_headers [5, 2] := l_current_rva - stream_headers [5, 1] - l_core_20_header.metadata [1]
 			l_core_20_header.metadata [2] := l_current_rva - l_core_20_header.metadata [1]
 			l_pe_header.import_rva := l_current_rva.to_integer_32
 			l_current_rva := l_current_rva + ({PE_IMPORT_DIR}.size_of * 2).to_natural_32 + 8
-
 
 			if (l_current_rva \\ 16) /= 0 then
 				l_current_rva := l_current_rva + 16 - (l_current_rva \\ 16).to_natural_32
 			end
 
 			l_current_rva := l_current_rva + 2 +
-								c_sizeof ((create {C_STRING}.make ("_CorXXXMain")).item).to_natural_32 +
-								c_sizeof ((create {C_STRING}.make ("mscoree.dll")).item).to_natural_32 + 1
+				c_sizeof ((create {C_STRING}.make ("_CorXXXMain")).item).to_natural_32 +
+				c_sizeof ((create {C_STRING}.make ("mscoree.dll")).item).to_natural_32 + 1
 
 			l_pe_header.import_size := l_current_rva.to_integer_32 - l_pe_header.import_rva
 
@@ -873,7 +900,6 @@ feature -- Operations
 			l_pe_objects [l_sect].raw_size := l_n
 			l_pe_header.code_size := l_n
 
-
 			if (l_current_rva \\ object_align) /= 0 then
 				l_current_rva := l_current_rva + object_align - (l_current_rva \\ object_align)
 			end
@@ -881,7 +907,6 @@ feature -- Operations
 			l_pe_objects [l_sect + 1].virtual_addr := l_current_rva.to_integer_32
 			l_pe_header.data_base := l_current_rva.to_integer_32
 			l_sect := l_sect + 1
-
 
 --#if 0
 --        peHeader_->resource_rva = currentRVA;
@@ -939,7 +964,7 @@ feature -- Operations
 
 			l_pe_header.fixup_rva := l_current_rva.to_integer_32
 			l_current_rva := l_current_rva + 12
-					-- sizeof relocs
+				-- sizeof relocs
 
 			l_pe_objects [l_sect].virtual_size := l_current_rva.to_integer_32 - l_pe_objects [l_sect].virtual_addr
 			l_pe_header.fixup_size := l_pe_objects [l_sect].virtual_size
@@ -953,10 +978,9 @@ feature -- Operations
 			if (l_current_rva \\ object_align) /= 0 then
 				l_current_rva := l_current_rva + object_align - (l_current_rva \\ object_align)
 			end
-			l_pe_objects [l_sect + 1].raw_ptr := l_pe_objects [l_sect].raw_ptr + l_pe_objects[l_sect].raw_size
+			l_pe_objects [l_sect + 1].raw_ptr := l_pe_objects [l_sect].raw_ptr + l_pe_objects [l_sect].raw_size
 			l_pe_objects [l_sect + 1].virtual_addr := l_current_rva.to_integer_32
 			l_pe_header.image_size := l_current_rva.to_integer_32
-
 
 			pe_header := l_pe_header
 			pe_objects := l_pe_objects
@@ -980,17 +1004,11 @@ feature {NONE} -- Implementation
 			is_class: class
 		end
 
-
 	c_sizeof (a_str: POINTER): INTEGER
 		external "C inline"
 		alias
 			"return (EIF_INTEGER)sizeof($a_str);"
 		end
-
-
-
-
-
 
 	compute_rtv_string_size: NATURAL
 		do
