@@ -15,6 +15,8 @@ inherit
 	CIL_DATA_CONTAINER
 		rename
 			make as make_data_container
+		redefine
+			in_assembly_ref
 		end
 
 create
@@ -172,6 +174,11 @@ feature -- Status Report
 	lookup_class (a_lib: PE_LIB; a_namespace: STRING_32; a_name: STRING_32): detachable CIL_CLASS
 		do
 			to_implement ("Add implementation")
+		end
+
+	in_assembly_ref: BOOLEAN
+		do
+			Result := is_external
 		end
 
 feature -- Output

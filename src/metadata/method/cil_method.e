@@ -15,7 +15,8 @@ inherit
 		rename
 			make as make_code
 		redefine
-			il_src_dump
+			il_src_dump,
+			pe_dump
 		end
 
 create
@@ -434,4 +435,31 @@ feature -- Output
 			end
 		end
 
+	pe_dump (a_stream: FILE_STREAM): BOOLEAN
+		do
+			if is_pinvoke and then in_assembly_ref then
+				Result := prototype.pe_dump (a_stream, False)
+			else
+				if attached rendering then
+					Result := True
+				else
+					Result := pe_dump_imp (a_stream)
+				end
+			end
+		end
+
+
+feature {NONE} -- Implementation
+
+	pe_dump_imp (a_stream: FILE_STREAM): BOOLEAN
+		local
+			l_sz: NATURAL
+			l_method_signature: NATURAL
+			l_sig: ARRAY [NATURAL_8]
+			l_table: PE_TABLE_ENTRY_BASE
+		do
+			if  attached prototype.return_type as l_return_type then
+				to_implement ("Work in progress")
+			end
+		end
 end
