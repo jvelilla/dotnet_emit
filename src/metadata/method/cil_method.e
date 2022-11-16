@@ -453,13 +453,52 @@ feature {NONE} -- Implementation
 
 	pe_dump_imp (a_stream: FILE_STREAM): BOOLEAN
 		local
-			l_sz: NATURAL
+			l_sz: CELL [NATURAL]
 			l_method_signature: NATURAL
 			l_sig: ARRAY [NATURAL_8]
 			l_table: PE_TABLE_ENTRY_BASE
+			l_res: NATURAL_8
 		do
-			if  attached prototype.return_type as l_return_type then
-				to_implement ("Work in progress")
+			if  attached {CIL_TYPE} prototype.return_type as l_return_type then
+				if l_return_type.basic_type = {CIL_BASIC_TYPE}.class_ref and then
+				   attached {CIL_DATA_CONTAINER}l_return_type.type_ref as l_class and then
+				   l_class.in_assembly_ref
+				then
+					Result := l_class.pe_dump (a_stream)
+				end
+
+				if attached {CIL_TYPE} l_return_type.mod_opt as l_opt and then
+				   l_opt.basic_type = {CIL_BASIC_TYPE}.class_ref and then
+				   attached {CIL_DATA_CONTAINER} l_opt.type_ref as l_class
+				then
+					Result := l_class.pe_dump (a_stream)
+				end
+			end
+			if not prototype.params.is_empty then
+				-- Assign an index to any params
+				across prototype.params as param loop
+					if attached {CIL_TYPE} param.type as l_tp and then
+						l_tp.basic_type = {CIL_BASIC_TYPE}.class_ref
+					then
+						if l_tp.pe_index = 0 then
+							l_res := l_tp.render (a_stream, create {ARRAY [NATURAL_8]}.make_filled (0, 1, 256))
+						end
+					end
+				end
+			end
+			if not var_list.is_empty then
+				-- Assign type indexes to any types that haven't already been defined
+				across var_list as l_local loop
+					if attached {CIL_TYPE} l_local.type as l_tp and then
+					   l_tp.basic_type =  {CIL_BASIC_TYPE}.class_ref
+					then
+						if l_tp.pe_index = 0 then
+							l_res := l_tp.render (a_stream, create {ARRAY [NATURAL_8]}.make_filled (0, 1, 256))
+						end
+					end
+				end
+				create l_sz.put (0)
+				l_sig := {PE_SIGNATURE_GENERATOR_HELPER}.local_var_sig (Current, l_sz)
 			end
 		end
 end

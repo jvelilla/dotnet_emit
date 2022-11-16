@@ -540,7 +540,6 @@ feature -- Stream functions
 	hash_blob (a_blob_data: ARRAY [NATURAL_8]; a_blob_len: NATURAL_8): NATURAL
 			-- return the stream index.
 		local
-			l_xcount: INTEGER
 			l_rv: NATURAL
 			l_blob_len: INTEGER
 		do
@@ -1063,7 +1062,6 @@ feature {NONE} -- Implementation
 		local
 			l_date_epoch: DATE_TIME
 			l_date_now: DATE_TIME
-			l_diff: INTEGER_32
 		do
 			create l_date_epoch.make_from_epoch (0)
 			create l_date_now.make_now_utc

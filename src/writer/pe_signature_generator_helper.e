@@ -44,9 +44,18 @@ feature -- Access: Signature Generators
 			to_implement ("Add implementation")
 		end
 
-	local_var_sig (a_method: CIL_METHOD; a_size: CELL [NATURAL_32]): NATURAL_8
+	local_var_sig (a_method: CIL_METHOD; a_size: CELL [NATURAL_32]): ARRAY [NATURAL_8]
+		local
+			l_size: INTEGER
 		do
-			to_implement ("Add implementation")
+			signature_generator.work_area [l_size] := 7
+			  -- local sig
+			l_size := l_size + 1
+			signature_generator.work_area [l_size] := a_method.var_list.count
+			create Result.make_empty
+			to_implement ("Work in progress")
+		ensure
+			instance_free: class
 		end
 
 	type_var_sig (a_method: CIL_TYPE; a_size: CELL [NATURAL_32]): NATURAL_8

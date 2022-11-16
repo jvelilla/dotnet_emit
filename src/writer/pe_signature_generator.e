@@ -17,16 +17,16 @@ feature {NONE} -- Initilization
 
 	default_create
 		do
-			create work_area.make_filled (0, 1, 400 * 1024)
-			create basic_types.make_empty
+			create work_area.make_filled (0, 400 * 1024)
+			create basic_types.make_empty (0)
 		end
 
 feature -- Access
 
-	work_area: ARRAY [INTEGER]
+	work_area: SPECIAL [INTEGER]
 			-- 400 * 1024
 
-	basic_types: ARRAY [INTEGER]
+	basic_types: SPECIAL [INTEGER]
 
 	object_base: INTEGER assign set_object_base
 
