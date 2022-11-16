@@ -52,6 +52,13 @@ feature -- Access: Signature Generators
 			  -- local sig
 			l_size := l_size + 1
 			signature_generator.work_area [l_size] := a_method.var_list.count
+				-- todo check if we need to create an size or count feature in CIL_METHOD
+				-- to avoid call to var_list.count
+
+			across a_method.var_list as  elem loop
+				l_size := l_size + embed_type (signature_generator.work_area, l_size, elem.type).to_integer_32
+			end
+
 			create Result.make_empty
 			to_implement ("Work in progress")
 		ensure
@@ -63,11 +70,44 @@ feature -- Access: Signature Generators
 			to_implement ("Add implementation")
 		end
 
-	embed_type (a_buf: ARRAY [INTEGER]; a_offset: INTEGER; a_type: CIL_TYPE): NATURAL
+	embed_type (a_buf: SPECIAL [INTEGER]; a_offset: INTEGER; a_type: detachable CIL_TYPE): NATURAL
 			-- this function is a generic function to embed a type
 			-- inito a signature
+		local
+			l_rv: INTEGER
 		do
-			to_implement ("Add implementation")
+			if attached a_type as l_tp then
+				if attached {CIL_TYPE} l_tp.mod_opt as l_opt and then l_opt.basic_type = {CIL_BASIC_TYPE}.class_ref then
+					-- ELEMENT_TYPE_CMOD_OPT (typeRef)
+    			    -- to realize modopt([mscorlib]System.Runtime.CompilerServices.CallConvCdecl)
+        			-- placed on the return type of the delegates Invoke signature
+
+					a_buf [a_offset + l_rv] := {PE_TYPES_ENUM}.ELEMENT_TYPE_CMOD_OPT
+					l_rv := l_rv + 1
+					if attached {CIL_CLASS} l_opt.type_ref as l_cls then
+							-- cannot use EmbedType here becode it would add ELEMENT_TYPE_CLASS
+						if l_cls.pe_index = 0 then
+							io.set_error_default
+							io.put_string ("{PE_SIGNATURE_GENERATOR_HELPER}.embed_type classRef with no PEIndex")
+							io.put_new_line
+							io.set_output_default
+						end
+						if l_cls.in_assembly_ref then
+							a_buf[a_offset + l_rv] := (l_cls.pe_index.to_integer_32 |<< 2) | {PE_TYPEDEF_OR_REF}.typeref
+				        else
+            				--buf[offset + rv++] = (cls->PEIndex() << 2) | TypeDefOrRef::TypeDef;
+            			end
+
+					end
+
+
+				end
+
+
+
+			end
+		ensure
+			instance_free: class
 		end
 
 feature -- Convert

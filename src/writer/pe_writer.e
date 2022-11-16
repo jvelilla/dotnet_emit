@@ -625,7 +625,8 @@ feature -- Various Operations
 
 	next_table_index (a_table: INTEGER): NATURAL
 		do
-			to_implement ("Add implementation")
+				-- TODO double check if we need the + 1.
+			Result := (tables[a_table].size + 1).to_natural_32
 		end
 
 	write_file (a_corFlags: INTEGER; a_out: FILE_STREAM): BOOLEAN
