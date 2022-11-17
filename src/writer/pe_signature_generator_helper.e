@@ -69,9 +69,33 @@ feature -- Access: Signature Generators
 			instance_free: class
 		end
 
-	property_sig (a_property: CIL_PROPERTY; a_size: CELL [NATURAL_32]): NATURAL_8
+	property_sig (a_property: CIL_PROPERTY; a_size: CELL [NATURAL_32]): ARRAY [NATURAL_8]
+		local
+			l_size: INTEGER
+			l_getter: CIL_METHOD
+			l_val: INTEGER
 		do
-			to_implement ("Add implementation")
+			l_size := 0
+				-- a property sig is a modification of the methoddef of the getter
+			signature_generator.work_area [l_size] := 8
+			l_size := l_size + 1
+
+			l_getter := a_property.getter
+
+
+			l_size := core_method (if attached {CIL_METHOD} l_getter as ll_getter then ll_getter.prototype else	Void end,
+									if attached {CIL_METHOD} l_getter as ll_getter then ll_getter.prototype.params.count else 0 end,
+									signature_generator.work_area, 0).to_integer_32
+
+			l_val := 0x20
+			if a_property.instance then
+				 signature_generator.work_area[1] := signature_generator.work_area [1] | l_val
+			else
+				signature_generator.work_area[1] := signature_generator.work_area [1] & l_val.bit_not
+			end
+			Result := convert_to_blob (signature_generator.work_area, l_size, a_size)
+		ensure
+			instance_free: class
 		end
 
 	field_sig (a_field: CIL_FIELD; a_size: CELL [NATURAL_32]): NATURAL_8
@@ -202,7 +226,7 @@ feature -- Convert
 
 feature -- Access
 
-	core_method (a_method: CIL_METHOD_SIGNATURE; a_param_count: INTEGER; a_buf: SPECIAL [INTEGER]; a_offset: INTEGER): NATURAL
+	core_method (a_method: detachable CIL_METHOD_SIGNATURE; a_param_count: INTEGER; a_buf: SPECIAL [INTEGER]; a_offset: INTEGER): NATURAL
 		local
 			l_orig_offset: INTEGER
 			l_size: INTEGER
@@ -213,30 +237,37 @@ feature -- Access
 			l_flag := 0
 				--  for static members, flag will usually remain 0.
 
-			if (a_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.instance_flag) /= 0 then
+			if 	attached a_method as l_method and then
+				(l_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.instance_flag) /= 0 then
 				l_flag := l_flag | 0x20
 			end
-			if ((a_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.vararg) /= 0) and then not ((a_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.Managed /= 0)) then
+			if  attached a_method as l_method and then
+				((l_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.vararg) /= 0)
+				and then not ((l_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.Managed /= 0)) then
         		l_flag := l_flag | 5
         	end
-			if (a_method.generic_param_count /= 0) then
+			if 	attached a_method as l_method and then
+				(a_method.generic_param_count /= 0) then
 		        l_flag := l_flag | 0x10
 		    end
 		    signature_generator.work_area [l_size] := l_flag
 		    l_size := l_size + 1
 
-			if (a_method.generic_param_count /= 0) then
-		         signature_generator.work_area[l_size] := a_method.generic_param_count
+			if attached a_method as l_method and then
+				(l_method.generic_param_count /= 0) then
+		         signature_generator.work_area[l_size] := l_method.generic_param_count
 		         l_size := l_size + 1
 		    end
 		    signature_generator.work_area [l_size] := a_param_count
 		    l_size := l_size + 1
-		    l_size := l_size + embed_type (signature_generator.work_area, l_size, a_method.return_type).to_integer_32
+		    l_size := l_size + embed_type (signature_generator.work_area, l_size, if attached a_method as l_method then l_method.return_type else Void end).to_integer_32
 
 
-		    across a_method.params as elem loop
-		    	l_size := l_size + embed_type (signature_generator.work_area, l_size, elem.type).to_integer_32
-		    end
+			if attached a_method as l_method then
+			    across l_method.params as elem loop
+			    	l_size := l_size + embed_type (signature_generator.work_area, l_size, elem.type).to_integer_32
+			    end
+			end
 
 			Result := (l_size - l_orig_offset).to_natural_32
 		ensure
