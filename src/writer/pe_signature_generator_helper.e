@@ -173,8 +173,42 @@ feature -- Convert
 feature -- Access
 
 	core_method (a_method: CIL_METHOD_SIGNATURE; a_param_count: INTEGER; a_buf: SPECIAL [INTEGER]; a_offset: INTEGER): NATURAL
+		local
+			l_orig_offset: INTEGER
+			l_size: INTEGER
+			l_flag: INTEGER
 		do
-			to_implement ("Add implementation")
+			l_orig_offset := a_offset
+			l_size := a_offset
+			l_flag := 0
+				--  for static members, flag will usually remain 0.
+
+			if (a_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.instance_flag) /= 0 then
+				l_flag := l_flag | 0x20
+			end
+			if ((a_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.vararg) /= 0) and then not ((a_method.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.Managed /= 0)) then
+        		l_flag := l_flag | 5
+        	end
+			if (a_method.generic_param_count /= 0) then
+		        l_flag := l_flag | 0x10
+		    end
+		    signature_generator.work_area [l_size] := l_flag
+		    l_size := l_size + 1
+
+			if (a_method.generic_param_count /= 0) then
+		         signature_generator.work_area[l_size] := a_method.generic_param_count
+		         l_size := l_size + 1
+		    end
+		    signature_generator.work_area [l_size] := a_param_count
+		    l_size := l_size + 1
+		    l_size := l_size + embed_type (signature_generator.work_area, l_size, a_method.return_type).to_integer_32
+
+
+		    across a_method.params as elem loop
+		    	l_size := l_size + embed_type (signature_generator.work_area, l_size, elem.type).to_integer_32
+		    end
+
+			Result := (l_size - l_orig_offset).to_natural_32
 		ensure
 			instance_free: class
 		end
