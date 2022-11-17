@@ -25,14 +25,30 @@ feature -- Access: Signature Generators
 		do
 			l_size := core_method (a_signature, a_signature.params.count, signature_generator.work_area, 0).to_integer_32
 			Result := convert_to_blob (signature_generator.work_area, l_size, a_size)
-			to_implement ("Work in progress")
 		ensure
 			instance_free: class
 		end
 
-	method_ref_sig (a_signature: CIL_METHOD_SIGNATURE; a_size: CELL [NATURAL_32]): NATURAL_8
+	method_ref_sig (a_signature: CIL_METHOD_SIGNATURE; a_size: CELL [NATURAL_32]): ARRAY [NATURAL_8]
+		local
+			l_size: INTEGER
 		do
-			to_implement ("Add implementation")
+			l_size := core_method (a_signature, a_signature.params.count, signature_generator.work_area, 0).to_integer_32
+				-- variable length args... this is the difference from the methoddef
+			if ((a_signature.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.vararg) /= 0) and then
+			   not ((a_signature.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.Managed) /= 0)
+			then
+				if not a_signature.vararg_params.is_empty then
+					signature_generator.work_area [l_size] := {PE_TYPES_ENUM}.ELEMENT_TYPE_SENTINEL
+					l_size := l_size + 1
+					across a_signature.vararg_params as  param loop
+						l_size := l_size + embed_type (signature_generator.work_area, l_size, param.type).to_integer_32
+					end
+				end
+			end
+			Result := convert_to_blob (signature_generator.work_area, l_size, a_size)
+		ensure
+			instance_free: class
 		end
 
 	method_spec_sig (a_signature: CIL_METHOD_SIGNATURE; a_size: CELL [NATURAL_32]): NATURAL_8
@@ -112,6 +128,7 @@ feature -- Access: Signature Generators
 
 
 			end
+			to_implement ("Work in progress")
 		ensure
 			instance_free: class
 		end
