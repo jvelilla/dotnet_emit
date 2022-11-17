@@ -51,9 +51,22 @@ feature -- Access: Signature Generators
 			instance_free: class
 		end
 
-	method_spec_sig (a_signature: CIL_METHOD_SIGNATURE; a_size: CELL [NATURAL_32]): NATURAL_8
+	method_spec_sig (a_signature: CIL_METHOD_SIGNATURE; a_size: CELL [NATURAL_32]): ARRAY [NATURAL_8]
+		local
+			l_size: INTEGER
 		do
-			to_implement ("Add implementation")
+			l_size := 0
+			signature_generator.work_area [l_size] := 0x0a
+				-- generic
+			l_size := l_size + 1
+			signature_generator.work_area [l_size] := a_signature.generic.count
+			l_size := l_size + 1
+			across a_signature.generic as g loop
+				l_size := l_size + embed_type (signature_generator.work_area, l_size, g).to_integer_32
+			end
+			Result := convert_to_blob (signature_generator.work_area, l_size, a_size)
+		ensure
+			instance_free: class
 		end
 
 	property_sig (a_property: CIL_PROPERTY; a_size: CELL [NATURAL_32]): NATURAL_8
