@@ -19,9 +19,15 @@ inherit
 
 feature -- Access: Signature Generators
 
-	method_def_sig (a_signature: CIL_METHOD_SIGNATURE; a_size: CELL [NATURAL_32]): NATURAL_8
+	method_def_sig (a_signature: CIL_METHOD_SIGNATURE; a_size: CELL [NATURAL_32]): ARRAY [NATURAL_8]
+		local
+			l_size: INTEGER
 		do
-			to_implement ("Add implementation")
+			l_size := core_method (a_signature, a_signature.params.count, signature_generator.work_area, 0).to_integer_32
+			Result := convert_to_blob (signature_generator.work_area, l_size, a_size)
+			to_implement ("Work in progress")
+		ensure
+			instance_free: class
 		end
 
 	method_ref_sig (a_signature: CIL_METHOD_SIGNATURE; a_size: CELL [NATURAL_32]): NATURAL_8
@@ -112,11 +118,49 @@ feature -- Access: Signature Generators
 
 feature -- Convert
 
-	convert_to_blob (a_buf: ARRAY [INTEGER]; a_size: INTEGER; a_sz: CELL [NATURAL_32]): NATURAL_8
+	convert_to_blob (a_buf: SPECIAL [INTEGER]; a_size: INTEGER; a_sz: CELL [NATURAL_32]): ARRAY [NATURAL_8]
 			-- this function converts a signature buffer to a blob entry, by compressing
 			-- the integer values in the signature.
+		local
+			l_sz: NATURAL_32
+			l_rv: SPECIAL [NATURAL_8]
+			l_pos: INTEGER
 		do
-			to_implement ("Add implementation")
+			l_sz := 0
+			across 0 |..| (a_size - 1) as i loop
+				if a_buf [i] >  0x3fff then
+					l_sz := l_sz + 4
+				elseif a_buf[i] > 0x7f then
+					l_sz := l_sz + 2
+				else
+					l_sz := l_sz + 1
+				end
+			end
+			create l_rv.make_empty (l_sz.to_integer_32)
+			across 0 |..| (a_size - 1) as i loop
+				if a_buf [i] > 0x3fff then
+					l_rv[l_pos] := (((a_buf[i] |>> 24) & 0x1f) | 0xc0).to_natural_8
+					l_pos := l_pos + 1
+		            l_rv[l_pos] := ((a_buf[i] |>> 16) & 0xff).to_natural_8
+		            l_pos := l_pos + 1
+		            l_rv[l_pos] := ((a_buf[i] |>> 8) & 0xff).to_natural_8
+		            l_pos := l_pos + 1
+		            l_rv[l_pos] := (a_buf[i] & 0xff).to_natural_8
+		            l_pos := l_pos + 1
+				elseif (a_buf[i] > 0x7f) then
+ 		            l_rv[l_pos] := ((a_buf[i] |>> 8) | 0x80).to_natural_8
+ 		            l_pos := l_pos + 1
+        		    l_rv[l_pos] := (a_buf[i] & 0xff).to_natural_8
+        		    l_pos := l_pos + 1
+        		else
+        			l_rv[l_pos] := a_buf [i].to_natural_8
+        			l_pos := l_pos + 1
+        		end
+			end
+			a_sz.put (l_sz)
+			create Result.make_from_special (l_rv)
+		ensure
+			instance_free: class
 		end
 
 	set_object_type (a_object_base: NATURAL_32)
@@ -128,9 +172,11 @@ feature -- Convert
 
 feature -- Access
 
-	core_method (a_method: CIL_METHOD_SIGNATURE; a_param_count: INTEGER; a_buf: ARRAY [INTEGER]; a_offset: INTEGER): NATURAL
+	core_method (a_method: CIL_METHOD_SIGNATURE; a_param_count: INTEGER; a_buf: SPECIAL [INTEGER]; a_offset: INTEGER): NATURAL
 		do
 			to_implement ("Add implementation")
+		ensure
+			instance_free: class
 		end
 
 	load_index (a_buf: ARRAY [NATURAL_8]; a_start: CELL [NATURAL_32]; a_len: CELL [NATURAL_32]): NATURAL_32
