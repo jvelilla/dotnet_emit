@@ -16,7 +16,8 @@ inherit
 			make as make_code
 		redefine
 			il_src_dump,
-			pe_dump
+			pe_dump,
+			compile
 		end
 
 create
@@ -453,6 +454,17 @@ feature -- Output
 			end
 		end
 
+	compile (a_stream: FILE_STREAM)
+		local
+			l_sz: CELL [NATURAL_32]
+		do
+			if attached {PE_METHOD} rendering as l_rendering then
+				create l_sz.put (l_rendering.code_size)
+				l_rendering.code := compile_cc (a_stream, l_sz)
+				l_rendering.code_size := l_sz.item
+			end
+		end
+
 feature {NONE} -- Implementation
 
 	pe_dump_imp (a_stream: FILE_STREAM): BOOLEAN
@@ -468,7 +480,24 @@ feature {NONE} -- Implementation
 			l_rendering: like rendering
 			l_impl_flags: INTEGER
 			l_mf_flags: INTEGER
+			l_name_index: NATURAL
+			l_import_name_index: NATURAL
+			l_param_index: NATURAL
+			i: INTEGER
+			l_last_param_index: NATURAL
+			l_flags: INTEGER
+			l_module_name: NATURAL
+			l_module_ref: NATURAL
+			l_method_index: PE_MEMBER_FORWARDED
+			l_attribute_type: NATURAL
+			l_attribute_data: NATURAL
+			l_ctor_index: NATURAL
+			l_data: ARRAY [NATURAL_8]
+			l_data_sig: NATURAL
+			l_attribute:  PE_CUSTOM_ATTRIBUTE
+			l_type: PE_CUSTOM_ATTRIBUTE_TYPE
 		do
+			create l_sz.put (0)
 			if attached {CIL_TYPE} prototype.return_type as l_return_type then
 				if l_return_type.basic_type = {CIL_BASIC_TYPE}.class_ref and then
 					attached {CIL_DATA_CONTAINER} l_return_type.type_ref as l_class and then
@@ -507,7 +536,6 @@ feature {NONE} -- Implementation
 						end
 					end
 				end
-				create l_sz.put (0)
 				l_sig := {PE_SIGNATURE_GENERATOR_HELPER}.local_var_sig (Current, l_sz)
 				if attached {PE_WRITER} a_stream.pe_writer as l_writer then
 					l_method_signature := l_writer.hash_blob (l_sig, l_sz.item.to_natural_8)
@@ -582,7 +610,80 @@ feature {NONE} -- Implementation
 	        if invoke_mode = {CIL_INVOKE_MODE}.PInvoke then
 	            l_mf_flags := l_mf_flags | {PE_METHOD_DEF_TABLE_ENTRY}.PinvokeImpl
 	        end
-			to_implement ("Work in progress")
+
+	        if attached {PE_WRITER} a_stream.pe_writer as l_writer then
+
+	        	l_name_index := l_writer.hash_string (prototype.name)
+	        	l_import_name_index := l_name_index
+
+	        	if not import_name.is_empty then
+	        		l_import_name_index := l_writer.hash_string (import_name)
+	        	end
+				l_param_index := l_writer.next_table_index ({PE_TABLES}.tparam.value.to_integer_32)
+
+	        	l_sig := {PE_SIGNATURE_GENERATOR_HELPER}.method_def_sig(prototype, l_sz)
+				l_method_signature :=  l_writer.hash_blob (l_sig, l_sz.item.to_natural_8)
+
+				create {PE_METHOD_DEF_TABLE_ENTRY} l_table.make_with_data (l_rendering, l_impl_flags, l_mf_flags, l_name_index, l_method_signature, l_param_index)
+				prototype.set_pe_index (l_writer.add_table_entry (l_table))
+
+				i := 1
+				l_last_param_index := 0
+				across prototype.params as param loop
+					l_flags := 0
+					l_name_index := l_writer.hash_string (param.name)
+					create {PE_PARAM_TABLE_ENTRY} l_table.make_with_data(l_flags, i.to_natural_16, l_name_index)
+					i := i + 1
+					l_last_param_index := l_writer.add_table_entry (l_table)
+				end
+
+				if invoke_mode = {CIL_INVOKE_MODE}.pinvoke  then
+					l_flags := 0
+					if pinvoke_type = {CIL_INVOKE_TYPE}.cdecl then
+						l_flags := l_flags | {PE_IMPL_MAP_TABLE_ENTRY}.CallConvCdecl
+					else
+						l_flags := l_flags | {PE_IMPL_MAP_TABLE_ENTRY}.CallConvStdcall
+					end
+					l_module_name := l_writer.hash_string (pinvoke_name)
+					l_module_ref := a_stream.module_ref [l_module_name]
+					if l_module_ref = 0 then
+						create {PE_MODULE_REF_TABLE_ENTRY} l_table.make_with_data (l_module_name)
+						l_module_ref := l_writer.add_table_entry (l_table)
+						a_stream.module_ref.force (l_module_ref, l_module_name)
+					end
+					create l_method_index.make_with_tag_and_index ({PE_MEMBER_FORWARDED}.methoddef, prototype.pe_index)
+					create {PE_IMPL_MAP_TABLE_ENTRY} l_table.make_with_data (l_flags, l_method_index, l_import_name_index, l_module_ref)
+
+					l_res := l_writer.add_table_entry (l_table).to_natural_8
+						-- TODO fix this, the returned value is not needed.
+				end
+				if prototype.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.vararg /= 0 and then
+					prototype.flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.managed /= 0
+				then
+					l_attribute_type := l_writer.param_attribute_type
+					l_attribute_data := l_writer.param_attribute_data
+					if not (l_attribute_type /= 0) and then
+						not (l_attribute_data /= 0)
+					then
+						l_ctor_index := 0
+						if attached {CIL_METHOD} a_stream.find ("System.ParamArrayAttribute::.ctor") as l_result then
+							Result := l_result.pe_dump (a_stream)
+							l_ctor_index := l_result.prototype.pe_index_call_site
+						end
+						l_data := <<1, 0, 0, 0>>
+						l_data_sig := l_writer.hash_blob (l_data, l_data.count.to_natural_8)
+						l_writer.set_param_attribute (l_ctor_index, l_data_sig)
+						l_attribute_type := l_writer.param_attribute_type
+						l_attribute_data := l_writer.param_attribute_data
+
+						create l_attribute.make_with_tag_and_index ({PE_CUSTOM_ATTRIBUTE}.ParamDef, l_last_param_index)
+						create l_type.make_with_tag_and_index ({PE_CUSTOM_ATTRIBUTE_TYPE}.methodref, l_attribute_type)
+						create {PE_CUSTOM_ATTRIBUTE_TABLE_ENTRY} l_table.make_with_data (l_attribute, l_type, l_attribute_data)
+						l_res := l_writer.add_table_entry (l_table).to_natural_8
+					end
+				end
+	        end
+			Result := True
 		end
 
 end
