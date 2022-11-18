@@ -358,7 +358,7 @@ feature -- Output
 			Result := True
 		end
 
-	render (a_stream: FILE_STREAM; a_bytes: detachable ARRAY [NATURAL_8]): NATURAL_8
+	render (a_stream: FILE_STREAM; a_bytes: detachable SPECIAL [NATURAL_8]): NATURAL_8
 		do
 			to_implement ("Add implementation")
 		end

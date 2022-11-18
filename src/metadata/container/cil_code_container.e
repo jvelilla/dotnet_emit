@@ -593,10 +593,13 @@ feature -- Output
 feature -- Compile
 
 	compile_cc (a_stream: FILE_STREAM; a_sz: CELL [NATURAL_32]): detachable ARRAY [NATURAL_8]
+	    	--| this method is the translation
+	    	--| of CodeContainer::Compile(Stream& peLib, size_t& sz)
 		local
 			l_last: CIL_INSTRUCTION
 			l_sz: NATURAL
 			l_pos: INTEGER
+			l_result: SPECIAL [NATURAL_8]
 		do
 			l_sz := a_sz.item
 			calculate_offsets
@@ -606,11 +609,11 @@ feature -- Compile
 			if attached l_last then
 				l_sz := (l_last.offset + l_last.instruction_size).to_natural_32
 				if l_sz /= 0 then
-					create Result.make_filled (0, 1, l_sz.to_integer_32)
+					create l_result.make_empty (l_sz.to_integer_32)
 					l_pos := 0
 					across instructions as ins loop
 						--l_pos := l_pos + ins.render (a_stream, l_pos, labels)
-						to_implement ("Work in progress")
+						l_pos := l_pos + ins.render (a_stream, l_result, l_pos, labels).to_integer_32
 					end
 				end
 			else

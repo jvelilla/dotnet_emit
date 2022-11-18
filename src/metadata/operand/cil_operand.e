@@ -213,7 +213,7 @@ feature --Access
 
 feature -- Output
 
-	render (a_stream: FILE_STREAM; a_opcode: INTEGER; a_operand_type: INTEGER; a_byte: ARRAY [NATURAL_8]): BOOLEAN
+	render (a_stream: FILE_STREAM; a_opcode: INTEGER; a_operand_type: INTEGER; a_byte: SPECIAL [NATURAL_8]; a_offset: INTEGER): NATURAL_8
 		do
 			to_implement ("Add implementation")
 		end
