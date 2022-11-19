@@ -78,6 +78,12 @@ feature -- Access
 
 	custom_attributes: CIL_CUSTOM_ATTRIBUTE_CONTAINER
 
+	assembly_def: CIL_ASSEMBLY_DEF
+			-- Return current assembly
+		do
+			Result := Current
+		end
+
 feature -- Element change
 
 	set_revision (a_revision: like revision)
@@ -154,12 +160,54 @@ feature -- Element change
 			loaded_set: is_loaded
 		end
 
-	insert_namespaces_table (a_lib: PE_LIB; a_namespaces: STRING_TABLE [CIL_NAMESPACE]; a_name: STRING_32)
+	insert_namespaces_table (a_lib: PE_LIB; a_namespaces: STRING_TABLE [CIL_NAMESPACE]; a_name: STRING_32): detachable CIL_NAMESPACE
+			--| Correspond to Namespace *InsertNameSpaces(PELib &lib, std::map<std::string, Namespace *> &nameSpaces, const std::string& name);
+		local
+			l_parent, l_rv: CIL_NAMESPACE
+			n: INTEGER
+			l_name: STRING_32
+			l_end: STRING_32
+			l_dc: CIL_DATA_CONTAINER
+			l_tmp: CIL_NAMESPACE
 		do
-			to_implement ("Add implementation")
+			l_name := a_name
+			if attached a_namespaces.item (a_name) as l_cnp then
+				Result := l_cnp
+			else
+				n := l_name.index_of ('.', l_name.lower)
+				create l_end.make_from_string (l_name)
+				if n /= 0 then
+					l_parent := insert_namespaces_table (a_lib, a_namespaces, l_name.substring (l_name.lower, n))
+					l_end := l_name.substring (n+1, l_name.count)
+				end
+				if attached l_parent then
+					l_dc := l_parent.find_container_string (l_end, Void)
+					if attached {CIL_NAMESPACE} l_dc as l_item then
+						l_parent := l_item
+						l_rv := l_parent
+					end
+				else
+					l_dc := find_container_string (l_end, Void)
+					if attached {CIL_NAMESPACE} l_dc as l_item then
+						l_parent := l_item
+						l_rv := l_parent
+					end
+				end
+				if attached l_rv then
+					a_namespaces.force (l_rv, l_name)
+				else
+					create l_tmp.make (l_end)
+					a_namespaces.force (l_tmp, l_name)
+					if attached l_parent then
+						l_parent.add (l_tmp)
+					end
+				end
+				Result := a_namespaces.item (name)
+			end
 		end
 
 	insert_namespaces (a_lib: PE_LIB; a_namespace: CELL [detachable CIL_NAMESPACE]; a_name: STRING_32): detachable CIL_NAMESPACE
+			--| Correspond to Namespace *InsertNameSpaces(PELib &lib, Namespace *nameSpace, std::string nameSpaceName);
 		local
 			l_in: STRING_32
 			n: INTEGER
@@ -234,7 +282,7 @@ feature -- Element change
 			else
 				l_dc := if attached a_namespace as l_nsp then l_nsp.find_container_string (l_name, Void) else Void end
 				if attached {CIL_CLASS} l_dc or attached {CIL_ENUM} l_dc then
-					if attached {CIL_CLASS}l_dc as l_class then
+					if attached {CIL_CLASS} l_dc as l_class then
 						l_rv := l_class
 					end
 				end
@@ -254,7 +302,8 @@ feature -- Element change
 
 feature -- Status Report
 
-	lookup_class (a_lib: PE_LIB; a_namespace: STRING_32; a_name: STRING_32):CIL_CLASS
+	lookup_class (a_lib: PE_LIB; a_namespace: STRING_32; a_name: STRING_32): CIL_CLASS
+			--  lookup or create a class.
 		local
 			l_in: STRING_32
 			l_namespace: CIL_NAMESPACE
@@ -293,7 +342,7 @@ feature -- Output
 				l_name_index := l_writer.hash_string (name)
 				if is_external then
 					across 1 |..| 8 as ic until l_exit loop
-						if public_key_token [ic] /= 0then
+						if public_key_token [ic] /= 0 then
 							l_blob_index := l_writer.hash_blob (public_key_token, 8)
 							l_exit := True
 						end
