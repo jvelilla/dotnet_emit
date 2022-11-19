@@ -387,7 +387,7 @@ feature -- Output
 					then
 						l_sz := l_sz + l_operand.render (a_stream, {CIL_INSTRUCTION_OPCODES}.index_of (opcode) + 1,
 															instructions [{CIL_INSTRUCTION_OPCODES}.index_of (opcode) + 1].operand_type,
-															a_result, l_sz)
+															a_result, l_sz).to_integer_32
 					end
 				end
 			end

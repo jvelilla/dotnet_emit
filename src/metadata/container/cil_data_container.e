@@ -102,14 +102,12 @@ feature -- Access Enumerations
 	base_index_system: INTEGER = 8
 			-- reference to 'System' namespace
 
-
 feature -- Status Report
 
 	in_assembly_ref: BOOLEAN
 		do
 			Result := if attached parent as l_parent then l_parent.in_assembly_ref else False end
 		end
-
 
 feature --Element Change
 
@@ -235,6 +233,8 @@ feature -- Status Report
 
 	find_container_string (a_name: STRING_32; a_Generics: detachable LIST [CIL_TYPE]): detachable CIL_DATA_CONTAINER
 			-- Find a subcontainer.
+			--| Correspond to
+			--| DataContainer *FindContainer(const std::string& name, std::deque<Type*>* generics = nullptr);
 		local
 			exit: BOOLEAN
 		do
@@ -259,6 +259,9 @@ feature -- Status Report
 
 	find_container_collection (a_split: LIST [STRING_32]; a_generics: detachable LIST [CIL_TYPE]; a_method: BOOLEAN): TUPLE [index: INTEGER; dc: detachable CIL_DATA_CONTAINER]
 			-- Find a sub container.
+			--| Correspond to  ///** Find a sub- container
+			--|   DataContainer *FindContainer(std::vector<std::string>& split, size_t &n,
+			--|                         std::deque<Type*>* generics = nullptr, bool method = false);
 		local
 			n: INTEGER
 			count: INTEGER
@@ -298,10 +301,10 @@ feature -- Operations
 	base_types (a_type: CELL [INTEGER])
 		do
 			across methods as method loop
-				method.base_types(a_type)
+				method.base_types (a_type)
 			end
 			across children as child loop
-				child.base_types(a_type)
+				child.base_types (a_type)
 			end
 			if attached {CIL_ENUM} Current then
 				a_type.put (a_type.item | base_type_enum)

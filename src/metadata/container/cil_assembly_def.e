@@ -159,21 +159,120 @@ feature -- Element change
 			to_implement ("Add implementation")
 		end
 
-	insert_namespaces (a_lib: PE_LIB; a_namespace: CIL_NAMESPACE; a_name: STRING_32)
+	insert_namespaces (a_lib: PE_LIB; a_namespace: CELL [detachable CIL_NAMESPACE]; a_name: STRING_32): detachable CIL_NAMESPACE
+		local
+			l_in: STRING_32
+			n: INTEGER
+			l_namespace_void: CELL [detachable CIL_NAMESPACE]
+			l_namespace: CIL_NAMESPACE
+			l_name: STRING_32
+			l_rv: CIL_NAMESPACE
+			l_dc: CIL_DATA_CONTAINER
 		do
-			to_implement ("Add implementation")
+			l_name := a_name
+			if attached namespace_cache.item (l_name) as l_elem then
+				Result := l_elem
+			else
+				l_in := l_name
+				n := l_name.index_of ('0', l_name.lower)
+				if n /= 0 then
+					create l_namespace_void.put (Void)
+					l_namespace := insert_namespaces (a_lib, l_namespace_void, a_name.substring (l_name.lower, n))
+					a_namespace.put (l_namespace)
+					l_name := l_name.substring (n + 1, l_name.count)
+				end
+				if attached l_namespace then
+					l_dc := l_namespace.find_container_string (l_name, Void)
+					if attached {CIL_NAMESPACE} l_dc as l_nsp then
+						l_namespace := l_nsp
+						l_rv := l_namespace
+					end
+				else
+					l_dc := find_container_string (l_name, Void)
+					if attached {CIL_NAMESPACE} l_dc as l_nsp then
+						l_namespace := l_nsp
+						l_rv := l_namespace
+					end
+				end
+				if l_rv = Void then
+					create l_rv.make (l_name)
+					if attached l_namespace then
+						l_namespace.add (l_rv)
+					else
+						add (l_rv)
+					end
+					l_namespace := l_rv
+					namespace_cache.force (l_namespace, l_in)
+				end
+				Result := l_namespace
+			end
 		end
 
-	insert_classes (a_lib: PE_LIB; a_namespace: CIL_NAMESPACE; a_name: STRING_32)
+	insert_classes (a_lib: PE_LIB; a_namespace: detachable CIL_NAMESPACE; a_cls: CELL [detachable CIL_CLASS] a_name: STRING_32): CIL_CLASS
+		local
+			n: INTEGER
+			l_cls: CIL_CLASS
+			l_name: STRING_32
+			l_rv: CIL_CLASS
+			l_res, l_dc: CIL_DATA_CONTAINER
+			l_cell: CELL [detachable CIL_CLASS]
+
 		do
-			to_implement ("Add implementation")
+			l_name := a_name
+			n := l_name.last_index_of ('.', 1)
+			if n /= 0 then
+				create l_cell.put (Void)
+				l_cls := insert_classes (a_lib, a_namespace, l_cell, l_name.substring (1, n))
+				a_cls.put (l_cls)
+				l_name := l_name.substring (n + 1, l_name.count)
+			end
+			if attached l_cls then
+				l_res := l_cls.find_container_string (l_name, Void)
+				if attached {CIL_CLASS} l_res as l_class then
+					l_rv := l_class
+				end
+			else
+				l_dc := if attached a_namespace as l_nsp then l_nsp.find_container_string (l_name, Void) else Void end
+				if attached {CIL_CLASS} l_dc or attached {CIL_ENUM} l_dc then
+					if attached {CIL_CLASS}l_dc as l_class then
+						l_rv := l_class
+					end
+				end
+			end
+			if attached l_rv then
+				if attached a_namespace then
+					a_namespace.add (l_rv)
+				end
+			else
+				create l_rv.make (l_name, create {CIL_QUALIFIERS}.make, -1, -1)
+				if attached l_cls then
+					l_cls.add (l_rv)
+				end
+			end
+			Result := l_rv
 		end
 
 feature -- Status Report
 
-	lookup_class (a_lib: PE_LIB; a_namespace: STRING_32; a_name: STRING_32): detachable CIL_CLASS
+	lookup_class (a_lib: PE_LIB; a_namespace: STRING_32; a_name: STRING_32):CIL_CLASS
+		local
+			l_in: STRING_32
+			l_namespace: CIL_NAMESPACE
+			l_rv: CIL_CLASS
+			l_class_void: CELL [detachable CIL_CLASS]
+			l_namespace_void: CELL [detachable CIL_NAMESPACE]
 		do
-			to_implement ("Add implementation")
+			l_in := a_namespace + "::" + a_name
+			if attached class_cache.item (l_in) as l_elem then
+				Result := l_elem
+			else
+				create l_namespace_void.put (Void)
+				l_namespace := insert_namespaces (a_lib, l_namespace_void, a_namespace)
+				create l_class_void.put (Void)
+				l_rv := insert_classes (a_lib, l_namespace, l_class_void, a_name)
+				class_cache.force (l_rv, l_in)
+				Result := l_rv
+			end
 		end
 
 	in_assembly_ref: BOOLEAN
