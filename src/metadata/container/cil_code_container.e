@@ -581,20 +581,18 @@ feature -- Output
 
 	pe_dump (a_stream: FILE_STREAM): BOOLEAN
 		do
-			to_implement ("Add Implementation")
 			Result := False
 		end
 
 	render (a_stream: FILE_STREAM)
 		do
-			to_implement ("Add Implementation")
+			-- empty implementation.
 		end
 
 feature -- Compile
 
 	compile_cc (a_stream: FILE_STREAM; a_sz: CELL [NATURAL_32]): detachable ARRAY [NATURAL_8]
-	    	--| this method is the translation
-	    	--| of CodeContainer::Compile(Stream& peLib, size_t& sz)
+	    	--| Correspond to CodeContainer::Compile(Stream& peLib, size_t& sz)
 		local
 			l_last: CIL_INSTRUCTION
 			l_sz: NATURAL
@@ -612,7 +610,6 @@ feature -- Compile
 					create l_result.make_empty (l_sz.to_integer_32)
 					l_pos := 0
 					across instructions as ins loop
-						--l_pos := l_pos + ins.render (a_stream, l_pos, labels)
 						l_pos := l_pos + ins.render (a_stream, l_result, l_pos, labels).to_integer_32
 					end
 				end
@@ -624,18 +621,115 @@ feature -- Compile
 		end
 
 	compile (a_stream: FILE_STREAM)
+			--| Correspond to void Compile(Stream&) { }
 		do
 			-- to be redefined
 		end
 
 	compile_seh_cc (a_tags: LIST [CIL_INSTRUCTION]; a_offset: INTEGER; a_seh_data: LIST [CIL_SEH_DATA]): INTEGER
+			-- Correspond to  int CompileSEH(std::vector<Instruction *>tags, int offset, std::vector<SEHData> &sehData)
+		local
+			l_current: CIL_SEH_DATA
+			l_offset: INTEGER
+			l_exit: BOOLEAN
 		do
-			to_implement ("Add implementation C++ [int CompileSEH(std::vector<Instruction *>tags, int offset, std::vector<SEHData> &sehData);]")
+			l_offset := a_offset
+			if not a_tags [l_offset].seh_begin or else
+				a_tags [l_offset].seh_type /= {CIL_SEH}.seh_try
+			then
+				Result := 1
+			else
+				create l_current.make
+				l_current.try_offset := a_tags [l_offset].offset.to_natural_32
+				l_offset := l_offset + 1
+				from
+				until
+					l_offset > a_tags.count or else not a_tags [l_offset].seh_begin
+				loop
+					l_offset := compile_seh_cc (a_tags, l_offset, a_seh_data)
+				end
+				if l_offset < a_tags.count and then a_tags [l_offset].seh_type = {CIL_SEH}.seh_try then
+					l_current.try_length := a_tags [l_offset].offset.to_natural_32 - l_current.try_offset
+					l_offset := l_offset + 1
+				else
+						-- error
+					Result := l_offset + 1
+					l_exit := True
+				end
+				if not l_exit then
+					from
+					until
+						l_offset > a_tags.count or else l_exit
+					loop
+						if not a_tags[l_offset].seh_begin then
+							Result := l_offset
+							l_exit := True
+						end
+						if not l_exit then
+							inspect a_tags [l_offset].seh_type
+							when {CIL_SEH}.seh_try  then
+								Result := compile_seh_cc (a_tags, l_offset, a_seh_data)
+								l_exit := True
+							when {CIL_SEH}.seh_filter then
+									-- assumes there are no try catch block within a filter expression
+								l_current.filter_offset := a_tags [l_offset].offset.to_natural_32
+								l_offset := l_offset + 2
+								l_current.flags := {CIL_SEH_DATA_ENUM}.filter
+							when {CIL_SEH}.seh_catch then
+								if attached {CIL_TYPE} a_tags[l_offset].seh_catch_type as l_catch_type and then
+									attached {CIL_DATA_CONTAINER} l_catch_type.type_ref as l_class
+								then
+									if l_class.in_assembly_ref
+									then
+										l_current.class_token := l_class.pe_index + ({PE_TABLES}.ttyperef.value |<< 24)
+									else
+										l_current.class_token := l_class.pe_index + ({PE_TABLES}.ttypedef.value |<< 24)
+									end
+								end
+								l_current.flags := {CIL_SEH_DATA_ENUM}.exception
+							when {CIL_SEH}.seh_fault then
+								l_current.flags := {CIL_SEH_DATA_ENUM}.fault
+							when {CIL_SEH}.seh_finally then
+								l_current.flags := {CIL_SEH_DATA_ENUM}.finally
+							end
+						end
+						if not l_exit and then l_offset <= a_tags.count then
+							l_current.handler_offset := a_tags [l_offset].offset.to_natural_32
+							l_offset := l_offset + 1
+							from until l_offset > a_tags.count or else not a_tags [l_offset].seh_begin
+							loop
+								l_offset := compile_seh_cc (a_tags, l_offset, a_seh_data)
+							end
+							if l_offset <= a_tags.count then
+								l_current.handler_length := a_tags[l_offset].offset.to_natural_32 - l_current.handler_offset
+								a_seh_data.force (l_current)
+							end
+							l_offset := l_offset + 1
+						end
+					end
+				end
+				if not l_exit then
+					Result := 1
+				end
+			end
+
 		end
 
-	compile_seh (a_seh_data: CIL_SEH_DATA)
+	compile_seh (a_seh_data: LIST [CIL_SEH_DATA])
+			-- Correspond to void CompileSEH(std::vector<SEHData> &sehData)
+		local
+			l_tags: LIST [CIL_INSTRUCTION]
+			l_dis: INTEGER
 		do
-			to_implement ("Add implementation C++ [void CompileSEH(std::vector<SEHData> &sehData);]")
+			create {ARRAYED_LIST [CIL_INSTRUCTION]} l_tags.make (instructions.count)
+			across instructions as instruction loop
+				if instruction.opcode = {CIL_INSTRUCTION_OPCODES}.i_seh then
+					l_tags.force (instruction)
+				end
+			end
+			if not l_tags.is_empty then
+				l_dis := compile_seh_cc (l_tags, 1, a_seh_data)
+			end
 		end
 
 end

@@ -69,6 +69,7 @@ feature -- Access
 
 	is_external: BOOLEAN assign set_is_external
 			-- `is_external'
+			--| Correspond to external_
 
 	extend_from: detachable CIL_CLASS assign set_extend_from
 			-- `extend_from'
@@ -192,23 +193,23 @@ feature -- Status Report
 			l_pe_flags := {PE_TYPEDEF_TABLE_ENTRY}.class_
 			if attached {CIL_CLASS} parent as l_parent then
 				if flags.flags & {CIL_QUALIFIERS_ENUM}.public /= 0 then
-					l_pe_flags := l_pe_flags |  {PE_TYPEDEF_TABLE_ENTRY}.nestedpublic
+					l_pe_flags := l_pe_flags | {PE_TYPEDEF_TABLE_ENTRY}.nestedpublic
 				else
-					l_pe_flags := l_pe_flags |  {PE_TYPEDEF_TABLE_ENTRY}.nestedprivate
+					l_pe_flags := l_pe_flags | {PE_TYPEDEF_TABLE_ENTRY}.nestedprivate
 				end
 			else
 				if flags.flags & {CIL_QUALIFIERS_ENUM}.public /= 0 then
-					l_pe_flags := l_pe_flags |  {PE_TYPEDEF_TABLE_ENTRY}.public
+					l_pe_flags := l_pe_flags | {PE_TYPEDEF_TABLE_ENTRY}.public
 				end
 			end
 			if flags.flags & {CIL_QUALIFIERS_ENUM}.sequential /= 0 then
-				l_pe_flags := l_pe_flags |  {PE_TYPEDEF_TABLE_ENTRY}.explicitlayout
+				l_pe_flags := l_pe_flags | {PE_TYPEDEF_TABLE_ENTRY}.explicitlayout
 			end
 			if flags.flags & {CIL_QUALIFIERS_ENUM}.sealed /= 0 then
-				l_pe_flags := l_pe_flags |  {PE_TYPEDEF_TABLE_ENTRY}.sealed
+				l_pe_flags := l_pe_flags | {PE_TYPEDEF_TABLE_ENTRY}.sealed
 			end
 			if flags.flags & {CIL_QUALIFIERS_ENUM}.ansi /= 0 then
-				l_pe_flags := l_pe_flags |  {PE_TYPEDEF_TABLE_ENTRY}.ansiclass
+				l_pe_flags := l_pe_flags | {PE_TYPEDEF_TABLE_ENTRY}.ansiclass
 			end
 			Result := l_pe_flags
 		end
