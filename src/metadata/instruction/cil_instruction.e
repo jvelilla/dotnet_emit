@@ -67,7 +67,7 @@ feature -- Access
 	text: STRING_32
 			-- text, e.g for a comment.
 
-	label: STRING
+	label: STRING_32
 			-- Label name associated with the instruction.
 		do
 			Result := "";
@@ -383,7 +383,8 @@ feature -- Output
 					end
 				else
 					if attached operand as l_operand and then
-					   instructions [{CIL_INSTRUCTION_OPCODES}.index_of (opcode) + 1].operand_type /= {CIL_IOPERAND}.o_single
+					   instructions [{CIL_INSTRUCTION_OPCODES}.index_of (opcode) + 1].operand_type /= {CIL_IOPERAND}.index_of ({CIL_IOPERAND}.o_single) + 1
+					   			-- TODO double check if this comparision is ok!!!
 					then
 						l_sz := l_sz + l_operand.render (a_stream, {CIL_INSTRUCTION_OPCODES}.index_of (opcode) + 1,
 															instructions [{CIL_INSTRUCTION_OPCODES}.index_of (opcode) + 1].operand_type,

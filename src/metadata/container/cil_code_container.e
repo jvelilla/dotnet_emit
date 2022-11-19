@@ -52,7 +52,6 @@ feature -- Access
 	has_seh: BOOLEAN
 			-- has Structured Exception Handling?
 
-
 feature -- Status Report
 
 	in_assembly_ref: BOOLEAN
@@ -115,7 +114,7 @@ feature {NONE} -- Implementation
 				if ins.opcode = {CIL_INSTRUCTION_OPCODES}.i_label then
 					if labels.has (ins.label) then
 							-- TODO reimplement
-						{EXCEPTIONS}.raise (generator + "load_labels Duplicate label at " + ins.label)
+						{EXCEPTIONS}.raise (generator + "load_labels Duplicate label at " + ins.label.to_string_8)
 					else
 						labels.force (ins, ins.label)
 					end
@@ -225,7 +224,6 @@ feature {NONE} -- Implementation
 	optimize_ldarg
 			-- Optimize load argument on the stack.
 		local
-			v: CIL_VALUE
 			l_index: INTEGER
 			ldargs: ARRAY [CIL_INSTRUCTION_OPCODES]
 		do
@@ -384,7 +382,7 @@ feature {NONE} -- Implementation
 							l_value.index > 65534
 						then
 								-- TODO reimplement.
-							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
+							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name.to_string_8)
 						end
 					when {CIL_INSTRUCTION_OPCODES}.i_ldloc, {CIL_INSTRUCTION_OPCODES}.i_ldloca, {CIL_INSTRUCTION_OPCODES}.i_stloc then
 						if attached ins.operand as l_operand and then
@@ -392,7 +390,7 @@ feature {NONE} -- Implementation
 							l_value.index > 65534
 						then
 								-- TODO reimplement.
-							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
+							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name.to_string_8)
 						end
 					when {CIL_INSTRUCTION_OPCODES}.i_ldarg_s, {CIL_INSTRUCTION_OPCODES}.i_ldarga_s, {CIL_INSTRUCTION_OPCODES}.i_starg_s then
 						if attached ins.operand as l_operand and then
@@ -400,7 +398,7 @@ feature {NONE} -- Implementation
 							l_value.index > 255
 						then
 								-- TODO reimplement.
-							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
+							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name.to_string_8)
 
 						end
 					when {CIL_INSTRUCTION_OPCODES}.i_ldloc_s, {CIL_INSTRUCTION_OPCODES}.i_ldloca_s, {CIL_INSTRUCTION_OPCODES}.i_stloc_s then
@@ -409,7 +407,7 @@ feature {NONE} -- Implementation
 							l_value.index > 255
 						then
 								-- TODO reimplement.
-							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name)
+							{EXCEPTIONS}.raise (generator + "validate_instructions: IndexOutOfRange at" + l_value.name.to_string_8)
 						end
 					else
 							-- Do nothing
@@ -551,7 +549,6 @@ feature -- Base types
 
 	base_types (a_types: CELL [INTEGER])
 		local
-			l_op: CIL_OPERAND
 			l_exit: BOOLEAN
 		do
 			if not (a_types.item & {CIL_DATA_CONTAINER}.base_index_system /= 0) then
@@ -586,13 +583,13 @@ feature -- Output
 
 	render (a_stream: FILE_STREAM)
 		do
-			-- empty implementation.
+				-- empty implementation.
 		end
 
 feature -- Compile
 
 	compile_cc (a_stream: FILE_STREAM; a_sz: CELL [NATURAL_32]): detachable ARRAY [NATURAL_8]
-	    	--| Correspond to CodeContainer::Compile(Stream& peLib, size_t& sz)
+			--| Correspond to CodeContainer::Compile(Stream& peLib, size_t& sz)
 		local
 			l_last: CIL_INSTRUCTION
 			l_sz: NATURAL
@@ -623,7 +620,7 @@ feature -- Compile
 	compile (a_stream: FILE_STREAM)
 			--| Correspond to void Compile(Stream&) { }
 		do
-			-- to be redefined
+				-- to be redefined
 		end
 
 	compile_seh_cc (a_tags: LIST [CIL_INSTRUCTION]; a_offset: INTEGER; a_seh_data: LIST [CIL_SEH_DATA]): INTEGER
@@ -661,13 +658,13 @@ feature -- Compile
 					until
 						l_offset > a_tags.count or else l_exit
 					loop
-						if not a_tags[l_offset].seh_begin then
+						if not a_tags [l_offset].seh_begin then
 							Result := l_offset
 							l_exit := True
 						end
 						if not l_exit then
 							inspect a_tags [l_offset].seh_type
-							when {CIL_SEH}.seh_try  then
+							when {CIL_SEH}.seh_try then
 								Result := compile_seh_cc (a_tags, l_offset, a_seh_data)
 								l_exit := True
 							when {CIL_SEH}.seh_filter then
@@ -676,7 +673,7 @@ feature -- Compile
 								l_offset := l_offset + 2
 								l_current.flags := {CIL_SEH_DATA_ENUM}.filter
 							when {CIL_SEH}.seh_catch then
-								if attached {CIL_TYPE} a_tags[l_offset].seh_catch_type as l_catch_type and then
+								if attached {CIL_TYPE} a_tags [l_offset].seh_catch_type as l_catch_type and then
 									attached {CIL_DATA_CONTAINER} l_catch_type.type_ref as l_class
 								then
 									if l_class.in_assembly_ref
@@ -701,7 +698,7 @@ feature -- Compile
 								l_offset := compile_seh_cc (a_tags, l_offset, a_seh_data)
 							end
 							if l_offset <= a_tags.count then
-								l_current.handler_length := a_tags[l_offset].offset.to_natural_32 - l_current.handler_offset
+								l_current.handler_length := a_tags [l_offset].offset.to_natural_32 - l_current.handler_offset
 								a_seh_data.force (l_current)
 							end
 							l_offset := l_offset + 1

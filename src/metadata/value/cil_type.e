@@ -44,7 +44,7 @@ feature {NONE} --Initialization
 			pinned_set: not pinned
 			show_type_set: not show_type
 			var_num_default: not (basic_type = {CIL_BASIC_TYPE}.type_var or else basic_type = {CIL_BASIC_TYPE}.method_param) implies var_num = 0
-			var_num_set: basic_type = (basic_type = {CIL_BASIC_TYPE}.type_var or else basic_type = {CIL_BASIC_TYPE}.method_param) implies var_num = a_pointer_level
+			var_num_set: (basic_type = {CIL_BASIC_TYPE}.type_var or else basic_type = {CIL_BASIC_TYPE}.method_param) implies var_num = a_pointer_level
 			mod_opt_void: mod_opt = Void
 		end
 

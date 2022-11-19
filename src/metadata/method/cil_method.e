@@ -238,8 +238,6 @@ feature {NONE} -- Implementation
 			l_labels: STRING_TABLE [INTEGER]
 			n, m: INTEGER
 			last_branch: BOOLEAN
-			skipping: BOOLEAN
-
 		do
 			create l_labels.make (0)
 			labels.compare_objects
@@ -267,7 +265,7 @@ feature {NONE} -- Implementation
 								l_val /= n
 							then
 									-- TODO reimplement.
-								{EXCEPTIONS}.raise (generator + " MismatchedStack at " + l_operand.string_value)
+								{EXCEPTIONS}.raise (generator + " MismatchedStack at " + l_operand.string_value.to_string_8)
 							else
 								l_labels.force (n, l_operand.string_value)
 							end
@@ -279,7 +277,7 @@ feature {NONE} -- Implementation
 									l_val /= n
 								then
 										-- TODO reimplement.
-									{EXCEPTIONS}.raise (generator + " MismatchedStack at " + item)
+									{EXCEPTIONS}.raise (generator + " MismatchedStack at " + item.to_string_8)
 								else
 									l_labels.force (n, item)
 								end
@@ -297,7 +295,7 @@ feature {NONE} -- Implementation
 								l_val /= n
 							then
 									-- TODO reimplement.
-								{EXCEPTIONS}.raise (generator + " MismatchedStack at " + ins.label)
+								{EXCEPTIONS}.raise (generator + " MismatchedStack at " + ins.label.to_string_8)
 							else
 								l_labels.force (n, ins.label)
 							end
@@ -584,7 +582,7 @@ feature {NONE} -- Implementation
 	        if (flags.flags & {CIL_QUALIFIERS_ENUM}.PreserveSig) /= 0 then
 	            l_impl_flags := l_impl_flags | {PE_METHOD_DEF_TABLE_ENTRY}.PreserveSig
 	        end
-	        if (flags.Flags() & {CIL_QUALIFIERS_ENUM}.Public) /= 0 then
+	        if (flags.flags & {CIL_QUALIFIERS_ENUM}.Public) /= 0 then
 	           	l_mf_flags := l_mf_flags | {PE_METHOD_DEF_TABLE_ENTRY}.Public
 	        elseif (flags.flags & {CIL_QUALIFIERS_ENUM}.Private) /= 0 then
 	            l_mf_flags := l_mf_flags | {PE_METHOD_DEF_TABLE_ENTRY}.Private
@@ -670,7 +668,7 @@ feature {NONE} -- Implementation
 							Result := l_result.pe_dump (a_stream)
 							l_ctor_index := l_result.prototype.pe_index_call_site
 						end
-						l_data := <<1, 0, 0, 0>>
+						l_data := {ARRAY [NATURAL_8]}<<1, 0, 0, 0>>
 						l_data_sig := l_writer.hash_blob (l_data, l_data.count.to_natural_8)
 						l_writer.set_param_attribute (l_ctor_index, l_data_sig)
 						l_attribute_type := l_writer.param_attribute_type

@@ -284,7 +284,6 @@ feature -- Output
 
 	adorn_generics (a_names: BOOLEAN): STRING_32
 		local
-			l_count: INTEGER
 			l_type: CIL_TYPE
 			l_file: FILE_STREAM
 			bool: BOOLEAN

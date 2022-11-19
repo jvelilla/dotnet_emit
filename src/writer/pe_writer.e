@@ -165,7 +165,7 @@ feature -- Access
 	mzh_header: ARRAY [NATURAL_8]
 			-- MS-DOS header
 		do
-			Result := <<
+			Result :={ARRAY [NATURAL_8]} <<
 					0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00,
 					0x04, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00,
 					0xb8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -191,7 +191,7 @@ feature -- Access
 
 	stream_names: ARRAY [STRING_32]
 		do
-			Result := <<"#~", "#Strings", "#US", "#GUID", "#Blob">>
+			Result := {ARRAY [STRING_32]}<<"#~", "#Strings", "#US", "#GUID", "#Blob">>
 		ensure
 			instance_free: class
 		end
@@ -200,7 +200,7 @@ feature -- Access
 			-- defined as static Byte defaultUS_[];
 			--| Byte defined as 1 byte.
 		do
-			Result := <<0, 3, 0x20, 0, 0>>
+			Result := {ARRAY [NATURAL_8]}<<0, 3, 0x20, 0, 0>>
 			Result.conservative_resize_with_default (0, 1, 8)
 		end
 

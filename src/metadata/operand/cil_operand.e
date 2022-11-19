@@ -251,7 +251,7 @@ feature -- Output
 	il_src_dump (a_file: FILE_STREAM): BOOLEAN
 		local
 			l_buf: ARRAY [NATURAL_8]
-			l_sz, i: INTEGER
+			l_sz: INTEGER
 		do
 			inspect type
 			when {CIL_OPERAND_TYPE}.t_none then
