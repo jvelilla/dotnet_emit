@@ -333,9 +333,9 @@ feature -- Output
 
 	pe_header_dump (a_stream: FILE_STREAM): BOOLEAN
 		local
-			l_name_index: NATURAL
+			l_name_index: NATURAL_64
 			l_table: PE_TABLE_ENTRY_BASE
-			l_blob_index: NATURAL
+			l_blob_index: NATURAL_64
 			l_exit: BOOLEAN
 		do
 			if attached {PE_WRITER} a_stream.pe_writer as l_writer then
@@ -349,7 +349,7 @@ feature -- Output
 					end
 					create {PE_ASSEMBLY_REF_TABLE_ENTRY} l_table.make_with_data ({PE_ASSEMBLY_FLAGS}.PA_none, major.to_natural_16, minor.to_natural_16, build.to_natural_16, revision.to_natural_16, l_name_index, l_blob_index)
 				else
-					create {PE_ASSEMBLY_DEF_TABLE_ENTRY} l_table.make_with_data ({PE_ASSEMBLY_FLAGS}.PA_none, major.to_natural_16, minor.to_natural_16, build.to_natural_16, revision.to_natural_16, l_name_index.to_natural_32)
+					create {PE_ASSEMBLY_DEF_TABLE_ENTRY} l_table.make_with_data ({PE_ASSEMBLY_FLAGS}.PA_none, major.to_natural_16, minor.to_natural_16, build.to_natural_16, revision.to_natural_16, l_name_index)
 				end
 				pe_index := l_writer.add_table_entry (l_table)
 				Result := True

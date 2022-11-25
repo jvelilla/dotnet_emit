@@ -20,6 +20,7 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
+			test_natural_64
 			test_byte_array
 			test_guid;
 			(create {TEST_1}).test;
@@ -270,13 +271,32 @@ feature -- C Byte Array
 			create l_mp.make_from_array (l_arr)
 			l_mp.put_integer_32 (2147483646, 0)
 			l_arr := l_mp.read_array (0, 8)
-
-
 			{BYTE_ARRAY_HELPER}.put_array_integer_32 (l_special, 2147483646, 0)
-
 		end
 
+
+	test_natural_64
+		local
+			l_val: NATURAL_64
+			l_sp: SPECIAL [NATURAL_8]
+			l_mp: MANAGED_POINTER
+		do
+			create l_sp.make_filled (0, 8)
+			fun_test (l_sp)
+			create l_mp.make_from_array (l_sp.to_array)
+			l_val := l_mp.read_natural_64 (0)
+		end
+
+
+	fun_test (a_arr: SPECIAL [NATURAL_8])
+		do
+			{BYTE_ARRAY_HELPER}.put_array_integer_32 (a_arr, 2 | (27 |<< 24) , 0)
+		end
+
+
+
 feature -- GUID
+
 	test_guid
 		local
 			l_guid: ARRAY [NATURAL_8]

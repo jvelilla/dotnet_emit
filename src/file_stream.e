@@ -66,7 +66,7 @@ feature -- Access
 			-- iff debug is enabled.
 
 
-	module_ref: HASH_TABLE [NATURAL, NATURAL]
+	module_ref: HASH_TABLE [NATURAL_64, NATURAL_64]
 
 feature -- Element change
 

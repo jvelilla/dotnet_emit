@@ -736,24 +736,24 @@ feature {NONE} -- Output Implementation
 		local
 			n: NATURAL
 			l_pe_writer: PE_WRITER
-			l_module_index: NATURAL
+			l_module_index: NATURAL_64
 			l_type_def: PE_TYPEDEF_OR_REF
 			l_table: PE_TABLE_ENTRY_BASE
 			l_n: NATURAL
 			l_base_types: CELL [INTEGER]
-			l_system_index: NATURAL
-			l_object_index: NATURAL
-			l_value_index: NATURAL
-			l_enum_index: NATURAL
+			l_system_index: NATURAL_64
+			l_object_index: NATURAL_64
+			l_value_index: NATURAL_64
+			l_enum_index: NATURAL_64
 			l_stream: FILE_STREAM
 			l_mscorlib_assembly: CIL_ASSEMBLY_DEF
-			l_assembly_index: NATURAL
+			l_assembly_index: NATURAL_64
 			l_rs: PE_RESOLUTION_SCOPE
 			l_result: TUPLE [type: CIL_FIND_TYPE; resource: detachable ANY]
 			l_pos: INTEGER
 			l_file_name: STRING_32
-			l_name_index: NATURAL
-			l_guid_index: NATURAL
+			l_name_index: NATURAL_64
+			l_guid_index: NATURAL_64
 		do
 			n := 1
 				-- Give initial PE Indexes for field resolution..

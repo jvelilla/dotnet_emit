@@ -93,7 +93,7 @@ feature -- Access
 
 	mod_opt: detachable CIL_TYPE
 
-	pe_index: NATURAL
+	pe_index: NATURAL_64
 
 	show_type: BOOLEAN assign set_show_type
 
@@ -239,7 +239,7 @@ feature -- Element Change
 			basic_type_set: basic_type = a_type
 		end
 
-	set_pe_index (a_val: NATURAL_32)
+	set_pe_index (a_val: NATURAL_64)
 			-- Set `pe_index` with `a_val`.
 		do
 			pe_index := a_val

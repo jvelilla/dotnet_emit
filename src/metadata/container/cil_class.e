@@ -18,6 +18,7 @@ inherit
 			make as make_container
 		redefine
 			il_src_dump,
+			pe_dump,
 			traverse
 		end
 
@@ -310,6 +311,58 @@ feature -- Output
 			end
 			Result := l_file.text
 			l_file.close
+		end
+
+	pe_dump (a_stream: FILE_STREAM): BOOLEAN
+		do
+			if not generics.is_empty and then
+				generics.first.basic_type /= {CIL_BASIC_TYPE}.type_var
+			then
+
+			elseif in_assembly_ref then
+			else
+			end
+			to_implement ("Work in progress")
+		end
+
+feature {NONE} -- Implementation
+
+	pe_dump_generics (a_stream: FILE_STREAM): BOOLEAN
+		local
+			l_val: SPECIAL [NATURAL_8]
+			l_dis: INTEGER
+			l_sz: CELL [NATURAL_64]
+			l_type: CIL_TYPE
+			l_sig: ARRAY [NATURAL_8]
+			l_signature: NATURAL_64
+			l_table: PE_TYPE_SPEC_TABLE_ENTRY
+		do
+			if pe_index /= 0 then
+				if attached {CIL_CLASS} generic_parent as l_generic_parent and then
+					l_generic_parent.pe_index = 0 -- !genericParent_->PEIndex()
+				then
+					Result := l_generic_parent.pe_dump (a_stream)
+				end
+				if not generics.is_empty then
+					across generics as l_gen loop
+						if l_gen.basic_type = {CIL_BASIC_TYPE}.class_ref and then l_gen.pe_index = 0 then
+							create l_val.make_filled (0, 8)
+								-- we create an special object with 8 slots
+								-- since size_t could have 8 bytes.
+							l_dis := l_gen.render (a_stream, l_val)
+							l_gen.set_pe_index ({BYTE_ARRAY_HELPER}.byte_array_to_natural_64 (l_val))
+						end
+					end
+				end
+				create l_sz.put (0)
+				create l_type.make_with_container (Current)
+				l_sig := {PE_SIGNATURE_GENERATOR_HELPER}.type_sig (l_type, l_sz)
+				if attached {PE_WRITER} a_stream.pe_writer as l_writer then
+					l_signature := l_writer.hash_blob (l_sig, l_sz.item)
+					create l_table.make_with_data (l_signature)
+				end
+			end
+			Result := True
 		end
 
 end

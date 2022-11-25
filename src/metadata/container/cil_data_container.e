@@ -56,7 +56,7 @@ feature -- Access
 	instantiated: BOOLEAN
 			-- use to tell if the class has been instantiated, for example it might be used after a forward reference is resolved.
 
-	pe_index: NATURAL
+	pe_index: NATURAL_64
 			-- metatable index in the PE file for this data container.
 
 	assembly_ref: BOOLEAN
@@ -66,19 +66,19 @@ feature -- Access
 
 feature -- Access
 
-	parent_namespace (a_lib: PE_LIB): NATURAL
+	parent_namespace (a_lib: PE_LIB): NATURAL_64
 			-- The inner namespace parent.
 		do
 			to_implement ("Add implementation")
 		end
 
-	parent_class (a_lib: PE_LIB): NATURAL
+	parent_class (a_lib: PE_LIB): NATURAL_64
 			-- The closest parent class.
 		do
 			to_implement ("Add implementation")
 		end
 
-	parent_assembly (a_lib: PE_LIB): NATURAL
+	parent_assembly (a_lib: PE_LIB): NATURAL_64
 			-- The parent assembly.
 		do
 			to_implement ("Add implementation")
@@ -194,7 +194,7 @@ feature --Element Change
 			is_instantiated: instantiated = True
 		end
 
-	set_peindex (a_index: NATURAL)
+	set_peindex (a_index: NATURAL_64)
 			-- Set `pe_index` with `a_index`.
 		do
 			pe_index := a_index
