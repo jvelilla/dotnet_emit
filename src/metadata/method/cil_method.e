@@ -37,7 +37,7 @@ feature {NONE} --Initialization
 			create {ARRAYED_LIST [CIL_LOCAL]} var_list.make (0)
 			create pinvoke_name.make_empty
 			if not (flags.flags & {CIL_QUALIFIERS_ENUM}.Static /= 0) then
-				prototype.instance (True)
+				prototype.set_instance (True)
 			end
 		ensure
 			import_name_set: import_name.is_empty
@@ -128,7 +128,7 @@ feature -- Change Element
 		end
 
 	add_local (a_local: CIL_LOCAL)
-			-- Aadd a local variable `a_local`.
+			-- Add a local variable `a_local`.
 		do
 			a_local.set_index (var_list.count)
 			var_list.force (a_local)
@@ -145,7 +145,14 @@ feature -- Change Element
 			end
 				-- TODO double check if at some point
 				-- prototype could be Void.
-			prototype.instance (a_instance)
+			prototype.set_instance (a_instance)
+		end
+
+	set_max_stack (a_stack: INTEGER)
+		do
+			max_stack := a_stack
+		ensure
+			max_stack_set: max_stack = a_stack
 		end
 
 feature -- Operations
@@ -158,7 +165,7 @@ feature -- Operations
 					--calculate_live
 					--calculate_max_stack
 					--optimize_locals
-				optimize_code
+				optimize_code -- From {CIL_CODE_CONTAINER}
 			else
 					-- do nothing.
 			end

@@ -152,7 +152,7 @@ feature -- Element change
 			vararg_params.force (a_param)
 		end
 
-	instance (a_instance: BOOLEAN)
+	set_instance (a_instance: BOOLEAN)
 			-- Make it an instance member.
 		do
 			if a_instance then
@@ -234,7 +234,32 @@ feature -- Element change
 			ref_set: ref = a_val
 		end
 
+	set_generic_param_count (a_count: INTEGER)
+			-- Set `generic_param_count` with `a_count`
+		do
+			generic_param_count := a_count
+		ensure
+			generic_param_count_set: generic_param_count = a_count
+		end
+
 feature -- Status Report
+
+	param_count: NATURAL_64
+			-- Return parameter count.
+		do
+			Result := params.count.to_natural_64
+		end
+
+	vararg_param_count: NATURAL_64
+		do
+			Result := vararg_params.count.to_natural_64
+		end
+
+	instance: BOOLEAN
+			-- Is an instance member?
+		do
+			Result := not not(flags & {CIL_METHOD_SIGNATURE_ATTRIBUTES}.instance_flag /= 0)
+		end
 
 	get_param (i: INTEGER; by_ordinal: BOOLEAN): CIL_PARAM
 			-- Get a parameter.
@@ -429,9 +454,48 @@ feature -- Output
 			Result := True
 		end
 
-	il_signature_dump (a_file: FILE_STREAM)
+	il_signature_dump (a_stream: FILE_STREAM)
+		local
+			l_result: BOOLEAN
 		do
-			to_implement("Add implementation")
+			if attached return_type as l_return_type then
+				l_result := l_return_type.il_src_dump (a_stream)
+			end
+			a_stream.put_string (" ")
+			if attached {CIL_CLASS}container as l_class and then
+				not l_class.generics.is_empty
+			then
+				if l_class.flags.flags & {CIL_QUALIFIERS_ENUM}.value /= 0 then
+					a_stream.put_string ("valuetype ")
+				else
+					a_stream.put_string ("class ")
+				end
+				a_stream.put_string ({CIL_QUALIFIERS}.name ({STRING_32}"", container, False))
+				a_stream.put_string (l_class.adorn_generics (false))
+				a_stream.put_string ("::'")
+				a_stream.put_string (name)
+				a_stream.put_string ("'(") -- double check
+			else
+				a_stream.put_string ({CIL_QUALIFIERS}.name (name, container, False))
+			end
+			a_stream.put_string ("(")
+			across params as param loop
+				if attached {CIL_TYPE} param.type as l_type and then
+					attached {CIL_DATA_CONTAINER} l_type.type_ref as l_class and then
+					l_class.flags.flags & {CIL_QUALIFIERS_ENUM}.value /= 0
+				then
+					a_stream.put_string ("valuetype ")
+				else
+					a_stream.put_string ("class ")
+				end
+				if attached {CIL_TYPE} param.type as l_type then
+					l_result := l_type.il_src_dump (a_stream)
+				end
+				if @ param.target_index + 1 < @ param.last_index then
+					a_stream.put_string (", ")
+				end
+			end
+			a_stream.put_string (")")
 		end
 
 
