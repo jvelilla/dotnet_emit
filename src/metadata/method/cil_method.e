@@ -496,7 +496,7 @@ feature {NONE} -- Implementation
 			l_method_index: PE_MEMBER_FORWARDED
 			l_attribute_type: NATURAL_64
 			l_attribute_data: NATURAL_64
-			l_ctor_index: NATURAL
+			l_ctor_index: NATURAL_64
 			l_data: ARRAY [NATURAL_8]
 			l_data_sig: NATURAL_64
 			l_attribute:  PE_CUSTOM_ATTRIBUTE
