@@ -49,13 +49,13 @@ feature -- Output
 			a_file.put_string (name)
 			a_file.put_string ("' {")
 			a_file.put_new_line
-			Result := Precursor(a_file)
+			Result := Precursor (a_file)
 			a_file.put_string ("}")
 			a_file.put_new_line
 			Result := True
 		end
 
-	pe_dump(a_stream: FILE_STREAM): BOOLEAN
+	pe_dump (a_stream: FILE_STREAM): BOOLEAN
 		local
 			l_full_name: STRING_32
 		do
