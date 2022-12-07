@@ -14,18 +14,18 @@ feature -- Access
 
 	table_index: INTEGER
 		do
-			Result := 0
+			fixme ("Make it deferred")
 		end
 
 feature -- Operations
 
 	render (a_sizes: ARRAY [NATURAL_64]; a_bytes: ARRAY [NATURAL_8]): NATURAL_64
 		do
-			to_implement  ("Add implementation")
+			fixme ("Make it deferred")
 		end
 
 	get (a_sizes: ARRAY [NATURAL_64]; a_bytes: ARRAY [NATURAL_8]): NATURAL_64
 		do
-			to_implement ("Add implementation")
+			fixme ("Make it deferred")
 		end
 end

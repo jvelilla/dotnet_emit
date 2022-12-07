@@ -56,7 +56,7 @@ feature -- Access
 
 feature -- Operations
 
-	render (a_sizes: ARRAY [NATURAL_64]; a_bytes: ARRAY [NATURAL_8]): NATURAL_64
+	render (a_sizes: ARRAY [NATURAL_64]; a_bytes: ARRAY [NATURAL_8]; a_pos: INTEGER): NATURAL_64
 		require
 			valid_size: a_sizes.capacity = {PE_TABLE_CONSTANTS}.max_tables + {PE_TABLE_CONSTANTS}.extra_indexes
 		local
@@ -65,16 +65,16 @@ feature -- Operations
 		do
 			l_val := ((index |<< get_index_shift) + tag.to_natural_64).to_natural_32
 			if has_index_overflow (a_sizes) then
-				{BYTE_ARRAY_HELPER}.put_array_natural_32 (a_bytes, l_val, 0)
+				{BYTE_ARRAY_HELPER}.put_array_natural_32 (a_bytes, l_val, a_pos)
 				l_rv := 4
 			else
-				{BYTE_ARRAY_HELPER}.put_array_natural_16_with_natural_32 (a_bytes, l_val, 0)
+				{BYTE_ARRAY_HELPER}.put_array_natural_16_with_natural_32 (a_bytes, l_val, a_pos)
 				l_rv := 2
 			end
 			Result := l_rv
 		end
 
-	get (a_sizes: ARRAY [NATURAL_64]; a_bytes: ARRAY [NATURAL_8]): NATURAL_64
+	get (a_sizes: ARRAY [NATURAL_64]; a_bytes: ARRAY [NATURAL_8]; a_pos: INTEGER): NATURAL_64
 		require
 			valid_size: a_sizes.capacity = {PE_TABLE_CONSTANTS}.max_tables + {PE_TABLE_CONSTANTS}.extra_indexes
 		local
@@ -82,10 +82,10 @@ feature -- Operations
 			l_rv: NATURAL_64
 		do
 			if has_index_overflow (a_sizes) then
-				l_val := {BYTE_ARRAY_HELPER}.byte_array_to_natural_32 (a_bytes.to_special)
+				l_val := {BYTE_ARRAY_HELPER}.byte_array_to_natural_32 (a_bytes.to_special, a_pos)
 				l_rv := 4
 			else
-				l_val := {BYTE_ARRAY_HELPER}.byte_array_to_natural_16 (a_bytes.to_special)
+				l_val := {BYTE_ARRAY_HELPER}.byte_array_to_natural_16 (a_bytes.to_special, a_pos)
 				l_rv := 2
 			end
 			index := l_val |>> get_index_shift
