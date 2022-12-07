@@ -1,4 +1,4 @@
-note
+﻿note
 	description: "Class desribing the module table."
 	date: "$Date$"
 	revision: "$Revision$"
