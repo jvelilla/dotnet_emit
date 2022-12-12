@@ -47,14 +47,14 @@ feature -- Operations
 		local
 			l_bytes: NATURAL_64
 		do
-				-- Write the flags to the destination buffer `a_dest`.
+				-- Write the type to the destination buffer `a_dest`.
 			{BYTE_ARRAY_HELPER}.put_array_natural_8 (a_dest.to_special, type, 0)
 			{BYTE_ARRAY_HELPER}.put_array_natural_8 (a_dest.to_special, 0, 1)
 
 				-- Initialize the number of bytes written
 			l_bytes := 2
 
-				-- Write the parent_index and value_index to the buffer and update the number of byes
+				-- Write the parent_index and value_index to the buffer and update the number of bytes
 			l_bytes := l_bytes + parent_index.render (a_sizes, a_dest, l_bytes.to_integer_32)
 			l_bytes := l_bytes + value_index.render (a_sizes, a_dest, l_bytes.to_integer_32)
 
