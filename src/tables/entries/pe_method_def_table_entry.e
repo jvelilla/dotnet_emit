@@ -162,11 +162,9 @@ feature -- Operations
 			impl_flags := {BYTE_ARRAY_HELPER}.byte_array_to_integer_16 (a_src, l_bytes.to_integer_32)
 			l_bytes := l_bytes + 2
 
-
 				-- Set the flags (from a_src)  to flags.
 			flags := {BYTE_ARRAY_HELPER}.byte_array_to_integer_16 (a_src, l_bytes.to_integer_32)
 			l_bytes := l_bytes + 2
-
 
 				-- Get the name_index, signature_index, param_index
 				-- to the buffer and update the number of bytes.
@@ -178,4 +176,5 @@ feature -- Operations
 				-- Return the number of bytes readed.
 			Result := l_bytes
 		end
+
 end

@@ -249,6 +249,16 @@ feature -- Access
 			instance_free: class
 		end
 
+	byte_array_to_natural_8 (a_arr: SPECIAL[NATURAL_8]; a_pos: INTEGER): NATURAL_8
+		local
+			l_mp: MANAGED_POINTER
+		do
+			create l_mp.make_from_array (a_arr.to_array)
+			Result := l_mp.read_natural_8 (a_pos)
+		ensure
+			instance_free: class
+		end
+
 	byte_array_to_integer_32 (a_arr: SPECIAL[NATURAL_8]; a_pos: INTEGER): INTEGER_32
 		local
 			l_mp: MANAGED_POINTER
