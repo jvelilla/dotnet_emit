@@ -94,6 +94,8 @@ feature -- Operations
 		do
 				-- always assume the right hash algorithm as there is currently only one spec'd
 				-- Initialize the number of bytes readed
+				-- TODO check if we need to get the hash ffrom the buffer and set to
+				-- hash_alg_id	
 			l_bytes := 4
 
 				-- Assembly version
