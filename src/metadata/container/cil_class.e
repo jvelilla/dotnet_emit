@@ -322,7 +322,7 @@ feature -- Output
 			elseif in_assembly_ref then
 				pe_dump_assembly_ref (a_stream)
 			else
-				pe_dump_generics (a_stream)
+				pe_dump_default (a_stream)
 			end
 			Result := True
 
@@ -488,7 +488,7 @@ feature {NONE} -- Implementation
 						l_name.append_character (((i // 26) + l_char_A.code).to_character_32)
 						l_name.append_character (((i \\ 26) + l_char_A.code).to_character_32)
 						l_name_str := l_writer.hash_string (l_name)
-						create {PE_GENERIC_PARAM_CONSTRAINTS_TABLE_ENTRY} l_table.make_with_data (i.to_natural_16, 0, l_owner, l_name_str)
+						create {PE_GENERIC_PARAM_TABLE_ENTRY} l_table.make_with_data (i.to_natural_16, 0, l_owner, l_name_str)
 						fixme ("Doube check the index i when we create l_table. ")
 						l_dis := l_writer.add_table_entry (l_table)
 					end

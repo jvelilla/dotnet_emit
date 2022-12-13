@@ -20,7 +20,7 @@ create
 
 feature {NONE} -- Implementation
 
-	make_with_data (a_number: NATURAL_16; a_flags: NATURAL_16; a_owner: PE_TYPE_OR_METHOD_DEF; a_name: NATURAL)
+	make_with_data (a_number: NATURAL_16; a_flags: NATURAL_16; a_owner: PE_TYPE_OR_METHOD_DEF; a_name: NATURAL_64)
 		do
 			number := a_number
 			flags := a_flags
