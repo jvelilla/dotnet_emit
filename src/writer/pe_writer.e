@@ -17,14 +17,8 @@ create
 
 feature {NONE} -- Initialization
 
-		--  the maximum number of PE objects we will generate
-		--  this includes the following:
-		--  	.text / cildata
-		--   	.reloc (for the single necessary reloc entry)
-		--    	.rsrc (not implemented yet, will hold version info record)
-
 	make (is_exe: BOOLEAN; is_gui: BOOLEAN; a_snk_file: STRING_32)
-			--
+			-- Creation procedure to instance a new object.
 		do
 			dll := not is_exe
 			gui := is_gui
@@ -106,19 +100,20 @@ feature -- Access
 
 	pe_header: detachable PE_HEADER
 			-- `pe_header'
+			-- TODO double check if we need a list of headers.
 
 	language: NATURAL_32
 			-- `language'
 			-- C++ defined as four bytes
 			-- DWord language_;
 
-	image_base: NATURAL assign set_image_base
+	image_base: NATURAL_64 assign set_image_base
 			-- `image_base'
 
-	object_align: NATURAL assign set_object_align
+	object_align: NATURAL_64 assign set_object_align
 			-- `object_align'
 
-	file_align: NATURAL assign set_file_align
+	file_align: NATURAL_64 assign set_file_align
 			-- `file_align'
 
 	param_attribute_data: NATURAL_64 assign set_param_attribute_data
@@ -159,13 +154,14 @@ feature -- Access
 	product_version: detachable ARRAY [NATURAL_16]
 
 	stream_headers: ARRAY2 [NATURAL_64]
+			-- defined as streamHeaders_[5][2];
 
 	rsa_encoder: CIL_RSA_ENCODER
 
 	mzh_header: ARRAY [NATURAL_8]
 			-- MS-DOS header
 		do
-			Result :={ARRAY [NATURAL_8]} <<
+			Result := {ARRAY [NATURAL_8]} <<
 					0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00,
 					0x04, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00,
 					0xb8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -191,7 +187,7 @@ feature -- Access
 
 	stream_names: ARRAY [STRING_32]
 		do
-			Result := {ARRAY [STRING_32]}<<"#~", "#Strings", "#US", "#GUID", "#Blob">>
+			Result := {ARRAY [STRING_32]} <<"#~", "#Strings", "#US", "#GUID", "#Blob">>
 		ensure
 			instance_free: class
 		end
@@ -200,7 +196,7 @@ feature -- Access
 			-- defined as static Byte defaultUS_[];
 			--| Byte defined as 1 byte.
 		do
-			Result := {ARRAY [NATURAL_8]}<<0, 3, 0x20, 0, 0>>
+			Result := {ARRAY [NATURAL_8]} <<0, 3, 0x20, 0, 0>>
 			Result.conservative_resize_with_default (0, 1, 8)
 		end
 
@@ -426,6 +422,15 @@ feature -- Element Change
 			tables [n].table.force (a_entry)
 			debug ("pe_writer")
 					-- Check C++ code  PEWriter::AddTableEntry
+--					#if 0
+--					    // seems to alway apply
+--					    if( n == tMethodDef )
+--					    { {}
+--					        MethodDefTableEntry* e = (MethodDefTableEntry*)entry;
+--					        const int id = tables_[n].size();
+--					        Q_ASSERT( id == e->method_->methodDef_ );
+--					    }
+--					#endif
 				to_implement ("Double check if its requried.")
 			end
 			Result := tables [n].table.count.to_natural_32
@@ -495,36 +500,36 @@ feature -- Stream functions
 				us.base [us.size.to_integer_32] := l_blob_len.to_natural_8
 				us.increment_size
 			elseif l_blob_len <= 0x3fff then
-				us.base[us.size.to_integer_32] := ((l_blob_len |>> 8) | 0x80).to_natural_8
+				us.base [us.size.to_integer_32] := ((l_blob_len |>> 8) | 0x80).to_natural_8
 				us.increment_size
-        		us.base[us.size.to_integer_32] := l_blob_len.to_natural_8
-        		us.increment_size
-        	else
-		        l_blob_len := l_blob_len & 0x1fffffff
-		        us.base[us.size.to_integer_32] := ((l_blob_len |>> 24) | 0xc0).to_natural_8
-		        us.increment_size
-		        us.base[us.size.to_integer_32] := (l_blob_len |>> 16).to_natural_8
-		        us.increment_size
-		        us.base[us.size.to_integer_32] := (l_blob_len |>> 8).to_natural_8
-		        us.increment_size
-		        us.base[us.size.to_integer_32] := (l_blob_len |>> 0).to_natural_8
-		    	us.increment_size
-		    end
+				us.base [us.size.to_integer_32] := l_blob_len.to_natural_8
+				us.increment_size
+			else
+				l_blob_len := l_blob_len & 0x1fffffff
+				us.base [us.size.to_integer_32] := ((l_blob_len |>> 24) | 0xc0).to_natural_8
+				us.increment_size
+				us.base [us.size.to_integer_32] := (l_blob_len |>> 16).to_natural_8
+				us.increment_size
+				us.base [us.size.to_integer_32] := (l_blob_len |>> 8).to_natural_8
+				us.increment_size
+				us.base [us.size.to_integer_32] := (l_blob_len |>> 0).to_natural_8
+				us.increment_size
+			end
 
 			across a_str as i loop
 				n := i.code
-		        if (n & 0xff00)/= 0 then
-		            l_flag := 1
-		        elseif (n <= 8 or else (n >= 0x0e and then n < 0x20) or else n = 0x27 or else n = 0x2d or else n = 0x7f) then
-		            l_flag := 1
-		        end
-		        us.base[us.size.to_integer_32] := (n & 0xff).to_natural_8
-		        us.increment_size
-		        us.base[us.size.to_integer_32] := (n |>> 8).to_natural_8
-		        us.increment_size
-		    end
-		    us.base [us.size.to_integer_32] := l_flag.to_natural_8
-		    us.increment_size
+				if (n & 0xff00) /= 0 then
+					l_flag := 1
+				elseif (n <= 8 or else (n >= 0x0e and then n < 0x20) or else n = 0x27 or else n = 0x2d or else n = 0x7f) then
+					l_flag := 1
+				end
+				us.base [us.size.to_integer_32] := (n & 0xff).to_natural_8
+				us.increment_size
+				us.base [us.size.to_integer_32] := (n |>> 8).to_natural_8
+				us.increment_size
+			end
+			us.base [us.size.to_integer_32] := l_flag.to_natural_8
+			us.increment_size
 		end
 
 	hash_guid (a_guid: ARRAY [NATURAL_8]): NATURAL_64
@@ -575,11 +580,19 @@ feature -- Stream functions
 
 feature -- Various Operations
 
-	RVA_bytes (a_bytes: ARRAY [NATURAL_8]; a_data: NATURAL_64): NATURAL_64
+	RVA_bytes (a_bytes: ARRAY [NATURAL_8]; a_data_len: NATURAL_64): NATURAL_64
 			--  this is the 'cildata' contents.   Again we emit into the cildata and it returns the offset in
-			--  the cildata to use.  It does NOT return the rva immediately, that is calculated later
+			--  the cildata to use.  It does NOT return the rva immediately, that is calculated later.
+		local
+			l_pos: INTEGER
+			l_rv: NATURAL_64
 		do
-			to_implement ("Add implementation")
+			l_pos := rva.size.to_integer_32
+			rva.confirm (a_data_len + l_pos.to_natural_64 - rva.size)
+			l_rv := rva.size
+			rva.increment_size_by (l_pos.to_natural_64 - rva.size + a_data_len)
+			a_bytes.make_from_special (rva.base)
+			Result := l_rv
 		end
 
 	set_base_classes (a_object_index: NATURAL_64; a_value_index: NATURAL_64; a_enum_index: NATURAL_64; a_system_index: NATURAL_64)
@@ -626,19 +639,70 @@ feature -- Various Operations
 	next_table_index (a_table: INTEGER): NATURAL
 		do
 				-- TODO double check if we need the + 1.
-			Result := (tables[a_table].size + 1).to_natural_32
+			Result := (tables [a_table].size + 1).to_natural_32
 		end
 
 	write_file (a_corFlags: INTEGER; a_out: FILE_STREAM): BOOLEAN
+		local
+			l_rv: BOOLEAN
+			l_context: CIL_SHA1_CONTEXT
+			l_pos: INTEGER
+			l_off: INTEGER
+			l_sz: INTEGER
+			l_dis: INTEGER
 		do
 			output_file := a_out
 			if not is_entry_point and not dll then
 				{EXCEPTIONS}.raise (generator + " Missing Entry Point ")
 			end
 			calculate_objects (a_corflags)
+
+			l_rv := write_mz_data and then write_pe_header and then write_pe_objects and then write_iat and then write_core_header and then
+			        write_static_data and then write_methods and then write_metadata_headers and then write_tables and then write_strings and then
+			        write_us and then write_guid and then write_blob and then write_imports and then write_entry_point and then write_hash_data and then
+			        --write_version_info (a_file_name: STRING_32)
+			        write_relocs
+
+			if l_rv and then snk_len /= 0 then
+				create l_context.make
+				l_context.sha1_reset
+				hash_part_of_file (l_context, 0, 0x80)
+					-- if there was something between here and the PE header we would hash it now
+
+			        -- well we are supposed to zero the pe header checksum and the
+			        -- authenticode signature pointer, but, since we don't set them nonzero anyway
+			        -- this is fine.
+				hash_part_of_file (l_context, 0x80, 0xf8)
+
+				fixme("Double check this call to hash_part_of_file")
+				hash_part_of_file (l_context, (0x80 + 0xf8).to_natural_64, ({PE_OBJECT}.size_of * if attached pe_header as l_header then l_header.num_objects else {INTEGER_16}0 end).to_natural_64)
+
+
+				 	-- yes we do NOT hash the gap between the objects table and the first section.
+				if attached pe_header as l_header and then attached pe_objects as l_objects and then
+					attached cor20_header as l_cor20_header then
+					across 0 |..| (l_header.num_objects - 1)  as i  loop
+						if l_objects [i + 1].virtual_addr > l_cor20_header.strong_name_signature[1].to_integer_32 and then
+							l_cor20_header.strong_name_signature [1].to_integer_32 < l_objects [i + 1].virtual_addr + l_objects[i + 1].virtual_size
+						then
+							l_off := l_cor20_header.strong_name_signature [1].to_integer_32 - l_objects [i].virtual_addr
+							l_sz := l_cor20_header.strong_name_signature [2].to_integer_32
+							hash_part_of_file (l_context, l_objects [i + 1].raw_ptr.to_natural_64, l_off.to_natural_64)
+							hash_part_of_file (l_context, (l_objects [i + 1].raw_ptr + l_off + l_sz).to_natural_64, (l_objects [i + 1].raw_size - l_off - l_sz).to_natural_64)
+						else
+							hash_part_of_file (l_context, l_objects [i + 1].raw_ptr.to_natural_64, l_objects [i + 1].raw_size.to_natural_64)
+						end
+					end
+				end
+
+				l_dis := l_context.sha1_result
+
+			end
+
+			to_implement ("Work in progress")
 		end
 
-	hash_part_of_file (a_context: CIL_SHA1_CONTEXT; a_offset: NATURAL; a_len: NATURAL)
+	hash_part_of_file (a_context: CIL_SHA1_CONTEXT; a_offset: NATURAL_64; a_len: NATURAL_64)
 		do
 			to_implement ("Add implementation")
 		end
@@ -655,7 +719,6 @@ feature -- Various Operations
 			--| defined as
 			--|  static DWord cildata_rva_;
 			--|  DWord =:: four bytes
-
 
 feature -- Operations
 
