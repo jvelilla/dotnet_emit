@@ -661,10 +661,10 @@ feature -- Various Operations
 			calculate_objects (a_corflags)
 
 			l_rv := write_mz_data and then write_pe_header and then write_pe_objects and then write_iat and then write_core_header and then
-			        write_static_data and then write_methods and then write_metadata_headers and then write_tables and then write_strings and then
-			        write_us and then write_guid and then write_blob and then write_imports and then write_entry_point and then write_hash_data and then
-			        --write_version_info (a_file_name: STRING_32)
-			        write_relocs
+				write_static_data and then write_methods and then write_metadata_headers and then write_tables and then write_strings and then
+				write_us and then write_guid and then write_blob and then write_imports and then write_entry_point and then write_hash_data and then
+					--write_version_info (a_file_name: STRING_32)
+				write_relocs
 
 			if l_rv and then snk_len /= 0 then
 				create l_context.make
@@ -672,21 +672,20 @@ feature -- Various Operations
 				hash_part_of_file (l_context, 0, 0x80)
 					-- if there was something between here and the PE header we would hash it now
 
-			        -- well we are supposed to zero the pe header checksum and the
-			        -- authenticode signature pointer, but, since we don't set them nonzero anyway
-			        -- this is fine.
+					-- well we are supposed to zero the pe header checksum and the
+					-- authenticode signature pointer, but, since we don't set them nonzero anyway
+					-- this is fine.
 				hash_part_of_file (l_context, 0x80, 0xf8)
 
-				fixme("Double check this call to hash_part_of_file")
-				hash_part_of_file (l_context, (0x80 + 0xf8).to_natural_64, ({PE_OBJECT}.size_of * if attached pe_header as l_header then l_header.num_objects else {INTEGER_16}0 end).to_natural_64)
+				fixme ("Double check this call to hash_part_of_file")
+				hash_part_of_file (l_context, (0x80 + 0xf8).to_natural_64, ({PE_OBJECT}.size_of * if attached pe_header as l_header then l_header.num_objects else {INTEGER_16} 0 end).to_natural_64)
 
-
-				 	-- yes we do NOT hash the gap between the objects table and the first section.
+					-- yes we do NOT hash the gap between the objects table and the first section.
 				if attached pe_header as l_header and then attached pe_objects as l_objects and then
 					attached cor20_header as l_cor20_header then
-					across 0 |..| (l_header.num_objects - 1)  as i  loop
-						if l_objects [i + 1].virtual_addr > l_cor20_header.strong_name_signature[1].to_integer_32 and then
-							l_cor20_header.strong_name_signature [1].to_integer_32 < l_objects [i + 1].virtual_addr + l_objects[i + 1].virtual_size
+					across 0 |..| (l_header.num_objects - 1) as i loop
+						if l_objects [i + 1].virtual_addr > l_cor20_header.strong_name_signature [1].to_integer_32 and then
+							l_cor20_header.strong_name_signature [1].to_integer_32 < l_objects [i + 1].virtual_addr + l_objects [i + 1].virtual_size
 						then
 							l_off := l_cor20_header.strong_name_signature [1].to_integer_32 - l_objects [i].virtual_addr
 							l_sz := l_cor20_header.strong_name_signature [2].to_integer_32
@@ -713,8 +712,24 @@ feature -- Various Operations
 		end
 
 	hash_part_of_file (a_context: CIL_SHA1_CONTEXT; a_offset: NATURAL_64; a_len: NATURAL_64)
+		local
+			l_buf: ARRAY[NATURAL_8]
+			l_sz: INTEGER
+			l_len: INTEGER
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream then
+				l_stream.go (a_offset.to_integer_32)
+				create l_buf.make_filled (0, 1, 8192)
+				from
+					l_sz := 0x0
+				until
+					l_sz >= a_len.to_integer_32
+				loop
+					l_len := if a_len.to_integer_32 - l_sz > 8192 then 8192 else a_len.to_integer_32 -l_sz end
+					l_stream.read_stream (l_buf, l_len)
+					l_sz := l_sz + l_len
+				end
+			end
 		end
 
 	cildata_rva: PE_CILDATA_RVA
@@ -1301,7 +1316,7 @@ feature {NONE} -- Helper features
 		do
 			create Result.make (a_len)
 			across 1 |..| a_len as i loop
-				Result.append_character (a_arr[i].to_character_8)
+				Result.append_character (a_arr [i].to_character_8)
 			end
 		end
 
