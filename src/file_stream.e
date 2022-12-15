@@ -166,6 +166,21 @@ feature -- Element change
 		end
 
 
+	read_stream (a_buf: ARRAY [NATURAL_8]; a_len: INTEGER_32)
+			-- Read a string of at most `a_len' bound characters
+			-- or until end of file.
+			-- Make result available in `a_buf'.
+		local
+			l_converter: BYTE_ARRAY_CONVERTER
+		do
+			if attached output_stream as l_stream then
+				l_stream.read_stream (a_len)
+				create l_converter.make_from_string (l_stream.last_string)
+				a_buf.make_from_array (l_converter.to_natural_8_array)
+			end
+		end
+
+
 feature -- PE_LIB	
 
 	find (a_name: STRING_32): detachable ANY
