@@ -102,6 +102,16 @@ feature -- Operations
 		end
 
 
+feature -- Convertion
+
+	message_digest_byte: ARRAY [NATURAL_8]
+		do
+			create Result.make_filled (0, 1, message_digest.count)
+			across 1 |..| message_digest.count as i loop
+				Result [i] := message_digest [i].to_natural_8
+			end
+		end
+
 feature {NONE} -- implementation	
 
 	sha1_pad_message

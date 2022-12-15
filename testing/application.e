@@ -20,6 +20,8 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
+			test_byte_array_to_string
+			file_test
 			test_natural_64
 			test_byte_array
 			test_guid;
@@ -272,6 +274,27 @@ feature -- C Byte Array
 			l_mp.put_integer_32 (2147483646, 0)
 			l_arr := l_mp.read_array (0, 8)
 			{BYTE_ARRAY_HELPER}.put_array_integer_32 (l_special, 2147483646, 0)
+
+			l_arr := <<0,0,0,0,0,0,0,0>>
+			{BYTE_ARRAY_HELPER}.put_array_integer_32 (l_arr.to_special, 26, 0)
+		end
+
+	test_byte_array_to_string
+		local
+			l_arr: ARRAY [NATURAL_8]
+			l_bc: BYTE_ARRAY_CONVERTER
+			str: STRING_32
+
+		do
+			create l_bc.make_from_string ("This is an apple")
+			l_arr := l_bc.to_natural_8_array
+
+			create str.make (l_arr.count)
+			across 1 |..| l_arr.count as i loop
+				str.append_character (l_arr[i].to_character_8)
+			end
+			print (str)
+
 		end
 
 
@@ -293,6 +316,18 @@ feature -- C Byte Array
 			{BYTE_ARRAY_HELPER}.put_array_integer_32 (a_arr, 2 | (27 |<< 24) , 0)
 		end
 
+
+	file_test
+		local
+			l_file: PLAIN_TEXT_FILE
+		do
+			create l_file.make_create_read_write ("test.txt")
+
+			l_file.put_string ("This is an apple")
+			l_file.go (l_file.count -7)
+			l_file.put_string (" sam")
+			l_file.close
+		end
 
 
 feature -- GUID
@@ -341,6 +376,9 @@ feature -- GUID
 		    memcpy($a_guid, rnd.data(), rnd.size());
 			}"
 		end
+
+
+
 
 note
 	copyright: "Copyright (c) 1984-2019, Eiffel Software and others"

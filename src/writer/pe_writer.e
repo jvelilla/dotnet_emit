@@ -36,7 +36,7 @@ feature {NONE} -- Initialization
 			create blob.make
 			create us.make
 			create strings.make
-			create rsa_encoder
+			create rsa_encoder.make
 			create stream_headers.make_filled (0, 5, 2)
 		ensure
 			dll_set: dll = not is_exe
@@ -650,8 +650,11 @@ feature -- Various Operations
 			l_off: INTEGER
 			l_sz: INTEGER
 			l_dis: INTEGER
+			l_sig_hash: ARRAY [NATURAL_8]
+			l_sig_len: CELL [NATURAL_64]
+			l_output_file: like output_file
 		do
-			output_file := a_out
+			l_output_file := a_out
 			if not is_entry_point and not dll then
 				{EXCEPTIONS}.raise (generator + " Missing Entry Point ")
 			end
@@ -696,10 +699,17 @@ feature -- Various Operations
 				end
 
 				l_dis := l_context.sha1_result
+				create l_sig_hash.make_filled (0, 1, 16384)
+				l_sig_hash.area.fill_with (0xfe, 1, 128)
+				create l_sig_len.put (0)
+				rsa_encoder.get_strong_name_signature (l_sig_hash, l_sig_len, l_context.message_digest_byte, 20)
 
+					-- TODO review
+				l_output_file.go (snk_base.to_integer_32)
+				l_output_file.put_string (byte_array_to_string (l_sig_hash, l_sig_len.item.to_integer_32))
 			end
 
-			to_implement ("Work in progress")
+			Result := l_rv
 		end
 
 	hash_part_of_file (a_context: CIL_SHA1_CONTEXT; a_offset: NATURAL_64; a_len: NATURAL_64)
@@ -1284,6 +1294,16 @@ feature -- Constants
 			-- 	.text / cildata
 			-- 	.reloc (for the single necessary reloc entry)
 			-- 	.rsrc (not implemented yet, will hold version info record)
+
+feature {NONE} -- Helper features
+
+	byte_array_to_string (a_arr: ARRAY [NATURAL_8]; a_len: INTEGER): STRING_32
+		do
+			create Result.make (a_len)
+			across 1 |..| a_len as i loop
+				Result.append_character (a_arr[i].to_character_8)
+			end
+		end
 
 feature {NONE} -- C++ externals
 

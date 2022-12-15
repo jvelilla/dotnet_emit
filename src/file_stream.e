@@ -156,6 +156,16 @@ feature -- Element change
 		end
 
 
+	go (abs_position: INTEGER_32)
+			-- Go to the absolute `position'.
+			-- (New position may be beyond physical length.)
+		do
+			if attached output_stream as l_stream then
+				l_stream.go (abs_position)
+			end
+		end
+
+
 feature -- PE_LIB	
 
 	find (a_name: STRING_32): detachable ANY
