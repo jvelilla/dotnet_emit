@@ -1181,12 +1181,18 @@ feature -- Write operations
 
 	write_mz_data: BOOLEAN
 		do
-			to_implement ("Add implementation")
+			put_mz_header (mzh_header)
+			Result := True
 		end
 
 	write_pe_header: BOOLEAN
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream and then
+			   attached pe_header as l_pe_header
+			then
+				pe_base := l_stream.count.to_natural_32
+				put_pe_header (l_pe_header)
+			end
 		end
 
 	write_pe_objects: BOOLEAN
@@ -1275,7 +1281,7 @@ feature -- Write operations
 			to_implement ("Add implementation")
 		end
 
-feature -- Output Helpers
+feature {NONE} -- Output Helpers
 
 	put (a_data: ANY; a_size: NATURAL)
 		do
@@ -1283,6 +1289,21 @@ feature -- Output Helpers
 					-- outputFile_->write((char *)data, size)
 			end
 		end
+
+	put_mz_header (a_data: ARRAY [NATURAL_8])
+		do
+			if attached output_file as l_stream then
+				l_stream.put_string (byte_array_to_string (a_data, a_data.count))
+			end
+		end
+
+	put_pe_header (a_header: PE_HEADER)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (a_header.managed_pointer)
+			end
+		end
+
 
 	offset: NATURAL_64
 			-- the output position.

@@ -126,6 +126,14 @@ feature -- Element change
 			end
 		end
 
+
+	put_managed_pointer (mp: MANAGED_POINTER)
+		do
+			if attached output_stream as l_stream then
+				l_stream.put_managed_pointer (mp, l_stream.count, mp.count)
+			end
+		end
+
 	put_new_line
 		do
 			if attached output_stream as l_stream then
@@ -180,6 +188,13 @@ feature -- Element change
 			end
 		end
 
+	count: INTEGER
+			-- size in bytes.
+		do
+			if attached output_stream as l_stream then
+				Result := l_stream.count
+			end
+		end
 
 feature -- PE_LIB	
 
