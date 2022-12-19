@@ -713,7 +713,7 @@ feature -- Various Operations
 
 	hash_part_of_file (a_context: CIL_SHA1_CONTEXT; a_offset: NATURAL_64; a_len: NATURAL_64)
 		local
-			l_buf: ARRAY[NATURAL_8]
+			l_buf: ARRAY [NATURAL_8]
 			l_sz: INTEGER
 			l_len: INTEGER
 		do
@@ -725,7 +725,7 @@ feature -- Various Operations
 				until
 					l_sz >= a_len.to_integer_32
 				loop
-					l_len := if a_len.to_integer_32 - l_sz > 8192 then 8192 else a_len.to_integer_32 -l_sz end
+					l_len := if a_len.to_integer_32 - l_sz > 8192 then 8192 else a_len.to_integer_32 - l_sz end
 					l_stream.read_stream (l_buf, l_len)
 					l_sz := l_sz + l_len
 				end
@@ -1188,21 +1188,43 @@ feature -- Write operations
 	write_pe_header: BOOLEAN
 		do
 			if attached output_file as l_stream and then
-			   attached pe_header as l_pe_header
+				attached pe_header as l_pe_header
 			then
 				pe_base := l_stream.count.to_natural_32
 				put_pe_header (l_pe_header)
 			end
+			Result := True
 		end
 
 	write_pe_objects: BOOLEAN
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream and then
+				attached pe_objects as l_objects
+			then
+				put_pe_objects (l_objects)
+			end
+			Result := True
 		end
 
 	write_iat: BOOLEAN
+		local
+			l_import_rva: NATURAL_32
+			l_n: NATURAL_32
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream and then
+				attached pe_header as l_pe_header
+			then
+				align (file_align)
+				l_import_rva := l_pe_header.import_rva.to_natural_32
+				l_n := l_import_rva + ({PE_IMPORT_DIR}.size_of * 2 + 4).to_natural_32
+				if (l_n \\ 16) /= 0 then
+					l_n := l_n + 16 - (l_n \\ 16)
+				end
+				put_natural_32 (l_n)
+				l_n := 0
+				put_natural_32 (l_n)
+			end
+			Result := True
 		end
 
 	write_core_header: BOOLEAN
@@ -1304,6 +1326,33 @@ feature {NONE} -- Output Helpers
 			end
 		end
 
+	put_pe_objects (a_objects: LIST [PE_OBJECT])
+		do
+			if attached output_file as l_stream then
+				across a_objects as l_item loop
+					l_stream.put_managed_pointer (l_item.managed_pointer)
+				end
+			end
+		end
+
+	put_array (a_data: ARRAY [NATURAL_8])
+		local
+			mp: MANAGED_POINTER
+		do
+			fixme ("Double check if we need to merge the current code with put_mz_header")
+			create mp.make (a_data.count)
+			mp.put_array (a_data, 0)
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (mp)
+			end
+		end
+
+	put_natural_32 (a_value: NATURAL_32)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_natural_32 (a_value)
+			end
+		end
 
 	offset: NATURAL_64
 			-- the output position.
@@ -1317,9 +1366,27 @@ feature {NONE} -- Output Helpers
 			to_implement ("Add implementation")
 		end
 
-	align (a_offset: NATURAL)
+	align (a_align: NATURAL_64)
+		local
+			l_current_offset: NATURAL_64
+			l_array: ARRAY [NATURAL_8]
+			l_bytes_needed: NATURAL_64
+
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream then
+					-- Current offset.
+				l_current_offset := l_stream.count.to_natural_64
+
+					-- Check if the current offset is align with the desired value.
+				if (l_current_offset \\ a_align) /= 0 then
+						-- assumes the alignments are 65536 or less
+
+						-- Compute the number of 0 bytes needed to align the offset.
+					l_bytes_needed := a_align - (l_current_offset \\ a_align)
+					create l_array.make_filled (0, 1, l_bytes_needed.to_integer_32)
+					put_array (l_array)
+				end
+			end
 		end
 
 feature -- Constants
