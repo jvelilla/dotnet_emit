@@ -183,7 +183,7 @@ feature -- Access
 			instance_free: class
 		end
 
-	meta_header: DOTNET_META_HEADER
+	meta_header: PE_DOTNET_META_HEADER
 
 	stream_names: ARRAY [STRING_32]
 		do
@@ -221,7 +221,7 @@ feature -- Access
 
 feature {NONE} -- Implemenation
 
-	meta_header1: DOTNET_META_HEADER
+	meta_header1: PE_DOTNET_META_HEADER
 		do
 			create Result
 			Result.set_signature (1)
