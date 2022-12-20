@@ -224,9 +224,10 @@ feature {NONE} -- Implemenation
 	meta_header1: PE_DOTNET_META_HEADER
 		do
 			create Result
-			Result.set_signature (1)
+			Result.set_signature ({PE_DOTNET_META_HEADER}.meta_sig)
 			Result.set_major (1)
-			Result.set_minor (0)
+			Result.set_minor (1)
+			Result.set_reserved (0)
 		ensure
 			instance_free: class
 		end
@@ -1301,7 +1302,11 @@ feature -- Write operations
 
 	write_metadata_headers: BOOLEAN
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream then
+				align (4)
+				put_metadata_headers(meta_header1)
+
+			end
 		end
 
 	write_tables: BOOLEAN
@@ -1410,6 +1415,13 @@ feature {NONE} -- Output Helpers
 		do
 			if attached output_file as l_stream then
 				l_stream.put_managed_pointer (a_core20_header.managed_pointer)
+			end
+		end
+
+	put_metadata_headers (a_header: PE_DOTNET_META_HEADER)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (a_header.managed_pointer)
 			end
 		end
 
