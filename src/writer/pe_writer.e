@@ -955,10 +955,10 @@ feature -- Operations
 
 			l_n := 0
 			create l_counts.make_filled (0, 1, Max_tables + Extra_indexes)
-			l_counts [t_string] := strings.size
-			l_counts [t_us] := us.size
-			l_counts [t_guid] := guid.size
-			l_counts [t_blob] := blob.size
+			l_counts [t_string + 1] := strings.size
+			l_counts [t_us + 1] := us.size
+			l_counts [t_guid + 1] := guid.size
+			l_counts [t_blob + 1] := blob.size
 
 			across 0 |..| (max_tables - 1) as ic loop
 				if not tables [ic + 1].is_empty then
@@ -1229,22 +1229,74 @@ feature -- Write operations
 
 	write_core_header: BOOLEAN
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream and then
+			   attached cor20_header as l_cor20_header
+			then
+				cor_base := l_stream.count.to_natural_32
+				put_core20_header (l_cor20_header)
+			end
+			Result := True
 		end
 
 	write_hash_data: BOOLEAN
+		local
+			l_buf: ARRAY [NATURAL_8]
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream then
+				snk_base := l_stream.count.to_natural_32
+				if snk_base /= 0 then
+						-- the original code does the following
+						-- Byte buf[2048]
+        				-- memset(buf, 0, snkLen_)
+        				-- put(buf, snkLen_)
+        				-- but if snkLen_ is greater than 2048, the buffer
+        				-- will not be large enough.
+					create l_buf.make_filled (0, 1, snk_base.to_integer_32)
+					to_implement ("To improve performance we can create a put_ntimes_natural_8 (0, snk_base")
+					put_array (l_buf)
+
+				end
+			end
 		end
 
 	write_static_data: BOOLEAN
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream and then
+			   rva.size /= 0
+		    then
+		    		-- To double check if the rva.base size is the
+		    		-- same as rva.size.
+		    	put_array (rva.base.to_array)
+		    	align (8)
+			end
+			Result := True
 		end
 
 	write_methods: BOOLEAN
+		local
+			l_counts: ARRAY [NATURAL_64]
+			l_dis: NATURAL_64
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream then
+				create l_counts.make_filled (0, 1, max_tables + extra_indexes)
+				l_counts [t_string + 1] := strings.size
+				l_counts [t_us + 1] := us.size
+				l_counts [t_guid + 1] := guid.size
+				l_counts [t_blob + 1] := blob.size
+
+				across 0 |..| (max_tables - 1) as i loop
+					l_counts [i + 1] := tables [i + 1].size.to_natural_64
+				end
+
+				across methods as m loop
+					if m.flags & {PE_METHOD}.cil /= 0 then
+						if m.flags & 3 = {PE_METHOD}.fatformat  then
+							align (3)
+						end
+						l_dis := m.write (l_counts, l_stream)
+					end
+				end
+			end
 		end
 
 	write_metadata_headers: BOOLEAN
@@ -1354,6 +1406,14 @@ feature {NONE} -- Output Helpers
 			end
 		end
 
+	put_core20_header (a_core20_header: PE_DOTNET_COR20_HEADER)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (a_core20_header.managed_pointer)
+			end
+		end
+
+
 	offset: NATURAL_64
 			-- the output position.
 		do
@@ -1388,6 +1448,8 @@ feature {NONE} -- Output Helpers
 				end
 			end
 		end
+
+
 
 feature -- Constants
 
