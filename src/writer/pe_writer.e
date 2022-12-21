@@ -1381,22 +1381,42 @@ feature -- Write operations
 
 	write_strings: BOOLEAN
 		do
-			to_implement ("Add implementation")
+				-- TODO check if we need to use
+				-- string.size
+			put_array (strings.base.to_array)
+			align (4)
+			Result := True
 		end
 
 	write_us: BOOLEAN
 		do
-			to_implement ("Add implementation")
+			if us.size = 0 then
+				put_array (default_us)
+			else
+					-- TODO check if we need to use
+					-- us.size
+				put_array (us.base.to_array)
+			end
+			align (4)
+			Result := True
 		end
 
 	write_guid: BOOLEAN
 		do
-			to_implement ("Add implementation")
+				-- Check if we need to use guid.size
+				-- put_special_with_size (guid.base, guid.size)
+			put_array (guid.base.to_array)
+			align (4)
+			Result := True
 		end
 
 	write_blob: BOOLEAN
 		do
-			to_implement ("Add implementation")
+				-- Check if we need to use guid.size
+				-- put_special_with_size (guid.base, guid.size)
+			put_array (blob.base.to_array)
+			align (4)
+			Result := True
 		end
 
 	write_imports: BOOLEAN
