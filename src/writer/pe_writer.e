@@ -1301,12 +1301,38 @@ feature -- Write operations
 		end
 
 	write_metadata_headers: BOOLEAN
+		local
+			n: INTEGER
+			l_flags: NATURAL_16
+			l_data: NATURAL_16
 		do
 			if attached output_file as l_stream then
 				align (4)
 				put_metadata_headers(meta_header1)
+				n := rtv_string.count
+				if n \\ 4 /= 0 then
+					n := n + 4 - (n \\ 4)
+				end
+				put_integer_32 (n)
+				put_string (rtv_string)
+				align (4)
+				l_flags := 0
+				put_natural_16 (0)
+				l_data := 5
+				put_natural_16 (l_data)
+				across 1 |..| 5 as i loop
 
+						-- TODO double check
+						-- C++ code uses put(&streamHeaders_[i][0], 4);
+					put_natural_32 (stream_headers[i,1].to_natural_32)
+					put_natural_32 (stream_headers[i,2].to_natural_32)
+						-- TODO double check
+						-- C++ code uses put(streamNames_[i], strlen(streamNames_[i]) + 1);
+					put_string (stream_names[i])
+					align (4)
+				end
 			end
+			Result := True
 		end
 
 	write_tables: BOOLEAN
@@ -1411,6 +1437,29 @@ feature {NONE} -- Output Helpers
 			end
 		end
 
+
+	put_natural_64 (a_value: NATURAL_64)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_natural_64 (a_value)
+			end
+		end
+
+	put_integer_32 (a_value: INTEGER_32)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_integer (a_value)
+			end
+		end
+
+	put_natural_16 (a_value: NATURAL_16)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_natural_16 (a_value)
+			end
+		end
+
+
 	put_core20_header (a_core20_header: PE_DOTNET_COR20_HEADER)
 		do
 			if attached output_file as l_stream then
@@ -1425,6 +1474,12 @@ feature {NONE} -- Output Helpers
 			end
 		end
 
+	put_string (a_str: READABLE_STRING_GENERAL)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_string (a_str)
+			end
+		end
 
 	offset: NATURAL_64
 			-- the output position.
