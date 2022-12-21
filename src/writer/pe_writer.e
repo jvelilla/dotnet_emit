@@ -29,7 +29,7 @@ feature {NONE} -- Initialization
 			create snk_file.make_from_string (a_snk_file)
 			create meta_header.make_from_other (meta_header1)
 			create string_map.make (0)
-			create tables.make_filled (create {DNL_TABLE}.make, 1, Max_tables)
+			initialize_dnl_tables
 			create {ARRAYED_LIST [PE_METHOD]} methods.make (0)
 			create rva.make
 			create guid.make
@@ -65,6 +65,15 @@ feature {NONE} -- Initialization
 			string_map_empty: string_map.is_empty
 			methods_empty: methods.is_empty
 		end
+
+	initialize_dnl_tables
+		do
+			create {ARRAYED_LIST [DNL_TABLE]} tables.make ({PE_TABLE_CONSTANTS}.max_tables)
+			across 1 |..| {PE_TABLE_CONSTANTS}.max_tables as  i loop
+				tables.force((create {DNL_TABLE}.make))
+			end
+		end
+
 
 feature -- Constant
 
@@ -204,7 +213,7 @@ feature -- Access
 			-- reflection of the String stream so that we can keep from doing duplicates.
 			-- right now we don't check duplicates on any of the other streams...
 
-	tables: ARRAY [DNL_TABLE]
+	tables: LIST [DNL_TABLE]
 			-- tables that can appear in a PE file.
 
 	methods: LIST [PE_METHOD]
@@ -647,7 +656,6 @@ feature -- Various Operations
 		local
 			l_rv: BOOLEAN
 			l_context: CIL_SHA1_CONTEXT
-			l_pos: INTEGER
 			l_off: INTEGER
 			l_sz: INTEGER
 			l_dis: INTEGER
@@ -1305,6 +1313,7 @@ feature -- Write operations
 			n: INTEGER
 			l_flags: NATURAL_16
 			l_data: NATURAL_16
+			l_names: STRING
 		do
 			if attached output_file as l_stream then
 				align (4)
@@ -1326,9 +1335,12 @@ feature -- Write operations
 						-- C++ code uses put(&streamHeaders_[i][0], 4);
 					put_natural_32 (stream_headers[i,1].to_natural_32)
 					put_natural_32 (stream_headers[i,2].to_natural_32)
-						-- TODO double check
+
+						-- Adding a null character a the end of the string
 						-- C++ code uses put(streamNames_[i], strlen(streamNames_[i]) + 1);
-					put_string (stream_names[i])
+					l_names := stream_names[i].twin
+					l_names.append_character ('%U')
+					put_string (l_names)
 					align (4)
 				end
 			end
@@ -1381,9 +1393,7 @@ feature -- Write operations
 
 	write_strings: BOOLEAN
 		do
-				-- TODO check if we need to use
-				-- string.size
-			put_array (strings.base.to_array)
+			put_array_with_size (strings.base.to_array, strings.size.to_integer_32)
 			align (4)
 			Result := True
 		end
@@ -1393,9 +1403,7 @@ feature -- Write operations
 			if us.size = 0 then
 				put_array (default_us)
 			else
-					-- TODO check if we need to use
-					-- us.size
-				put_array (us.base.to_array)
+				put_array_with_size (us.base.to_array, us.size.to_integer_32)
 			end
 			align (4)
 			Result := True
@@ -1403,24 +1411,41 @@ feature -- Write operations
 
 	write_guid: BOOLEAN
 		do
-				-- Check if we need to use guid.size
-				-- put_special_with_size (guid.base, guid.size)
-			put_array (guid.base.to_array)
+			put_array_with_size (guid.base.to_array, guid.size.to_integer_32)
 			align (4)
 			Result := True
 		end
 
 	write_blob: BOOLEAN
 		do
-				-- Check if we need to use guid.size
-				-- put_special_with_size (guid.base, guid.size)
-			put_array (blob.base.to_array)
+			put_array_with_size (blob.base.to_array, blob.size.to_integer_32)
 			align (4)
 			Result := True
 		end
 
 	write_imports: BOOLEAN
+		local
+			l_dir: ARRAY [PE_IMPORT_DIR]
+			l_item: NATURAL_32
+			l_main_name: NATURAL_32
 		do
+			if attached output_file as l_stream and then
+				attached pe_header as l_pe_header
+			then
+				create l_dir.make_filled (create {PE_IMPORT_DIR}, 1, 2)
+				l_dir [1] := (create {PE_IMPORT_DIR})
+				l_dir [1].thunk_pos2 := l_pe_header.import_rva + 2 * {PE_IMPORT_DIR}.size_of
+				l_item := (l_dir [1].thunk_pos2 + 8).to_natural_32
+				if l_item \\ 16 /= 0 then
+					l_item := l_item + 16 - (l_item \\ 16)
+				end
+				l_main_name := l_item
+				l_item := l_item + 2
+				l_item := l_item + 12  -- in C++ sizeof("_CorXXXMain");
+				l_dir [1].dll_name := l_item.to_integer_32
+				l_dir [1].thunk_pos := l_pe_header.iat_rva
+				put_import_dir (l_dir)
+			end
 			to_implement ("Add implementation")
 		end
 
@@ -1469,11 +1494,15 @@ feature {NONE} -- Output Helpers
 		end
 
 	put_pe_objects (a_objects: LIST [PE_OBJECT])
+		local
+			l_mp: MANAGED_POINTER
 		do
 			if attached output_file as l_stream then
+				create l_mp.make (0)
 				across a_objects as l_item loop
-					l_stream.put_managed_pointer (l_item.managed_pointer)
+					l_mp.append (l_item.managed_pointer)
 				end
+				l_stream.put_managed_pointer (l_mp)
 			end
 		end
 
@@ -1489,13 +1518,24 @@ feature {NONE} -- Output Helpers
 			end
 		end
 
+	put_array_with_size (a_data: ARRAY [NATURAL_8]; a_size: INTEGER_32)
+		local
+			mp: MANAGED_POINTER
+		do
+			fixme ("Double check if we need to merge the current code with put_mz_header")
+			create mp.make (a_size)
+			mp.put_array (a_data.subarray (1, a_size), 0)
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (mp)
+			end
+		end
+
 	put_natural_32 (a_value: NATURAL_32)
 		do
 			if attached output_file as l_stream then
 				l_stream.put_natural_32 (a_value)
 			end
 		end
-
 
 	put_natural_64 (a_value: NATURAL_64)
 		do
@@ -1517,7 +1557,6 @@ feature {NONE} -- Output Helpers
 				l_stream.put_natural_16 (a_value)
 			end
 		end
-
 
 	put_core20_header (a_core20_header: PE_DOTNET_COR20_HEADER)
 		do
@@ -1544,6 +1583,19 @@ feature {NONE} -- Output Helpers
 		do
 			if attached output_file as l_stream then
 				l_stream.put_managed_pointer (a_header.managed_pointer)
+			end
+		end
+
+	put_import_dir (a_dirs: ARRAY [PE_IMPORT_DIR])
+		local
+			l_mp: MANAGED_POINTER
+		do
+			if attached output_file as l_stream then
+				create l_mp.make (0)
+				across a_dirs as l_dir  loop
+					l_mp.append (l_dir.managed_pointer)
+				end
+				l_stream.put_managed_pointer (l_mp)
 			end
 		end
 

@@ -20,6 +20,9 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
+			test_pe_reader
+			test_pe_import_dir
+			test_pe_write_string
 			test_byte_array_to_string
 			file_test
 			test_natural_64
@@ -104,7 +107,7 @@ feature -- Initialization
 			end
 			print ({UTF_CONVERTER}.string_32_to_utf_8_string_8 ("Do you wish to send anyway?"))
 			IO.put_new_line
-			print ({UTF_CONVERTER}.string_32_to_utf_8_string_8 ("In the last decade, the German word %"über%" has come to be used frequently in colloquial English."))
+			print ({UTF_CONVERTER}.string_32_to_utf_8_string_8 ("In the last decade, the German word %"ï¿½ber%" has come to be used frequently in colloquial English."))
 		end
 
 	escaped_string (string_value: STRING_32): STRING_32
@@ -328,6 +331,65 @@ feature -- C Byte Array
 			l_file.put_string (" sam")
 			l_file.close
 		end
+
+
+feature -- PE Reader
+
+	test_pe_reader
+		local
+			l_reader: PE_READER
+		do
+			create l_reader.make
+		end
+
+feature -- PE Writer tests
+
+	test_pe_import_dir
+		local
+			l_file: RAW_FILE
+			l_dir: ARRAY [PE_IMPORT_DIR]
+			l_item: NATURAL_32
+			l_main_name: NATURAL_32
+			l_mp: MANAGED_POINTER
+		do
+			create l_dir.make_filled (create{PE_IMPORT_DIR}, 1,2)
+			l_dir [1] := (create {PE_IMPORT_DIR})
+			l_dir [1].thunk_pos2 := 10 + 2 * {PE_IMPORT_DIR}.size_of
+			l_item := (l_dir [1].thunk_pos2 + 8).to_natural_32
+			if l_item \\ 16 /= 0 then
+				l_item := l_item + 16 - (l_item \\ 16)
+			end
+			l_main_name := l_item
+			l_item := l_item + 2
+			l_item := l_item + 12  -- in C++ sizeof("_CorXXXMain");
+			l_dir [1].dll_name := l_item.to_integer_32
+			l_dir [1].thunk_pos := 10
+
+			create l_file.make_create_read_write ("eiffel_test.bin")
+
+			create l_mp.make (0)
+			across l_dir as dir loop
+				l_mp.append (dir.managed_pointer)
+			end
+
+			l_file.put_managed_pointer (l_mp, l_file.count, l_mp.count)
+			l_file.close
+		end
+
+
+	test_pe_write_string
+		local
+			l_file: RAW_FILE
+			l_str: STRING
+		do
+			l_str := "#Strings"
+			l_str.append_character('%U')
+			create l_file.make_create_read_write ("eiffel_test.bin")
+
+			l_file.put_string (l_str)
+			l_file.close
+		end
+
 
 
 feature -- GUID
