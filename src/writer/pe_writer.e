@@ -1336,8 +1336,47 @@ feature -- Write operations
 		end
 
 	write_tables: BOOLEAN
+		local
+			l_counts: ARRAY [NATURAL_64]
+			l_item: NATURAL_32
+			l_buffer: ARRAY [NATURAL_8]
+			l_sz: NATURAL_32
 		do
-			to_implement ("Add implementation")
+			if attached output_file as l_stream and then
+				attached tables_header as l_tables_header
+			then
+				create l_counts.make_filled (0, 1, max_tables + extra_indexes)
+				l_counts [t_string + 1] := strings.size
+				l_counts [t_us + 1] := us.size
+				l_counts [t_guid + 1] := guid.size
+				l_counts [t_blob + 1] := blob.size
+
+				put_tables_header (l_tables_header)
+
+				across 0 |..| (max_tables - 1) as i loop
+					l_counts [i + 1] := tables [i + 1].size.to_natural_64
+					l_item :=  l_counts [i + 1].to_natural_32
+					if l_item /= 0 then
+						put_natural_32 (l_item)
+					end
+				end
+
+				across 0 |..| (max_tables - 1) as i loop
+					l_item := tables [i + 1].size.to_natural_32
+					across 0 |..| (l_item - 1).to_integer_32 as j loop
+						create l_buffer.make_filled (0, 1, 512)
+						l_sz := tables[i + 1].table[j + 1].render (l_counts, l_buffer).to_natural_32
+							-- TODO double check
+							-- this is not efficient.
+						put_array (l_buffer.subarray (1, l_sz.as_integer_32))
+					end
+				end
+				align (4)
+				-- Commented code in C++ implementation to be double check.
+				-- Dword n = 0
+				-- put(&n, sizeof(n));	 	
+			end
+			Result := True
 		end
 
 	write_strings: BOOLEAN
@@ -1478,6 +1517,13 @@ feature {NONE} -- Output Helpers
 		do
 			if attached output_file as l_stream then
 				l_stream.put_string (a_str)
+			end
+		end
+
+	put_tables_header (a_header: PE_DOTNET_META_TABLES_HEADER)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (a_header.managed_pointer)
 			end
 		end
 
