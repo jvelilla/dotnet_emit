@@ -38,6 +38,9 @@ feature {NONE} -- Initialization
 			create strings.make
 			create rsa_encoder.make
 			create stream_headers.make_filled (0, 5, 2)
+			create assembly_version.make_filled (0, 1, 4)
+			create file_version.make_filled (0, 1, 4)
+			create product_version.make_filled (0, 1, 4)
 		ensure
 			dll_set: dll = not is_exe
 			gui_set: gui = is_gui
@@ -69,11 +72,10 @@ feature {NONE} -- Initialization
 	initialize_dnl_tables
 		do
 			create {ARRAYED_LIST [DNL_TABLE]} tables.make ({PE_TABLE_CONSTANTS}.max_tables)
-			across 1 |..| {PE_TABLE_CONSTANTS}.max_tables as  i loop
-				tables.force((create {DNL_TABLE}.make))
+			across 1 |..| {PE_TABLE_CONSTANTS}.max_tables as i loop
+				tables.force ((create {DNL_TABLE}.make))
 			end
 		end
-
 
 feature -- Constant
 
@@ -154,13 +156,13 @@ feature -- Access
 
 	output_file: detachable FILE_STREAM
 
-	assembly_version: detachable ARRAY [NATURAL_16]
+	assembly_version: ARRAY [NATURAL_16]
 			--| C++ defined as Word assemblyVersion_[4];
 			--| Word is two bytes.
 
-	file_version: detachable ARRAY [NATURAL_16]
+	file_version: ARRAY [NATURAL_16]
 
-	product_version: detachable ARRAY [NATURAL_16]
+	product_version: ARRAY [NATURAL_16]
 
 	stream_headers: ARRAY2 [NATURAL_64]
 			-- defined as streamHeaders_[5][2];
@@ -1220,8 +1222,7 @@ feature -- Write operations
 			l_import_rva: NATURAL_32
 			l_n: NATURAL_32
 		do
-			if attached output_file as l_stream and then
-				attached pe_header as l_pe_header
+			if attached pe_header as l_pe_header
 			then
 				align (file_align)
 				l_import_rva := l_pe_header.import_rva.to_natural_32
@@ -1239,7 +1240,7 @@ feature -- Write operations
 	write_core_header: BOOLEAN
 		do
 			if attached output_file as l_stream and then
-			   attached cor20_header as l_cor20_header
+				attached cor20_header as l_cor20_header
 			then
 				cor_base := l_stream.count.to_natural_32
 				put_core20_header (l_cor20_header)
@@ -1256,27 +1257,28 @@ feature -- Write operations
 				if snk_base /= 0 then
 						-- the original code does the following
 						-- Byte buf[2048]
-        				-- memset(buf, 0, snkLen_)
-        				-- put(buf, snkLen_)
-        				-- but if snkLen_ is greater than 2048, the buffer
-        				-- will not be large enough.
+						-- memset(buf, 0, snkLen_)
+						-- put(buf, snkLen_)
+						-- but if snkLen_ is greater than 2048, the buffer
+						-- will not be large enough.
 					create l_buf.make_filled (0, 1, snk_base.to_integer_32)
 					to_implement ("To improve performance we can create a put_ntimes_natural_8 (0, snk_base")
 					put_array (l_buf)
 
 				end
 			end
+			Result := True
 		end
 
 	write_static_data: BOOLEAN
 		do
 			if attached output_file as l_stream and then
-			   rva.size /= 0
-		    then
-		    		-- To double check if the rva.base size is the
-		    		-- same as rva.size.
-		    	put_array (rva.base.to_array)
-		    	align (8)
+				rva.size /= 0
+			then
+					-- To double check if the rva.base size is the
+					-- same as rva.size.
+				put_array (rva.base.to_array)
+				align (8)
 			end
 			Result := True
 		end
@@ -1299,13 +1301,14 @@ feature -- Write operations
 
 				across methods as m loop
 					if m.flags & {PE_METHOD}.cil /= 0 then
-						if m.flags & 3 = {PE_METHOD}.fatformat  then
+						if m.flags & 3 = {PE_METHOD}.fatformat then
 							align (3)
 						end
 						l_dis := m.write (l_counts, l_stream)
 					end
 				end
 			end
+			Result := True
 		end
 
 	write_metadata_headers: BOOLEAN
@@ -1313,36 +1316,34 @@ feature -- Write operations
 			n: INTEGER
 			l_flags: NATURAL_16
 			l_data: NATURAL_16
-			l_names: STRING
+			l_names: STRING_32
 		do
-			if attached output_file as l_stream then
-				align (4)
-				put_metadata_headers(meta_header1)
-				n := rtv_string.count
-				if n \\ 4 /= 0 then
-					n := n + 4 - (n \\ 4)
-				end
-				put_integer_32 (n)
-				put_string (rtv_string)
-				align (4)
-				l_flags := 0
-				put_natural_16 (0)
-				l_data := 5
-				put_natural_16 (l_data)
-				across 1 |..| 5 as i loop
+			align (4)
+			put_metadata_headers (meta_header1)
+			n := rtv_string.count
+			if n \\ 4 /= 0 then
+				n := n + 4 - (n \\ 4)
+			end
+			put_integer_32 (n)
+			put_string (rtv_string)
+			align (4)
+			l_flags := 0
+			put_natural_16 (0)
+			l_data := 5
+			put_natural_16 (l_data)
+			across 1 |..| 5 as i loop
 
-						-- TODO double check
-						-- C++ code uses put(&streamHeaders_[i][0], 4);
-					put_natural_32 (stream_headers[i,1].to_natural_32)
-					put_natural_32 (stream_headers[i,2].to_natural_32)
+					-- TODO double check
+					-- C++ code uses put(&streamHeaders_[i][0], 4);
+				put_natural_32 (stream_headers [i, 1].to_natural_32)
+				put_natural_32 (stream_headers [i, 2].to_natural_32)
 
-						-- Adding a null character a the end of the string
-						-- C++ code uses put(streamNames_[i], strlen(streamNames_[i]) + 1);
-					l_names := stream_names[i].twin
-					l_names.append_character ('%U')
-					put_string (l_names)
-					align (4)
-				end
+					-- Adding a null character a the end of the string
+					-- C++ code uses put(streamNames_[i], strlen(streamNames_[i]) + 1);
+				l_names := stream_names [i].twin
+				l_names.append_character ('%U')
+				put_string (l_names)
+				align (4)
 			end
 			Result := True
 		end
@@ -1354,8 +1355,7 @@ feature -- Write operations
 			l_buffer: ARRAY [NATURAL_8]
 			l_sz: NATURAL_32
 		do
-			if attached output_file as l_stream and then
-				attached tables_header as l_tables_header
+			if attached tables_header as l_tables_header
 			then
 				create l_counts.make_filled (0, 1, max_tables + extra_indexes)
 				l_counts [t_string + 1] := strings.size
@@ -1367,7 +1367,7 @@ feature -- Write operations
 
 				across 0 |..| (max_tables - 1) as i loop
 					l_counts [i + 1] := tables [i + 1].size.to_natural_64
-					l_item :=  l_counts [i + 1].to_natural_32
+					l_item := l_counts [i + 1].to_natural_32
 					if l_item /= 0 then
 						put_natural_32 (l_item)
 					end
@@ -1377,16 +1377,16 @@ feature -- Write operations
 					l_item := tables [i + 1].size.to_natural_32
 					across 0 |..| (l_item - 1).to_integer_32 as j loop
 						create l_buffer.make_filled (0, 1, 512)
-						l_sz := tables[i + 1].table[j + 1].render (l_counts, l_buffer).to_natural_32
+						l_sz := tables [i + 1].table [j + 1].render (l_counts, l_buffer).to_natural_32
 							-- TODO double check
 							-- this is not efficient.
 						put_array (l_buffer.subarray (1, l_sz.as_integer_32))
 					end
 				end
 				align (4)
-				-- Commented code in C++ implementation to be double check.
-				-- Dword n = 0
-				-- put(&n, sizeof(n));	 	
+					-- Commented code in C++ implementation to be double check.
+					-- Dword n = 0
+					-- put(&n, sizeof(n));
 			end
 			Result := True
 		end
@@ -1429,8 +1429,7 @@ feature -- Write operations
 			l_item: NATURAL_32
 			l_main_name: NATURAL_32
 		do
-			if attached output_file as l_stream and then
-				attached pe_header as l_pe_header
+			if attached pe_header as l_pe_header
 			then
 				create l_dir.make_filled (create {PE_IMPORT_DIR}, 1, 2)
 				l_dir [1] := (create {PE_IMPORT_DIR})
@@ -1441,22 +1440,204 @@ feature -- Write operations
 				end
 				l_main_name := l_item
 				l_item := l_item + 2
-				l_item := l_item + 12  -- in C++ sizeof("_CorXXXMain");
+				l_item := l_item + 12 -- in C++ sizeof("_CorXXXMain");
 				l_dir [1].dll_name := l_item.to_integer_32
 				l_dir [1].thunk_pos := l_pe_header.iat_rva
 				put_import_dir (l_dir)
+				put_natural_32 (l_main_name)
+				l_item := 0
+					-- thunk
+				put_natural_32 (l_item)
+				align (16)
+					-- ord
+				put_natural_16 (l_item.to_natural_16)
+				if dll then
+					put_string (create {STRING_32}.make_from_string ("_CorDllMain"))
+				else
+					put_string (create {STRING_32}.make_from_string ("mscoree.dll"))
+				end
+				align (4)
 			end
-			to_implement ("Add implementation")
+			Result := True
 		end
 
 	write_entry_point: BOOLEAN
+		local
+			l_item: NATURAL_32
 		do
-			to_implement ("Add implementation")
+			if attached pe_objects as l_pe_objects and then
+				attached pe_header as l_pe_header
+			then
+				l_item := 0
+				put_natural_16 (l_item.to_natural_16)
+				l_item := 0x25ff -- JMP[xxx]
+				put_natural_16 (l_item.to_natural_16)
+				l_item := l_pe_objects [1].virtual_addr.to_natural_32 + l_pe_header.image_base.to_natural_32
+				put_natural_32 (l_item)
+			end
+			Result := True
 		end
 
 	write_version_info (a_file_name: STRING_32): BOOLEAN
+		local
+			l_res_table: PE_RESOURCE_DIR_TABLE
+			l_dir: PE_RESOURCE_DIR_ENTRY
+			l_resource_data: PE_RESOURCE_DATA_ENTRY
+			l_n1: NATURAL_16
+			l_version_info_string: STRING_32
+			l_version_info: PE_FIXED_VERSION_INFO
+			l_n: NATURAL_64
+			l_path: PATH
+			l_index: INTEGER
+			l_file_name: STRING_32
+			l_versions: ARRAYED_LIST [STRING_32]
+			l_buf: STRING_32
 		do
-			to_implement ("Add implementation")
+			if attached pe_header as l_pe_header then
+				align (file_align)
+				create l_res_table
+				create l_dir
+				l_res_table.ident_entry := 1
+
+					--version info
+				l_dir.rva_or_id := 16
+
+					-- points to a subdir
+				l_dir.escape := 1
+
+				l_dir.subdir_or_data := {PE_RESOURCE_DIR_TABLE}.size_of + {PE_RESOURCE_DIR_ENTRY}.size_of
+				put_resource_dir_table (l_res_table)
+				put_resource_dir_entry (l_dir)
+
+					-- index
+				l_dir.rva_or_id := 1
+				l_dir.subdir_or_data := l_dir.subdir_or_data + {PE_RESOURCE_DIR_TABLE}.size_of + {PE_RESOURCE_DIR_ENTRY}.size_of
+				put_resource_dir_table (l_res_table)
+				put_resource_dir_entry (l_dir)
+
+				l_dir.rva_or_id := 0
+					-- points to a data table
+				l_dir.escape := 0
+				l_dir.subdir_or_data := l_dir.subdir_or_data + {PE_RESOURCE_DIR_TABLE}.size_of + {PE_RESOURCE_DIR_ENTRY}.size_of
+				put_resource_dir_table (l_res_table)
+				put_resource_dir_entry (l_dir)
+
+				create l_resource_data
+				l_resource_data.rva := l_dir.subdir_or_data + l_pe_header.resource_rva + {PE_RESOURCE_DATA_ENTRY}.size_of
+				l_resource_data.size := l_pe_header.resource_size - l_dir.subdir_or_data + {PE_RESOURCE_DATA_ENTRY}.size_of
+				put_resource_data_entry (l_resource_data)
+				l_n1 := l_resource_data.size_of.to_natural_16
+					-- length of resource
+				put_natural_16 (l_n1)
+					-- length of the first record
+				l_n1 := 0x34
+				put_natural_16 (l_n1)
+					-- Type bin
+				l_n1 := 0
+				put_natural_16 (l_n1)
+
+					-- the strings in this section presume WINDOWS compilers which compile
+					-- strings to two Bytes, GNU compilers would compile them to 4.
+					--| we don't have put_string_32
+				put_string_32 ({STRING_32} "VS_VERSION_INFO")
+				align (4)
+
+				create l_version_info
+				l_version_info.signature := 0x0FEEF04BD
+				l_version_info.struct_version := 0x10000
+				l_version_info.file_flags_mask := 0x3f
+				l_version_info.file_os := 4
+				l_version_info.file_type := 1
+				l_version_info.file_version_ms := (file_version [4] |<< 16) + file_version [3]
+				l_version_info.file_version_ls := (file_version [2] |<< 16) + file_version [1]
+				l_version_info.product_version_ms := (product_version [4] |<< 16) + product_version [3]
+				l_version_info.product_version_ls := (product_version [2] |<< 16) + product_version [1]
+				put_version_info (l_version_info)
+
+					-- length
+				l_n1 := 0x44
+				put_natural_16 (l_n1)
+					-- value length
+				l_n1 := 0
+				put_natural_16 (l_n1)
+					--type text
+				l_n1 := 1
+				put_natural_16 (l_n1)
+				put_string_32 ({STRING_32} "VarFileInfo")
+				align (4)
+					-- length (nester)
+				l_n1 := 0x24
+				put_natural_16 (l_n1)
+					-- value length
+				l_n1 := 4
+				put_natural_16 (l_n1)
+					-- type text
+				l_n1 := 1
+				put_natural_16 (l_n1)
+				put_string_32 ({STRING_32} "VarFileInfo")
+				align (4)
+					-- C++ uses Translation with the size of Language.
+					-- seems to be wrong.
+				put_string_32 ({STRING_32} "Translation")
+				align (4)
+				l_n := language |<< 16
+				put_natural_32 (l_n.to_natural_32)
+
+					-- C++ code leave the \ in the filename, seems to be wrong.
+					-- Check PEWriter::WriteVersionInfo
+				create l_path.make_from_string (a_file_name)
+				l_index := l_path.components.count
+				l_file_name := l_path.components [l_index].name
+
+				l_n := l_file_name.count.to_natural_64
+				l_n := l_n + 368
+
+				create l_versions.make (3)
+				l_versions.force (file_version[1].out + "." + file_version[2].out + "." + file_version[3].out + "." + file_version[4].out)
+				l_n := l_n + l_versions[1].count.to_natural_64
+				l_versions.force (file_version[1].out + "." + file_version[2].out + "." + file_version[3].out + "." + file_version[4].out)
+				l_n := l_n + l_versions[2].count.to_natural_64
+				l_versions.force (file_version[1].out + "." + file_version[2].out + "." + file_version[3].out + "." + file_version[4].out)
+				l_n := l_n + l_versions[3].count.to_natural_64
+
+					-- outer length
+				l_n1 := (l_n + 0x24).to_natural_16
+				put_natural_16 (l_n1)
+
+					-- value length
+				l_n1 := 0
+				put_natural_16 (l_n1)
+
+					-- type text
+				l_n1 := 1
+				put_natural_16 (l_n1)
+
+					-- inner length
+				l_n1 := l_n.to_natural_16
+				put_natural_16 (l_n1)
+
+					-- value length
+				l_n1 := 0
+				put_natural_16 (l_n1)
+
+					--type text
+				l_n1 := 1
+				put_natural_16 (l_n1)
+
+				l_buf := language.to_hex_string.to_string_32
+				l_buf.append_character ('%U')
+				put_string_32 (l_buf)
+				align (4)
+				version_string ({STRING_32}"FileDescription", " ")
+				version_string ({STRING_32}"FileVersion", l_versions [1])
+				version_string ({STRING_32}"InternalName", l_file_name)
+				version_string ({STRING_32}"LegalCopyright", " ")
+				version_string ({STRING_32}"OriginalFileName", l_file_name)
+				version_string ({STRING_32}"ProductVersion", l_versions [2])
+				version_string ({STRING_32}"Assembly Version", l_versions [3])
+			end
+			Result := True
+
 		end
 
 	write_relocs: BOOLEAN
@@ -1464,13 +1645,15 @@ feature -- Write operations
 			to_implement ("Add implementation")
 		end
 
-	version_string (a_name: STRING_32; a_value: STRING_32)
-			-- a helper to put a string into the string area of the version information.
-		do
-			to_implement ("Add implementation")
-		end
 
 feature {NONE} -- Output Helpers
+
+
+	version_string (a_name: STRING_32; a_value: STRING_32)
+			-- a helper to put a string into the string area of the version information
+		do
+
+		end
 
 	put (a_data: ANY; a_size: NATURAL)
 		do
@@ -1592,11 +1775,44 @@ feature {NONE} -- Output Helpers
 		do
 			if attached output_file as l_stream then
 				create l_mp.make (0)
-				across a_dirs as l_dir  loop
+				across a_dirs as l_dir loop
 					l_mp.append (l_dir.managed_pointer)
 				end
 				l_stream.put_managed_pointer (l_mp)
 			end
+		end
+
+	put_resource_dir_table (a_table: PE_RESOURCE_DIR_TABLE)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (a_table.managed_pointer)
+			end
+		end
+
+	put_resource_dir_entry (a_entry: PE_RESOURCE_DIR_ENTRY)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (a_entry.managed_pointer)
+			end
+		end
+
+	put_resource_data_entry (a_data: PE_RESOURCE_DATA_ENTRY)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (a_data.managed_pointer)
+			end
+		end
+
+	put_version_info (a_version_info: PE_FIXED_VERSION_INFO)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_managed_pointer (a_version_info.managed_pointer)
+			end
+		end
+
+	put_string_32 (a_str: READABLE_STRING_32)
+		do
+			across 1 |..| a_str.count as i loop put_natural_32 (a_str.code (i)) end
 		end
 
 	offset: NATURAL_64
@@ -1633,8 +1849,6 @@ feature {NONE} -- Output Helpers
 				end
 			end
 		end
-
-
 
 feature -- Constants
 
