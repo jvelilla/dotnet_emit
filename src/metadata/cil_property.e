@@ -31,6 +31,7 @@ feature {NONE} -- Intialization
 			setter_void: setter = Void
 			getter_void: getter = Void
 			flags_set: flags = special_name
+			instance_set: instance = True
 		end
 
 	make_with_lib (a_lib: PE_LIB; a_name: STRING_32; a_type: CIL_TYPE; a_indices: LIST [CIL_TYPE]; has_setter: BOOLEAN; a_parent: detachable CIL_DATA_CONTAINER)
@@ -44,6 +45,9 @@ feature {NONE} -- Intialization
 		ensure
 			name_set: name = a_name
 			type_set: type = a_type
+			flags_set: flags = special_name
+			instance_set: instance = True
+			parent_set: parent = a_parent
 		end
 
 feature -- Access

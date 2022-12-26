@@ -1593,12 +1593,12 @@ feature -- Write operations
 				l_n := l_n + 368
 
 				create l_versions.make (3)
-				l_versions.force (file_version[1].out + "." + file_version[2].out + "." + file_version[3].out + "." + file_version[4].out)
-				l_n := l_n + l_versions[1].count.to_natural_64
-				l_versions.force (file_version[1].out + "." + file_version[2].out + "." + file_version[3].out + "." + file_version[4].out)
-				l_n := l_n + l_versions[2].count.to_natural_64
-				l_versions.force (file_version[1].out + "." + file_version[2].out + "." + file_version[3].out + "." + file_version[4].out)
-				l_n := l_n + l_versions[3].count.to_natural_64
+				l_versions.force (file_version [1].out + "." + file_version [2].out + "." + file_version [3].out + "." + file_version [4].out)
+				l_n := l_n + l_versions [1].count.to_natural_64
+				l_versions.force (file_version [1].out + "." + file_version [2].out + "." + file_version [3].out + "." + file_version [4].out)
+				l_n := l_n + l_versions [2].count.to_natural_64
+				l_versions.force (file_version [1].out + "." + file_version [2].out + "." + file_version [3].out + "." + file_version [4].out)
+				l_n := l_n + l_versions [3].count.to_natural_64
 
 					-- outer length
 				l_n1 := (l_n + 0x24).to_natural_16
@@ -1628,26 +1628,43 @@ feature -- Write operations
 				l_buf.append_character ('%U')
 				put_string_32 (l_buf)
 				align (4)
-				version_string ({STRING_32}"FileDescription", " ")
-				version_string ({STRING_32}"FileVersion", l_versions [1])
-				version_string ({STRING_32}"InternalName", l_file_name)
-				version_string ({STRING_32}"LegalCopyright", " ")
-				version_string ({STRING_32}"OriginalFileName", l_file_name)
-				version_string ({STRING_32}"ProductVersion", l_versions [2])
-				version_string ({STRING_32}"Assembly Version", l_versions [3])
+				version_string ({STRING_32} "FileDescription", " ")
+				version_string ({STRING_32} "FileVersion", l_versions [1])
+				version_string ({STRING_32} "InternalName", l_file_name)
+				version_string ({STRING_32} "LegalCopyright", " ")
+				version_string ({STRING_32} "OriginalFileName", l_file_name)
+				version_string ({STRING_32} "ProductVersion", l_versions [2])
+				version_string ({STRING_32} "Assembly Version", l_versions [3])
 			end
 			Result := True
 
 		end
 
 	write_relocs: BOOLEAN
+		local
+			n: NATURAL_32
+			n1: NATURAL_16
+			l_value: INTEGER
 		do
-			to_implement ("Add implementation")
+			l_value := 0xfff
+			if attached pe_header as l_pe_header then
+				align (file_align)
+				n1 := (({PE_HEADER_CONSTANTS}.pe_fixup_highlow |<< 12) | (n.to_integer_32 & 0xfff)).to_natural_16
+				n := (n.to_integer_32 & l_value.bit_not).to_natural_32
+				put_natural_32 (n)
+					-- block size
+				n := 12
+				put_natural_32 (n)
+				put_natural_16 (n1)
+				n1 := 0
+				put_natural_16 (n1)
+					-- aligns the end of the file
+				align (file_align)
+			end
+			Result := True
 		end
 
-
 feature {NONE} -- Output Helpers
-
 
 	version_string (a_name: STRING_32; a_value: STRING_32)
 			-- a helper to put a string into the string area of the version information
@@ -1690,9 +1707,8 @@ feature {NONE} -- Output Helpers
 			end
 			put_character (l_name.at (l_index + 1).to_character_8)
 
-
 			align (4)
-			across 1 |..| ((n1*2).to_integer_32 - 1) as  i loop
+			across 1 |..| ((n1 * 2).to_integer_32 - 1) as i loop
 				put_natural_16 (l_buf.code (i).to_natural_16)
 			end
 			align (4)
@@ -1863,18 +1879,6 @@ feature {NONE} -- Output Helpers
 			if attached output_file as l_stream then
 				l_stream.put_character (a_char)
 			end
-		end
-
-	offset: NATURAL_64
-			-- the output position.
-		do
-			to_implement ("Add implementation")
-		end
-
-	seek (a_offset: NATURAL)
-			-- Set the output position.
-		do
-			to_implement ("Add implementation")
 		end
 
 	align (a_align: NATURAL_64)
