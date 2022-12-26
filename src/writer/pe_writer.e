@@ -1651,8 +1651,51 @@ feature {NONE} -- Output Helpers
 
 	version_string (a_name: STRING_32; a_value: STRING_32)
 			-- a helper to put a string into the string area of the version information
+		local
+			n1: NATURAL_16
+			n: NATURAL_32
+			l_buf: STRING_32
+			l_name: STRING_32
+			l_index: INTEGER
 		do
 
+			n1 := (a_name.count * 2 + a_value.count * 2 + 6 + 2 + 2).to_natural_16
+			n := (a_name.count + 2).to_natural_32
+			if n \\ 4 /= 0 then
+				n1 := n1 + (n - n \\ 4).to_natural_16
+			end
+			n := ((a_value.count + 1) * 2).to_natural_32
+			if n \\ 4 /= 0 then
+				n1 := n1 + (n - n \\ 4).to_natural_16
+			end
+				-- length
+			put_natural_16 (n1)
+				-- value length
+			n1 := ((a_value.count + 1) * 2).to_natural_16
+				-- length
+			put_natural_16 (n1)
+			create l_buf.make_from_string_general (a_value)
+			l_buf.append_character ('%U')
+				-- type string
+			n1 := 1
+				-- length
+			put_natural_16 (n1)
+
+				-- put_wide_character.
+			create l_name.make_from_string_general (a_name)
+			l_name.append_character ('%U')
+			l_index := l_name.count // 2
+			across 1 |..| l_index as i loop
+				put_natural_16 (l_name.code (i).to_natural_16)
+			end
+			put_character (l_name.at (l_index + 1).to_character_8)
+
+
+			align (4)
+			across 1 |..| ((n1*2).to_integer_32 - 1) as  i loop
+				put_natural_16 (l_buf.code (i).to_natural_16)
+			end
+			align (4)
 		end
 
 	put (a_data: ANY; a_size: NATURAL)
@@ -1813,6 +1856,13 @@ feature {NONE} -- Output Helpers
 	put_string_32 (a_str: READABLE_STRING_32)
 		do
 			across 1 |..| a_str.count as i loop put_natural_32 (a_str.code (i)) end
+		end
+
+	put_character (a_char: CHARACTER_8)
+		do
+			if attached output_file as l_stream then
+				l_stream.put_character (a_char)
+			end
 		end
 
 	offset: NATURAL_64

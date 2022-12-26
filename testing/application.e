@@ -20,7 +20,8 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
-			test_pe_version_string({STRING_32}"FileDescription", " ")
+			test_pe_version_string({STRING_32}"FileVersion", "1.1.0.1")
+			--test_pe_version_string({STRING_32}"FileDescription", " ")
 			text_hexadecimal_value
 			test_path_entries
 			test_pe_strings_32
@@ -384,11 +385,14 @@ feature -- PE Reader
 
 feature -- PE Writer tests
 
-	test_pe_version_string (a_name: STRING_32; a_value: STRING_32)
+	test_pe_version_string (a_name: STRING_32; a_value: STRING)
 		local
 			l_file: RAW_FILE
 			n1: NATURAL_16
 			n: NATURAL_32
+			l_buf: STRING_32
+			l_name: STRING_32
+			l_index: INTEGER
 		do
 			create l_file.make_create_read_write ("eiffel_test.bin")
 
@@ -402,6 +406,29 @@ feature -- PE Writer tests
 				n1 := n1 + (n - n \\ 4).to_natural_16
 			end
 			l_file.put_natural_16 (n1)
+
+			n1 := ((a_value.count + 1) * 2).to_natural_16
+			l_file.put_natural_16 (n1)
+			create l_buf.make_from_string_general (a_value)
+			l_buf.append_character ('%U')
+			n1 := 1
+			l_file.put_natural_16 (n1)
+
+
+				-- put_wide_character.
+			create l_name.make_from_string_general (a_name)
+			l_name.append_character ('%U')
+			l_index := l_name.count // 2
+			across 1 |..| l_index as i loop
+				l_file.put_natural_16 (l_name.code (i).to_natural_16)
+			end
+			l_file.put_character (l_name.at (l_index + 1).to_character_8)
+
+			n1 := 1
+			across 1 |..| ((n1*2).to_integer_32 - 1) as  i loop
+				l_file.put_natural_16 (l_buf.code (i).to_natural_16)
+			end
+
 			l_file.close
 		end
 
