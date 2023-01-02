@@ -63,7 +63,7 @@ feature -- Output
 			Result := True
 		end
 
-	render (a_stream: FILE_STREAM; a_opcode: INTEGER; a_operand_type: INTEGER; a_byte: detachable SPECIAL [NATURAL_8]): NATURAL_32
+	render (a_stream: FILE_STREAM; a_opcode: INTEGER; a_operand_type: INTEGER; a_byte: SPECIAL [NATURAL_8]): NATURAL_64
 		do
 			to_implement("Add implementation")
 		end
