@@ -1,14 +1,13 @@
 note
 	description: "[
-					Helper class to emulate C byte assigments like.
-				
-					 *(int*)(result + sz) = n;
-					 
-					  *(longlong*)result = intValue_;
-					 
-					 Where `result` is defined as Byte* result
-					 and Byte as typedef unsigned char Byte; /* 1 byte */
-
+								Helper class to emulate C byte assigments like.
+							
+								 *(int*)(result + sz) = n;
+								 
+								  *(longlong*)result = intValue_;
+								 
+								 Where `result` is defined as Byte* result
+								 and Byte as typedef unsigned char Byte; /* 1 byte */
 		]"
 	date: "$Date$"
 	revision: "$Revision$"
@@ -51,6 +50,21 @@ feature -- Element Change
 			instance_free: class
 		end
 
+	put_array_natural_8_with_integer_64 (a_arr: SPECIAL [NATURAL_8]; a_value: INTEGER_64; a_pos: INTEGER)
+		require
+			valid_pos: a_pos >= a_arr.lower and then a_pos <= a_arr.upper
+		local
+			l_arr: ARRAY [NATURAL_8]
+			l_mp: MANAGED_POINTER
+		do
+			create l_arr.make_from_special (a_arr)
+			create l_mp.make_from_array (l_arr)
+			l_mp.put_integer_64 (a_value, a_pos)
+			l_arr := l_mp.read_array (a_arr.lower, a_arr.upper)
+			a_arr.copy_data (l_arr.to_special, a_pos, a_pos, {PLATFORM}.natural_8_bytes)
+		ensure
+			instance_free: class
+		end
 
 	put_array_natural_16 (a_arr: SPECIAL [NATURAL_8]; a_value: NATURAL_16; a_pos: INTEGER)
 		require
@@ -218,7 +232,6 @@ feature -- Element Change
 			instance_free: class
 		end
 
-
 	put_array_integer_32_with_natural_64 (a_arr: SPECIAL [NATURAL_8]; a_value: NATURAL_64; a_pos: INTEGER)
 		require
 			valid_pos: a_pos >= a_arr.lower and then a_pos <= a_arr.upper
@@ -235,6 +248,21 @@ feature -- Element Change
 			instance_free: class
 		end
 
+	put_array_integer_32_with_integer_64 (a_arr: SPECIAL [NATURAL_8]; a_value: INTEGER_64; a_pos: INTEGER)
+		require
+			valid_pos: a_pos >= a_arr.lower and then a_pos <= a_arr.upper
+		local
+			l_arr: ARRAY [NATURAL_8]
+			l_mp: MANAGED_POINTER
+		do
+			create l_arr.make_from_special (a_arr)
+			create l_mp.make_from_array (l_arr)
+			l_mp.put_integer_64 (a_value, a_pos)
+			l_arr := l_mp.read_array (a_arr.lower, a_arr.upper)
+			a_arr.copy_data (l_arr.to_special, a_pos, a_pos, {PLATFORM}.integer_32_bytes)
+		ensure
+			instance_free: class
+		end
 
 	put_array_integer_64 (a_arr: SPECIAL [NATURAL_8]; a_value: INTEGER_64; a_pos: INTEGER)
 		require
@@ -252,9 +280,41 @@ feature -- Element Change
 			instance_free: class
 		end
 
+	put_array_float_with_double (a_arr: SPECIAL [NATURAL_8]; a_value: REAL_64; a_pos: INTEGER)
+		require
+			valid_pos: a_pos >= a_arr.lower and then a_pos <= a_arr.upper
+		local
+			l_arr: ARRAY [NATURAL_8]
+			l_mp: MANAGED_POINTER
+		do
+			create l_arr.make_from_special (a_arr)
+			create l_mp.make_from_array (l_arr)
+			l_mp.put_real_64 (a_value, a_pos)
+			l_arr := l_mp.read_array (a_arr.lower, a_arr.upper)
+			a_arr.copy_data (l_arr.to_special, a_pos, a_pos, {PLATFORM}.real_32_bytes)
+		ensure
+			instance_free: class
+		end
+
+	put_array_double (a_arr: SPECIAL [NATURAL_8]; a_value: REAL_64; a_pos: INTEGER)
+		require
+			valid_pos: a_pos >= a_arr.lower and then a_pos <= a_arr.upper
+		local
+			l_arr: ARRAY [NATURAL_8]
+			l_mp: MANAGED_POINTER
+		do
+			create l_arr.make_from_special (a_arr)
+			create l_mp.make_from_array (l_arr)
+			l_mp.put_real_64 (a_value, a_pos)
+			l_arr := l_mp.read_array (a_arr.lower, a_arr.upper)
+			a_arr.copy_data (l_arr.to_special, a_pos, a_pos, {PLATFORM}.real_64_bytes)
+		ensure
+			instance_free: class
+		end
+
 feature -- Access
 
-	byte_array_to_natural_64 (a_arr: SPECIAL[NATURAL_8]; a_pos: INTEGER): NATURAL_64
+	byte_array_to_natural_64 (a_arr: SPECIAL [NATURAL_8]; a_pos: INTEGER): NATURAL_64
 		local
 			l_mp: MANAGED_POINTER
 		do
@@ -264,7 +324,7 @@ feature -- Access
 			instance_free: class
 		end
 
-	byte_array_to_natural_32 (a_arr: SPECIAL[NATURAL_8]; a_pos: INTEGER): NATURAL_32
+	byte_array_to_natural_32 (a_arr: SPECIAL [NATURAL_8]; a_pos: INTEGER): NATURAL_32
 		local
 			l_mp: MANAGED_POINTER
 		do
@@ -274,7 +334,7 @@ feature -- Access
 			instance_free: class
 		end
 
-	byte_array_to_natural_16 (a_arr: SPECIAL[NATURAL_8]; a_pos: INTEGER): NATURAL_16
+	byte_array_to_natural_16 (a_arr: SPECIAL [NATURAL_8]; a_pos: INTEGER): NATURAL_16
 		local
 			l_mp: MANAGED_POINTER
 		do
@@ -284,7 +344,7 @@ feature -- Access
 			instance_free: class
 		end
 
-	byte_array_to_natural_8 (a_arr: SPECIAL[NATURAL_8]; a_pos: INTEGER): NATURAL_8
+	byte_array_to_natural_8 (a_arr: SPECIAL [NATURAL_8]; a_pos: INTEGER): NATURAL_8
 		local
 			l_mp: MANAGED_POINTER
 		do
@@ -294,7 +354,7 @@ feature -- Access
 			instance_free: class
 		end
 
-	byte_array_to_integer_32 (a_arr: SPECIAL[NATURAL_8]; a_pos: INTEGER): INTEGER_32
+	byte_array_to_integer_32 (a_arr: SPECIAL [NATURAL_8]; a_pos: INTEGER): INTEGER_32
 		local
 			l_mp: MANAGED_POINTER
 		do
@@ -304,7 +364,7 @@ feature -- Access
 			instance_free: class
 		end
 
-	byte_array_to_integer_16 (a_arr: SPECIAL[NATURAL_8]; a_pos: INTEGER): INTEGER_16
+	byte_array_to_integer_16 (a_arr: SPECIAL [NATURAL_8]; a_pos: INTEGER): INTEGER_16
 		local
 			l_mp: MANAGED_POINTER
 		do
@@ -313,6 +373,5 @@ feature -- Access
 		ensure
 			instance_free: class
 		end
-
 
 end
