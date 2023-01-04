@@ -20,6 +20,7 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
+			test_string_to_buf
 			test_pe_version_string({STRING_32}"FileVersion", "1.1.0.1")
 			--test_pe_version_string({STRING_32}"FileDescription", " ")
 			text_hexadecimal_value
@@ -385,6 +386,19 @@ feature -- PE Reader
 
 feature -- PE Writer tests
 
+	test_string_to_buf
+		local
+			l_str: STRING_32
+			l_str2: STRING
+			l_buf: STRING_32
+			l_size: INTEGER
+		do
+
+			l_str := {STRING_32}"Hello"
+			l_str.append_character('%U')
+
+		end
+
 	test_pe_version_string (a_name: STRING_32; a_value: STRING)
 		local
 			l_file: RAW_FILE
@@ -394,6 +408,7 @@ feature -- PE Writer tests
 			l_name: STRING_32
 			l_index: INTEGER
 		do
+			print (a_name.substring (1, a_name.count))
 			create l_file.make_create_read_write ("eiffel_test.bin")
 
 			n1 := (a_name.count * 2 + a_value.count * 2 + 6 + 2 + 2).to_natural_16
