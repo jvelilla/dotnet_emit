@@ -96,9 +96,48 @@ feature -- Operations
 			end
 		end
 
-	sha_input (a_string: STRING_32; a_val: NATURAL)
+	sha1_input (a_string: STRING_32; a_length: NATURAL)
+		local
+			l_exit: BOOLEAN
+			l_length: NATURAL
+			i: INTEGER
 		do
-			to_implement ("Add implementation")
+			if a_length = 0 then
+				l_exit := True
+			end
+
+			if not l_exit and then (computed /= 0 or else corrupted /= 0) then
+				l_exit := True
+			end
+
+			if not l_exit then
+				from
+					i := 1
+					l_length := a_length
+				until
+					l_length = 0 or corrupted /= 0
+				loop
+					message_block [message_block_index] := (a_string.at (i).code & 0xff).to_natural_8
+					length_low := length_low + 8
+
+						-- Force it to 32 bits
+					length_low := length_low & 0xFFFFFFFF
+					if length_low = 0 then
+						length_high := length_high + 1
+							-- Force it to 32 bits
+						length_high := length_high & 0xFFFFFFFF
+						if length_high = 0 then
+								-- Message too long
+							corrupted := 1
+						end
+					end
+					if message_block_index = 64 then
+						sha1_process_message_block
+					end
+					i := i +1
+				end
+
+			end
 		end
 
 
@@ -112,7 +151,26 @@ feature -- Convertion
 			end
 		end
 
-feature {NONE} -- implementation	
+feature {NONE} -- implementation
+
+	sha1_process_message_block
+			-- *  Description:
+			-- *      This function will process the next 512 bits of the message
+			-- *      stored in the Message_Block array.
+			-- *
+			-- *  Parameters:
+			-- *      None.
+			-- *
+			-- *  Returns:
+			-- *      Nothing.
+			-- *
+			-- *  Comments:
+			-- *      Many of the variable names in the SHAContext, especially the
+			-- *      single character names, were used because those were the names
+			-- *      used in the publication.
+		do
+			to_implement ("Add implementation")
+		end
 
 	sha1_pad_message
 				--  Pad the current context.
