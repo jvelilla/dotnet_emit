@@ -20,6 +20,7 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
+			test_copy_arrays
 			test_array_wrapped_code
 			test_arrays
 			test_string_to_buf
@@ -383,6 +384,43 @@ feature -- PE Reader
 		end
 
 feature -- Test Arrays
+
+	test_copy_arrays
+		local
+			l_result: ARRAY [NATURAL_8]
+			l_pos: INTEGER
+			l_tmp: NATURAL_8
+		do
+			create l_result.make_filled (0, 1, 50)
+			l_result.fill_with (0xff)
+			l_result [1] := 0
+			l_result [2] := 1
+			l_pos := l_result.count - 20 - der_header.count
+				-- C++ version uses sizeof.
+				--|result.size() - 20 - sizeof(DerHeader) - 1;
+			l_result [l_pos] := 0
+			l_result.subcopy (der_header, 1, der_header.count, l_pos + 1)
+			l_pos := l_result.count - 20
+
+
+			  -- reverse it before encryption..
+		    across 1 |..| (l_result.count // 2) as i loop
+		    	l_tmp := l_result [i]
+				l_result [i] := l_result [l_result.count - i]
+				l_result [l_result.count - i] := l_tmp
+		    end
+		end
+
+
+feature -- Static
+
+	der_header: ARRAY [NATURAL_8]
+		do
+			Result := {ARRAY [NATURAL_8]} <<0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02, 0x1a, 0x05, 0x00, 0x04, 0x14>>
+		ensure
+			instance_free: class
+		end
+
 
 	test_arrays
 		local
