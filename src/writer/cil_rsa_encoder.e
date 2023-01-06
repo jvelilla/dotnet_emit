@@ -84,8 +84,12 @@ feature -- Status Report
 		end
 
 	get_public_key_data (a_key: ARRAY [NATURAL_8]; a_len: CELL [NATURAL_64])
+		local
+			l_size: NATURAL_64
 		do
-			to_implement ("Add implementation")
+			fixme ("Check how to implement c_get_public_key_data in pure Eiffel")
+			c_get_public_key_data (a_key.area.base_address, $l_size, key_pair.area.base_address, modulus_bits)
+			a_len.put (l_size)
 		end
 
 	get_strong_name_signature (a_sig: ARRAY [NATURAL_8]; a_sig_len: CELL [NATURAL_64]; a_hash: ARRAY [NATURAL_8]; a_hash_size: NATURAL_64)
@@ -93,5 +97,32 @@ feature -- Status Report
 		do
 			to_implement ("Add implementation")
 		end
+
+
+
+feature {NONE} -- C/C++ wrapper
+
+
+
+	c_get_public_key_data (a_key: POINTER; a_key_size: TYPED_POINTER [NATURAL_64]; a_key_pair: POINTER; a_modulus_bits: NATURAL_64)
+		external
+			"C++ inline "
+		alias
+			"[
+				typedef uint32_t DIGIT_T;
+				DIGIT_T* dkey = (DIGIT_T*)$a_key;
+				dkey[0] = 0x2400;
+				dkey[1] = 0x8004;
+				dkey[2] = 0x14 + $a_modulus_bits / 8;
+					
+				memcpy(dkey + 3, $a_key_pair, dkey[2]);
+																	
+																			
+				((char*)dkey)[12 + 0x0b] = '1';  // change to RSA1 (pub key only)
+				((char*)dkey)[12 + 0] = 6;       // change to pub key only
+				*($a_key_size) = dkey[2] + 12;
+			]"
+		end
+
 
 end
