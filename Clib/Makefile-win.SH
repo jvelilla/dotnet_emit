@@ -15,7 +15,7 @@ MAKE = $make
 MKDIR = $mkdir
 OBJECTS = bigdigits.$obj
 
-.cpp.$obj:
+.c.$obj:
 	$(CC) -c $(JCFLAGS) $<
 
 all:: standard

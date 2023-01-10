@@ -87,22 +87,28 @@ feature -- Status Report
 		local
 			l_size: NATURAL_64
 		do
-			fixme ("Check how to implement c_get_public_key_data in pure Eiffel")
+			debug ("cil_fixme")
+				fixme ("Check how to implement c_get_public_key_data in pure Eiffel")
+			end
 			c_get_public_key_data (a_key.area.base_address, $l_size, key_pair.area.base_address, modulus_bits)
 			a_len.put (l_size)
 		end
 
 	get_strong_name_signature (a_sig: ARRAY [NATURAL_8]; a_sig_len: CELL [NATURAL_64]; a_hash: ARRAY [NATURAL_8]; a_hash_size: NATURAL_64)
 			-- Defined as void RSAEncoder::GetStrongNameSignature(Byte* sig, size_t* sigSize, const Byte* hash, size_t hashSize)
+		local
+			x: ARRAY [NATURAL_8]
+			l_formatter: CIL_PKCS1_FORMATTER
+			l_dis: INTEGER
 		do
-			to_implement ("Add implementation")
+			create x.make_filled (0, 1, (modulus_bits // 8).to_integer_8)
+			create l_formatter.make (a_hash)
+			l_formatter.calculate (x)
+			l_dis := c_mp_mod_exp (a_sig.area.base_address, x.area.base_address, private_exponent.area.base_address, modulus.area.base_address, modulus_bits // 8 // {PLATFORM}.natural_32_bytes.to_natural_64  )
+			a_sig_len.put (modulus_bits // 8)
 		end
 
-
-
-feature {NONE} -- C/C++ wrapper
-
-
+feature -- C/C++ wrapper
 
 	c_get_public_key_data (a_key: POINTER; a_key_size: TYPED_POINTER [NATURAL_64]; a_key_pair: POINTER; a_modulus_bits: NATURAL_64)
 		external
@@ -124,5 +130,15 @@ feature {NONE} -- C/C++ wrapper
 			]"
 		end
 
+
+	c_mp_mod_exp (a_sig: POINTER; a_x: POINTER; a_private_exponent: POINTER; a_modulus: POINTER; a_size: NATURAL_64): INTEGER
+		external
+			"C inline use bigdigits.h"
+			alias
+			"[
+				
+				return (EIF_INTEGER) mpModExp((DIGIT_T*)$a_sig, (DIGIT_T*)$a_x, (DIGIT_T*)$a_private_exponent, (DIGIT_T*)$a_modulus, $a_size);
+			]"
+		end
 
 end

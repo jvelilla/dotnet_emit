@@ -26,7 +26,7 @@ PLATFORM = $ISE_PLATFORM
 
 !GROK!THIS!
 $spitshell >>Makefile <<'!NO!SUBS!'
-.cpp.o:
+.c.o:
 	$(CC) $(CFLAGS) -c $<
 
 OBJECTS = eif_bigdigits.o

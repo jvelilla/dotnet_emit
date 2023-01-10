@@ -46,7 +46,7 @@ feature -- Operations
 			a_result.subcopy (der_header, 1, der_header.count, l_pos + 1)
 			l_pos := a_result.count - 20
 
-			-	- C++ code copy 20 bytes without checking if there are enough data
+				-- C++ code copy 20 bytes without checking if there are enough data
 				-- memcpy(result() + result.size() - 20, msg_, 20);
 			check valid_size_mgs: msg.count >= 20 end
 			a_result.subcopy (msg, 1, 20, l_pos)

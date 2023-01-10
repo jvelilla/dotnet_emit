@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include "bigdtypes.h"
 
-namespace DotNetPELib { // DAL
 /**** USER CONFIGURABLE SECTION ****/
 
 /* Define type and size of DIGIT */
@@ -82,7 +81,7 @@ typedef uint16_t HALF_DIGIT_T;
 
 
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 /* Forces linker to include copyright notice in executable */
@@ -572,8 +571,7 @@ void mpFail(char *msg);
 /** @endcond */
 
 #ifdef __cplusplus
-//}
+}
 #endif
-} // namespace DAL
 
 #endif	/* BIGDIGITS_H_ */

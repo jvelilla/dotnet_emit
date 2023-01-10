@@ -20,6 +20,7 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
+			test_big_digits
 			test_copy_arrays
 			test_array_wrapped_code
 			test_arrays
@@ -285,6 +286,36 @@ feature -- Test Path
 			create l_path.make_from_string (l_file_name)
 			n := l_path.components.count
 			l_file_name := l_path.components [n].name
+		end
+
+
+feature -- Test BigDigits
+
+	test_big_digits
+		local
+			l_result: ARRAY [NATURAL_32]
+					-- Array to hold the result of the operation
+			l_base: ARRAY [NATURAL_32]
+					-- Array holding the base number
+			l_exponent: ARRAY [NATURAL_32]
+					-- Array holding the exponent
+			l_modulus: ARRAY [NATURAL_32]
+					-- Array holding the modulus
+			l_ndigits: NATURAL_64
+					-- Number of digits in the base number.	
+
+			l_dis: INTEGER
+		do
+			create l_result.make_filled (0, 1, 50)
+			create l_base.make_filled (0, 1, 50)
+			l_base [1] := 9
+			create l_exponent.make_filled (0, 1, 50)
+			l_exponent [1] := 3
+			create l_modulus.make_filled (0, 1, 50)
+			l_modulus [1] := 10
+			l_ndigits := 1
+			l_dis := {CIL_RSA_ENCODER}.c_mp_mod_exp(l_result.area.base_address, l_base.area.base_address, l_exponent.area.base_address, l_modulus.area.base_address, l_ndigits)
+			check expected_9: l_result [1] = 9 end
 		end
 
 feature -- C Byte Array
