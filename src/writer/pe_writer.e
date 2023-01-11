@@ -71,9 +71,10 @@ feature {NONE} -- Initialization
 
 	initialize_dnl_tables
 		do
-			create {ARRAYED_LIST [DNL_TABLE]} tables.make ({PE_TABLE_CONSTANTS}.max_tables)
-			across 1 |..| {PE_TABLE_CONSTANTS}.max_tables as i loop
-				tables.force ((create {DNL_TABLE}.make))
+				-- create {ARRAYED_LIST [DNL_TABLE]} tables.make ({PE_TABLE_CONSTANTS}.max_tables)
+			create tables.make_empty ({PE_TABLE_CONSTANTS}.max_tables)
+			across 0 |..| ({PE_TABLE_CONSTANTS}.max_tables - 1) as i loop
+				tables.force ((create {DNL_TABLE}.make), i)
 			end
 		end
 
@@ -215,7 +216,8 @@ feature -- Access
 			-- reflection of the String stream so that we can keep from doing duplicates.
 			-- right now we don't check duplicates on any of the other streams...
 
-	tables: LIST [DNL_TABLE]
+		--tables: LIST [DNL_TABLE]
+	tables: SPECIAL [DNL_TABLE]
 			-- tables that can appear in a PE file.
 
 	methods: LIST [PE_METHOD]
@@ -666,6 +668,7 @@ feature -- Various Operations
 			l_output_file: like output_file
 		do
 			l_output_file := a_out
+			output_file := l_output_file
 			if not is_entry_point and not dll then
 				{EXCEPTIONS}.raise (generator + " Missing Entry Point ")
 			end
@@ -821,7 +824,10 @@ feature -- Operations
 				-- pe_objects setup
 			check pe_objects = Void end
 
-			create {ARRAYED_LIST [PE_OBJECT]} l_pe_objects.make_filled (max_pe_objects)
+			create {ARRAYED_LIST [PE_OBJECT]} l_pe_objects.make (max_pe_objects)
+			across (1 |..| Max_pe_objects) as i loop
+				l_pe_objects.force (create {PE_OBJECT})
+			end
 
 			l_n := 1
 			l_pe_objects [l_n].name := ".text"
@@ -864,10 +870,10 @@ feature -- Operations
 					create l_len.put (0)
 					rsa_encoder.get_public_key_data (l_buf, l_len)
 
-					if attached {PE_ASSEMBLY_DEF_TABLE_ENTRY} tables [{PE_TABLES}.index_of ({PE_TABLES}.tassemblydef).to_integer_32].table[1] as l_table then
+					if attached {PE_ASSEMBLY_DEF_TABLE_ENTRY} tables [{PE_TABLES}.index_of ({PE_TABLES}.tassemblydef).to_integer_32].table [1] as l_table then
 						l_table.public_key_index := (create {PE_BLOB}.make_with_index (hash_blob (l_buf, l_len.item)))
 					end
-					if attached {PE_ASSEMBLY_DEF_TABLE_ENTRY} tables [{PE_TABLES}.index_of ({PE_TABLES}.tassemblydef).to_integer_32].table[1] as l_table then
+					if attached {PE_ASSEMBLY_DEF_TABLE_ENTRY} tables [{PE_TABLES}.index_of ({PE_TABLES}.tassemblydef).to_integer_32].table [1] as l_table then
 						l_table.flags := l_table.flags | {PE_ASSEMBLY_FLAGS}.publickey
 					end
 					l_core_20_header.flags := l_core_20_header.flags | 8
@@ -996,8 +1002,8 @@ feature -- Operations
 			l_counts [t_blob + 1] := blob.size
 
 			across 0 |..| (max_tables - 1) as ic loop
-				if not tables [ic + 1].is_empty then
-					l_counts [ic + 1] := tables [ic + 1].size.to_natural_32
+				if not tables [ic].is_empty then
+					l_counts [ic + 1] := tables [ic].size.to_natural_32
 					l_tables_header.mask_valid := l_tables_header.mask_valid | ({INTEGER_64} 1 |<< ic)
 					l_n := l_n + 1
 				end
@@ -1011,7 +1017,7 @@ feature -- Operations
 			across 0 |..| (max_tables - 1) as ic loop
 				if l_counts [ic + 1] /= 0 then
 					create l_buffer.make_filled (0, 1, 512)
-					l_n := tables [ic + 1].table [1].render (l_counts, l_buffer).to_integer_32
+					l_n := tables [ic].table [1].render (l_counts, l_buffer).to_integer_32
 					l_n := l_n * (l_counts [ic + 1]).to_integer_32
 					l_current_rva := l_current_rva + l_n.to_natural_32
 				end
@@ -1319,7 +1325,7 @@ feature -- Write operations
 				l_counts [t_blob + 1] := blob.size
 
 				across 0 |..| (max_tables - 1) as i loop
-					l_counts [i + 1] := tables [i + 1].size.to_natural_64
+					l_counts [i + 1] := tables [i].size.to_natural_64
 				end
 
 				across methods as m loop
@@ -1389,7 +1395,7 @@ feature -- Write operations
 				put_tables_header (l_tables_header)
 
 				across 0 |..| (max_tables - 1) as i loop
-					l_counts [i + 1] := tables [i + 1].size.to_natural_64
+					l_counts [i + 1] := tables [i].size.to_natural_64
 					l_item := l_counts [i + 1].to_natural_32
 					if l_item /= 0 then
 						put_natural_32 (l_item)
@@ -1397,10 +1403,10 @@ feature -- Write operations
 				end
 
 				across 0 |..| (max_tables - 1) as i loop
-					l_item := tables [i + 1].size.to_natural_32
+					l_item := tables [i].size.to_natural_32
 					across 0 |..| (l_item - 1).to_integer_32 as j loop
 						create l_buffer.make_filled (0, 1, 512)
-						l_sz := tables [i + 1].table [j + 1].render (l_counts, l_buffer).to_natural_32
+						l_sz := tables [i].table [j + 1].render (l_counts, l_buffer).to_natural_32
 							-- TODO double check
 							-- this is not efficient.
 						put_array (l_buffer.subarray (1, l_sz.as_integer_32))
