@@ -377,7 +377,7 @@ feature {NONE} -- Implementation
 			l_namespace_index: NATURAL_64
 			l_result: BOOLEAN
 		do
-			if pe_index /= 0 then
+			if pe_index = 0 then
 				if attached {CIL_CLASS} parent as l_class then
 						-- This is a nested class
 					l_result := l_class.pe_dump (a_stream)
