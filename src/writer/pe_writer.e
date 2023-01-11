@@ -791,11 +791,11 @@ feature -- Operations
 			create l_pe_header
 			l_pe_header.signature := {PE_HEADER_CONSTANTS}.PESIG
 			l_pe_header.cpu_type := {PE_HEADER_CONSTANTS}.pe_intel386.to_integer_16
-			l_pe_header.magic := {PE_HEADER_CONSTANTS}.pe_magicnum.to_natural_8
+			l_pe_header.magic := {PE_HEADER_CONSTANTS}.pe_magicnum.to_integer_16
 			l_pe_header.nt_hdr_size := 0xe0
 
 				-- optional header size
-			l_pe_header.flags := ({PE_HEADER_CONSTANTS}.pe_file_executable + if dll then {PE_HEADER_CONSTANTS}.pe_file_library else 0 end).to_natural_8
+			l_pe_header.flags := ({PE_HEADER_CONSTANTS}.pe_file_executable + if dll then {PE_HEADER_CONSTANTS}.pe_file_library else 0 end).to_integer_16
 			l_pe_header.linker_major_version := 6
 			l_pe_header.object_align := object_align.to_integer_32
 			l_pe_header.file_align := file_align.to_integer_32
@@ -846,6 +846,8 @@ feature -- Operations
 			l_pe_header.code_base := l_current_rva.to_integer_32
 			l_pe_header.iat_rva := l_current_rva.to_integer_32
 			l_pe_header.iat_size := 8
+			l_current_rva := l_current_rva + l_pe_header.iat_size.to_natural_64
+			l_pe_header.com_rva := l_current_rva.to_integer_32
 			l_pe_header.com_size := {PE_DOTNET_COR20_HEADER}.size_of
 			l_current_rva := l_current_rva + l_pe_header.com_size.to_natural_32
 
@@ -970,7 +972,7 @@ feature -- Operations
 				-- check stream_names feature.
 
 			across stream_names as elem loop
-				l_current_rva := l_current_rva + (elem.count + 1).to_natural_32
+				l_current_rva := l_current_rva + 8 +(elem.count + 1).to_natural_32
 				if (l_current_rva \\ 4) /= 0 then
 					l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
 				end
@@ -1753,7 +1755,8 @@ feature {NONE} -- Output Helpers
 	put_mz_header (a_data: ARRAY [NATURAL_8])
 		do
 			if attached output_file as l_stream then
-				l_stream.put_string (byte_array_to_string (a_data, a_data.count))
+				--l_stream.put_string (byte_array_to_string (a_data, a_data.count))
+				l_stream.put_managed_pointer (create {MANAGED_POINTER}.make_from_array (a_data))
 			end
 		end
 
@@ -1768,10 +1771,10 @@ feature {NONE} -- Output Helpers
 		local
 			l_mp: MANAGED_POINTER
 		do
-			if attached output_file as l_stream then
+			if attached output_file as l_stream and then attached pe_header as l_pe_header then
 				create l_mp.make (0)
-				across a_objects as l_item loop
-					l_mp.append (l_item.managed_pointer)
+				across 1 |..| l_pe_header.num_objects as i loop
+					l_mp.append (a_objects.at (i).managed_pointer)
 				end
 				l_stream.put_managed_pointer (l_mp)
 			end
