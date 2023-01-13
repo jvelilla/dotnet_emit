@@ -489,7 +489,7 @@ feature -- Stream functions
 				strings.confirm (strings.size + 1)
 				Result := strings.size
 				l_str := {UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 (a_utf8)
-				create l_converter.make_from_bin_string (l_str)
+				create l_converter.make_from_string (l_str)
 
 				strings.copy_data (strings.size.to_integer_32, l_converter.to_natural_8_array, (l_str.count + 1).to_natural_64)
 				strings.increment_size_by ((a_utf8.count + 1).to_natural_32)
@@ -674,11 +674,16 @@ feature -- Various Operations
 			end
 			calculate_objects (a_corflags)
 
-			l_rv := write_mz_data and then write_pe_header and then write_pe_objects and then write_iat and then write_core_header and then
-				write_static_data and then write_methods and then write_metadata_headers and then write_tables and then write_strings and then
-				write_us and then write_guid and then write_blob and then write_imports and then write_entry_point and then write_hash_data and then
-					--write_version_info (a_file_name: STRING_32)
-				write_relocs
+			l_rv := write_strings
+			debug
+				-- check write_tables
+				l_rv := write_mz_data and then write_pe_header
+					and then write_pe_objects and then write_iat and then write_core_header and then
+					write_static_data and then write_methods and then write_metadata_headers and then write_tables and then write_strings and then
+					write_us and then write_guid and then write_blob and then write_imports and then write_entry_point and then write_hash_data and then
+						--write_version_info (a_file_name: STRING_32)
+					write_relocs
+			end
 
 			if l_rv and then snk_len /= 0 then
 				create l_context.make
@@ -830,11 +835,13 @@ feature -- Operations
 			end
 
 			l_n := 1
-			l_pe_objects [l_n].name := ".text"
+				-- TODO find a better way to write a string with format with 8 characters and null terminator.
+				-- similar to C strncpy
+			l_pe_objects [l_n].name := ".text%U%U%U"
 			l_pe_objects [l_n].flags := {PE_HEADER_CONSTANTS}.winf_execute | {PE_HEADER_CONSTANTS}.winf_code | {PE_HEADER_CONSTANTS}.winf_readable
 
 			l_n := l_n + 1
-			l_pe_objects [l_n].name := ".reloc"
+			l_pe_objects [l_n].name := ".reloc%U%U"
 			l_pe_objects [l_n].flags := {PE_HEADER_CONSTANTS}.WINF_INITDATA | {PE_HEADER_CONSTANTS}.WINF_READABLE | {PE_HEADER_CONSTANTS}.WINF_DISCARDABLE
 			l_current_rva := mzh_header.count.to_natural_32 + {PE_HEADER}.size_of.to_natural_32 + l_pe_header.num_objects.to_natural_32 * {PE_OBJECT}.size_of.to_natural_32
 			if (l_current_rva \\ object_align) /= 0 then
@@ -972,7 +979,7 @@ feature -- Operations
 				-- check stream_names feature.
 
 			across stream_names as elem loop
-				l_current_rva := l_current_rva + 8 +(elem.count + 1).to_natural_32
+				l_current_rva := l_current_rva + 8 + (elem.count + 1).to_natural_32
 				if (l_current_rva \\ 4) /= 0 then
 					l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
 				end
@@ -1076,9 +1083,8 @@ feature -- Operations
 				l_current_rva := l_current_rva + 16 - (l_current_rva \\ 16).to_natural_32
 			end
 
-			l_current_rva := l_current_rva + 2 +
-				c_sizeof ((create {C_STRING}.make ("_CorXXXMain")).item).to_natural_32 +
-				c_sizeof ((create {C_STRING}.make ("mscoree.dll")).item).to_natural_32 + 1
+			l_current_rva := l_current_rva + 2 + (create {STRING}.make_from_string ("_CorXXXMain%U")).count.to_natural_64 +
+				(create {STRING}.make_from_string ("mscoree.dll%U")).count.to_natural_64 + 1
 
 			l_pe_header.import_size := l_current_rva.to_integer_32 - l_pe_header.import_rva
 
@@ -1286,7 +1292,7 @@ feature -- Write operations
 		do
 			if attached output_file as l_stream then
 				snk_base := l_stream.count.to_natural_32
-				if snk_base /= 0 then
+				if snk_len /= 0 then
 						-- the original code does the following
 						-- Byte buf[2048]
 						-- memset(buf, 0, snkLen_)
@@ -1333,7 +1339,7 @@ feature -- Write operations
 				across methods as m loop
 					if m.flags & {PE_METHOD}.cil /= 0 then
 						if m.flags & 3 = {PE_METHOD}.fatformat then
-							align (3)
+							align (4)
 						end
 						l_dis := m.write (l_counts, l_stream)
 					end
@@ -1348,15 +1354,17 @@ feature -- Write operations
 			l_flags: NATURAL_16
 			l_data: NATURAL_16
 			l_names: STRING_32
+			l_rvt_string: STRING_32
 		do
 			align (4)
 			put_metadata_headers (meta_header1)
-			n := rtv_string.count
+			l_rvt_string := rtv_string + "%U"
+			n := l_rvt_string.count
 			if n \\ 4 /= 0 then
 				n := n + 4 - (n \\ 4)
 			end
 			put_integer_32 (n)
-			put_string (rtv_string)
+			put_string (l_rvt_string)
 			align (4)
 			l_flags := 0
 			put_natural_16 (0)
@@ -1485,8 +1493,9 @@ feature -- Write operations
 				if dll then
 					put_string (create {STRING_32}.make_from_string ("_CorDllMain"))
 				else
-					put_string (create {STRING_32}.make_from_string ("mscoree.dll"))
+					put_string (create {STRING_32}.make_from_string ("_CorExeMain"))
 				end
+				put_string (create {STRING_32}.make_from_string ("mscoree.dll"))
 				align (4)
 			end
 			Result := True
@@ -1755,7 +1764,7 @@ feature {NONE} -- Output Helpers
 	put_mz_header (a_data: ARRAY [NATURAL_8])
 		do
 			if attached output_file as l_stream then
-				--l_stream.put_string (byte_array_to_string (a_data, a_data.count))
+					--l_stream.put_string (byte_array_to_string (a_data, a_data.count))
 				l_stream.put_managed_pointer (create {MANAGED_POINTER}.make_from_array (a_data))
 			end
 		end
