@@ -674,16 +674,16 @@ feature -- Various Operations
 			end
 			calculate_objects (a_corflags)
 
-			l_rv := write_strings
-			debug
-				-- check write_tables
+			--l_rv := write_blob
+			--debug
+					-- check write_tables
 				l_rv := write_mz_data and then write_pe_header
 					and then write_pe_objects and then write_iat and then write_core_header and then
 					write_static_data and then write_methods and then write_metadata_headers and then write_tables and then write_strings and then
 					write_us and then write_guid and then write_blob and then write_imports and then write_entry_point and then write_hash_data and then
 						--write_version_info (a_file_name: STRING_32)
 					write_relocs
-			end
+			--end
 
 			if l_rv and then snk_len /= 0 then
 				create l_context.make
@@ -991,7 +991,7 @@ feature -- Operations
 			check tables_header = Void end
 			create l_tables_header
 			l_tables_header.major_version := 2
-			l_tables_header.minor_version := 1
+			l_tables_header.reserved2 := 1
 			l_tables_header.mask_sorted := ({INTEGER_64} 0x1600 |<< 32) + 0x3325FA00
 			if strings.size >= 65536 then
 				l_tables_header.heap_offset_sizes := l_tables_header.heap_offset_sizes | 1
@@ -1491,11 +1491,11 @@ feature -- Write operations
 					-- ord
 				put_natural_16 (l_item.to_natural_16)
 				if dll then
-					put_string (create {STRING_32}.make_from_string ("_CorDllMain"))
+					put_string ({STRING_32} "_CorDllMain%U")
 				else
-					put_string (create {STRING_32}.make_from_string ("_CorExeMain"))
+					put_string ({STRING_32} "_CorExeMain%U")
 				end
-				put_string (create {STRING_32}.make_from_string ("mscoree.dll"))
+				put_string ({STRING_32} "mscoree.dll%U")
 				align (4)
 			end
 			Result := True
@@ -1684,13 +1684,12 @@ feature -- Write operations
 		local
 			n: NATURAL_32
 			n1: NATURAL_16
-			l_value: INTEGER
 		do
-			l_value := 0xfff
 			if attached pe_header as l_pe_header then
 				align (file_align)
+				n := (l_pe_header.entry_point + 2).to_natural_32
 				n1 := (({PE_HEADER_CONSTANTS}.pe_fixup_highlow |<< 12) | (n.to_integer_32 & 0xfff)).to_natural_16
-				n := (n.to_integer_32 & l_value.bit_not).to_natural_32
+				n := (n.to_integer_32 & (0xfff).bit_not).to_natural_32
 				put_natural_32 (n)
 					-- block size
 				n := 12

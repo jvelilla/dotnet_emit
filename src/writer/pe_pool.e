@@ -79,9 +79,14 @@ feature -- Element Change
 			l_index := a_index
 				-- TODO fixme
 			fixme ("Implement the loop with from since there is no NATURAL_INTERVAL")
-			across 1 |..| (a_count-1).to_integer_32 as ic loop
-				base [l_index] := a_data [ic]
-				l_index := l_index + 1
+			across 1 |..| (a_count).to_integer_32 as ic loop
+				if ic <= a_data.count then
+					base [l_index] := a_data [ic]
+					l_index := l_index + 1
+				else
+					base [l_index] := ('%U').code.to_natural_8
+					l_index := l_index + 1
+				end
 			end
 			base [l_index] := ('%U').code.to_natural_8
 		end

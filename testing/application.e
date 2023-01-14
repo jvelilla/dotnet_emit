@@ -20,6 +20,7 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
+			print ((10).bit_not)
 --			test_big_digits
 --			test_copy_arrays
 --			test_array_wrapped_code
