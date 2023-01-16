@@ -319,7 +319,7 @@ feature -- Element Change
 			create l_mp.make (l_arr.count + a_pos)
 			l_mp.put_array (l_arr, 0)
 			l_mp.put_integer_64_le (a_value, a_pos)
-			l_arr := l_mp.read_array (a_arr.lower, a_arr.upper)
+			l_arr := l_mp.read_array (a_arr.lower, a_arr.count)
 			a_arr.copy_data (l_arr.to_special, a_pos, a_pos, {PLATFORM}.integer_64_bytes)
 		ensure
 			instance_free: class
@@ -353,7 +353,7 @@ feature -- Element Change
 			create l_mp.make (l_arr.count + a_pos)
 			l_mp.put_array (l_arr, 0)
 			l_mp.put_real_64_le (a_value, a_pos)
-			l_arr := l_mp.read_array (a_arr.lower, a_arr.upper)
+			l_arr := l_mp.read_array (a_arr.lower, a_arr.count)
 			a_arr.copy_data (l_arr.to_special, a_pos, a_pos, {PLATFORM}.real_64_bytes)
 		ensure
 			instance_free: class
