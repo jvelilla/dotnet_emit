@@ -115,9 +115,9 @@ feature -- Output
 					end
 						-- Call {CIL_DATA_CONTAINER}.pe_dump
 					Result := pe_dump_dc (a_stream)
-							-- should only be the enumerations
+						-- should only be the enumerations
 					inspect value_size
-					when {CIL_VALUE_SIZE}.i8  then
+					when {CIL_VALUE_SIZE}.i8 then
 						l_tsize := {CIL_BASIC_TYPE}.i8
 					when {CIL_VALUE_SIZE}.i16 then
 						l_tsize := {CIL_BASIC_TYPE}.i16
@@ -138,7 +138,7 @@ feature -- Output
 
 					l_sig_index := l_writer.hash_blob (l_sig, l_sz.item)
 					l_name_index := l_writer.hash_string (l_field.name)
-					create {PE_FIELD_TABLE_ENTRY} l_table.make_with_data ( {PE_FIELD_TABLE_ENTRY}.Public | {PE_FIELD_TABLE_ENTRY}.SpecialName | {PE_FIELD_TABLE_ENTRY}.RTSpecialName, l_name_index, l_sig_index)
+					create {PE_FIELD_TABLE_ENTRY} l_table.make_with_data ({PE_FIELD_TABLE_ENTRY}.Public | {PE_FIELD_TABLE_ENTRY}.SpecialName | {PE_FIELD_TABLE_ENTRY}.RTSpecialName, l_name_index, l_sig_index)
 					pe_index := l_writer.add_table_entry (l_table)
 				end
 			elseif pe_index = 0 then -- !peIndex
