@@ -20,7 +20,6 @@ feature -- Initialization
 			l_api: CIL_EMITTER_API
 			time: TIME
 		do
-			print ((10).bit_not)
 --			test_big_digits
 --			test_copy_arrays
 --			test_array_wrapped_code
@@ -40,7 +39,7 @@ feature -- Initialization
 --			test_natural_64
 --			test_byte_array
 --			test_guid;
---			(create {TEST_1}).test;
+			(create {TEST_1}).test;
 --			(create {TEST_2}).test;
 --			(create {TEST_3}).test;
 --			(create {TEST_4}).test;
@@ -48,6 +47,7 @@ feature -- Initialization
 --			(create {TEST_6}).test;
 --			(create {TEST_7}).test;
 			(create {TEST_8}).test;
+			(create {TEST_9}).test;
 		end
 
 	test
