@@ -297,6 +297,7 @@ feature -- Output
 				end
 			elseif opcode = {CIL_INSTRUCTION_OPCODES}.i_label then
 				a_file.put_string (label)
+				a_file.put_string (":")
 				a_file.put_new_line
 				a_file.flush
 			elseif opcode = {CIL_INSTRUCTION_OPCODES}.i_comment then
