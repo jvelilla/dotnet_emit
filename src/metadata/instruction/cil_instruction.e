@@ -12,7 +12,8 @@ inherit
 
 create
 	make,
-	make_with_text
+	make_with_text,
+	make_seh
 
 feature {NONE} -- Initialization
 
@@ -31,6 +32,17 @@ feature {NONE} -- Initialization
 			opcode := a_op
 			create text.make_from_string_general (a_text)
 			seh_type := {CIL_SEH}.seh_try
+		end
+
+	make_seh (a_seh: CIL_SEH; a_begin: BOOLEAN; a_catch_type: detachable CIL_TYPE)
+		do
+			create {ARRAYED_LIST [STRING_32]} switches.make (0)
+			opcode := {CIL_INSTRUCTION_OPCODES}.i_seh
+			create text.make_from_string_general ("")
+			seh_type := a_seh
+			seh_begin := a_begin
+			offset := 0
+			seh_catch_type := a_catch_type
 		end
 
 feature -- Access

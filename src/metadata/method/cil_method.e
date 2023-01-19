@@ -386,6 +386,8 @@ feature -- Output
 					a_file.flush
 				end
 				if not var_list.is_empty then
+						-- TODO
+						-- heck section I I.15.4.1.3 The . locals directive
 					a_file.put_string ("%T.locals (")
 					a_file.put_new_line
 					a_file.flush
@@ -408,7 +410,7 @@ feature -- Output
 							Result := l_type.il_src_dump (a_file)
 						end
 						a_file.put_string (" ")
-
+						Result := it.il_src_dump (a_file)
 						if @ it.cursor_index + 1 /= @ it.last_index then
 							a_file.put_string (")")
 							a_file.put_new_line
