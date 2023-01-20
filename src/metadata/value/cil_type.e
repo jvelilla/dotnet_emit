@@ -447,9 +447,9 @@ feature -- Output
 				end
 				{BYTE_ARRAY_HELPER}.put_array_integer_32_with_natural_64 (a_bytes, pe_index | ({PE_TABLES}.ttypespec.value |<< 24).to_natural_64, a_offset)
 			elseif l_is_ref then
-				{BYTE_ARRAY_HELPER}.put_array_integer_32_with_natural_64 (a_bytes, pe_index | ({PE_TABLES}.ttyperef.value |<< 24).to_natural_64, a_offset)
+				{BYTE_ARRAY_HELPER}.put_array_integer_32_with_natural_64 (a_bytes, a_type_ref.pe_index | ({PE_TABLES}.ttyperef.value |<< 24).to_natural_64, a_offset)
 			else
-				{BYTE_ARRAY_HELPER}.put_array_integer_32_with_natural_64 (a_bytes, pe_index | ({PE_TABLES}.ttypedef.value |<< 24).to_natural_64, a_offset)
+				{BYTE_ARRAY_HELPER}.put_array_integer_32_with_natural_64 (a_bytes, a_type_ref.pe_index | ({PE_TABLES}.ttypedef.value |<< 24).to_natural_64, a_offset)
 			end
 		end
 
