@@ -228,7 +228,7 @@ feature -- Test
 			create l_method_sig.make ("test_rescue", {CIL_METHOD_SIGNATURE_ATTRIBUTES}.managed, Void)
 			l_method_sig.set_return_type (create {CIL_TYPE}.make ({CIL_BASIC_TYPE}.Void_))
 
-				 -- Define method
+				-- Define method
 			create l_method.make (l_method_sig,
 				create {CIL_QUALIFIERS}.make_with_flags (
 						{CIL_QUALIFIERS_ENUM}.public |
@@ -241,16 +241,15 @@ feature -- Test
 
 			l_leave_label := {CIL_OPERAND_FACTORY}.label_operand ("leave")
 
-				 -- Try block
+				-- Try block
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make_seh ({CIL_SEH}.seh_try, True, Void))
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_ldc_i4_1, Void))
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_pop, Void))
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_leave, l_leave_label))
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make_seh ({CIL_SEH}.seh_try, False, Void))
 
-				 -- Catch block
+				-- Catch block
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make_seh ({CIL_SEH}.seh_catch, True, if attached l_exception then create {CIL_TYPE}.make_with_container (l_exception) else Void end))
-			l_method.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_pop, Void))
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_ldstr, {CIL_OPERAND_FACTORY}.string_operand ("Manu is nice")))
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_pop, Void))
 			l_method.add_instruction (create {CIL_INSTRUCTION}.make ({CIL_INSTRUCTION_OPCODES}.i_leave, l_leave_label))
