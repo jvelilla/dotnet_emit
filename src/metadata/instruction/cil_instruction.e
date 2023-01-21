@@ -354,13 +354,14 @@ feature -- Output
 			if opcode = {CIL_INSTRUCTION_OPCODES}.i_seh and then
 				seh_type = {CIL_SEH}.seh_catch
 			then
-				create l_data.make_empty (4)
+				create l_data.make_filled (0, 4)
 				if attached seh_catch_type as l_seh_catch_type then
-					l_dis := l_seh_catch_type.render (a_stream, l_data, l_sz + a_offset)
+					l_dis := l_seh_catch_type.render (a_stream, l_data, l_sz + 0)
 				end
 			end
 			if opcode /= {CIL_INSTRUCTION_OPCODES}.i_label and then
 				opcode /= {CIL_INSTRUCTION_OPCODES}.i_comment and then
+				opcode /= {CIL_INSTRUCTION_OPCODES}.i_seh and then
 				opcode /= {CIL_INSTRUCTION_OPCODES}.i_line
 			then
 				a_result.force (instructions [{CIL_INSTRUCTION_OPCODES}.index_of (opcode) + 1].op1, l_sz + a_offset)
