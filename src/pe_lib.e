@@ -317,6 +317,57 @@ feature -- Assembly
 			Result := l_result
 		end
 
+
+	runtime_assembly: CIL_ASSEMBLY_DEF
+			-- loads the Runtime assembly.
+		local
+			l_result: CIL_ASSEMBLY_DEF
+			l_system: CIL_NAMESPACE
+			l_object, l_value, l_enum: CIL_CLASS
+		do
+				-- [mscorlib]System.ParamArrayAttribute
+				-- System. + typeNames_[tp_]
+
+			l_result := find_assembly ({STRING_32} "System.Runtime")
+			if l_result = Void then
+				l_result := add_external_assembly ("System.Runtime", Void)
+				create l_system.make ({STRING_32} "System")
+				l_result.add (l_system)
+				create l_object.make ({STRING_32} "Object", create {CIL_QUALIFIERS}.make_with_flags ({CIL_QUALIFIERS_ENUM}.public), -1, -1)
+				l_system.add (l_object)
+				create l_value.make ({STRING_32} "ValueType", create {CIL_QUALIFIERS}.make_with_flags ({CIL_QUALIFIERS_ENUM}.public), -1, -1)
+				l_value.set_extend_from (l_object)
+				l_system.add (l_value)
+				create l_enum.make ({STRING_32} "Enum", create {CIL_QUALIFIERS}.make_with_flags ({CIL_QUALIFIERS_ENUM}.public), -1, -1)
+				l_enum.set_extend_from (l_value)
+				l_system.add (l_enum)
+			end
+			Result := l_result
+		end
+
+
+	console_assembly: CIL_ASSEMBLY_DEF
+			-- loads the Runtime assembly.
+		local
+			l_result: CIL_ASSEMBLY_DEF
+			l_system: CIL_NAMESPACE
+			l_console: CIL_CLASS
+		do
+				-- [mscorlib]System.ParamArrayAttribute
+				-- System. + typeNames_[tp_]
+
+			l_result := find_assembly ({STRING_32} "System.Console")
+			if l_result = Void then
+				l_result := add_external_assembly ("System.Console", Void)
+				create l_system.make ({STRING_32} "System")
+				l_result.add (l_system)
+				create l_console.make ({STRING_32} "Console", create {CIL_QUALIFIERS}.make_with_flags ({CIL_QUALIFIERS_ENUM}.public), -1, -1)
+				l_system.add (l_console)
+			end
+			Result := l_result
+		end
+
+
 	load_assembly (a_assembly_name: STRING_32; a_major, a_minor, a_build, a_revision: INTEGER)
 			-- Load data out of an assembly.
 		local
