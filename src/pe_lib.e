@@ -21,11 +21,60 @@ inherit
 	REFACTORING_HELPER
 
 create
-	make
+	make,
+	make_with_name
 
 feature {NONE} -- Initialization
 
-	make (a_name: STRING_32; a_core_flags: INTEGER)
+	make
+			-- Create the working assembly
+			-- Note that this will ALLWAYS be the first assembly in the list.
+		local
+			l_assembly_ref: CIL_ASSEMBLY_DEF
+		do
+			core_flags := {PE_LIB}.il_only
+
+			create module_refs.make (0)
+
+			create {LINKED_LIST [CIL_ASSEMBLY_DEF]} assembly_refs.make
+			assembly_refs.compare_objects
+			create p_invoke_signatures.make (0)
+			create p_invoke_references.make (0)
+			create assembly_name.make_empty
+			create file_name.make_empty
+			create unmanaged_routines.make (0)
+			create using_list.make (0)
+			create container_stack.make
+
+			create module_guid.make_filled (0, 1, 16)
+			create {ARRAYED_LIST [CIL_METHOD]} all_methods.make (0)
+			create source_file.make_empty
+			create lib_path.make_empty
+		ensure
+			valid_obj_input_size: obj_input_size = 0
+			valid_obj_input_pos: obj_input_pos = 0
+			valid_obj_input_cache: obj_input_cache = 0
+			core_flags_set: core_flags = {PE_LIB}.il_only
+			module_refs_empty: module_refs.is_empty
+			assembly_name_empty: assembly_name.is_empty
+			assembly_refs_set: assembly_refs.is_empty
+			using_list_empty: using_list.is_empty
+			file_name_empty: file_name.is_empty
+			unmanaged_routines_empty: unmanaged_routines.is_empty
+			pe_writer_void: pe_writer = Void
+			container_stack_empty: container_stack.is_empty
+			code_container_void: code_container = Void
+			p_invoke_references_empty: p_invoke_references.is_empty
+			p_invoke_signatures_empty: p_invoke_signatures.is_empty
+			module_guid_set: module_guid.count = 16
+			all_method_set: all_methods.is_empty
+			source_file_empty: source_file.is_empty
+			lib_path_empty: lib_path.is_empty
+		end
+
+
+
+	make_with_name (a_name: STRING_32; a_core_flags: INTEGER)
 			-- Create the working assembly
 			-- Note that this will ALLWAYS be the first assembly in the list.
 		local
@@ -317,7 +366,6 @@ feature -- Assembly
 			Result := l_result
 		end
 
-
 	runtime_assembly: CIL_ASSEMBLY_DEF
 			-- loads the Runtime assembly.
 		local
@@ -341,10 +389,10 @@ feature -- Assembly
 				create l_enum.make ({STRING_32} "Enum", create {CIL_QUALIFIERS}.make_with_flags ({CIL_QUALIFIERS_ENUM}.public), -1, -1)
 				l_enum.set_extend_from (l_value)
 				l_system.add (l_enum)
+
 			end
 			Result := l_result
 		end
-
 
 	console_assembly: CIL_ASSEMBLY_DEF
 			-- loads the Runtime assembly.
@@ -366,7 +414,6 @@ feature -- Assembly
 			end
 			Result := l_result
 		end
-
 
 	load_assembly (a_assembly_name: STRING_32; a_major, a_minor, a_build, a_revision: INTEGER)
 			-- Load data out of an assembly.
