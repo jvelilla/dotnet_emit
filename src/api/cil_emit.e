@@ -117,6 +117,7 @@ feature -- Definition: creation
 		end
 
 	define_type (a_name: STRING_32; a_flags: CIL_QUALIFIERS; a_object: CIL_CLASS): CIL_CLASS
+			-- Create a new type `a_name'
 		do
 			create Result.make (a_name, a_flags, -1, -1)
 			Result.set_extend_from (a_object)
@@ -124,6 +125,7 @@ feature -- Definition: creation
 		end
 
 	define_method (a_signature: CIL_METHOD_SIGNATURE; a_flags: CIL_QUALIFIERS; a_type: CIL_CLASS; a_entry: BOOLEAN): CIL_METHOD
+			-- Create a new method from signature `a_signatre' in type `a_type'.
 		do
 			create Result.make (a_signature, a_flags, a_entry)
 			a_type.add (Result)
@@ -136,7 +138,6 @@ feature -- Definition: creation
 			create Result.make (a_name, a_field_type, a_flags)
 			a_type.add (Result)
 		end
-
 
 	define_local_from_basic_type (a_name: STRING_32; a_type: CIL_BASIC_TYPE): CIL_LOCAL
 			-- Create a new local varaible `a_name' from a basic type `a_type'.
@@ -156,7 +157,6 @@ feature -- Definition: creation
 			Result := {CIL_OPERAND_FACTORY}.label_operand (a_name)
 		end
 
-
 feature -- Settings
 
 	set_module_name (a_name: STRING_32)
@@ -166,7 +166,6 @@ feature -- Settings
 				to_implement ("Add implementation, MODULE is not supported")
 			end
 		end
-
 
 feature -- Save
 

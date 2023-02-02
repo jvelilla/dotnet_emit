@@ -192,7 +192,6 @@ feature -- Write Body
 			put_opcode ({CIL_INSTRUCTION_OPCODES}.i_ret)
 		end
 
-
 	put_exception_block_start
 			-- Insert exception block start
 		do
@@ -204,7 +203,6 @@ feature -- Write Body
 		do
 			add_instruction (create {CIL_INSTRUCTION}.make_seh ({CIL_SEH}.seh_try, False, Void))
 		end
-
 
 	put_exception_catch_start (a_type: detachable CIL_TYPE)
 			-- Insert exception catch block with a handler exceptin of type a_type if it's
