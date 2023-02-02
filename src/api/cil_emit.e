@@ -131,6 +131,33 @@ feature -- Definition: creation
 			l_method_sig.set_return_type (create {CIL_TYPE}.make ({CIL_BASIC_TYPE}.Void_))
 			create Result.make (l_method_sig, a_flags, a_entry)
 			a_type.add (Result)
+			Result.optimize
+		end
+
+	define_field (a_name: STRING_32; a_field_type: CIL_TYPE; a_flags: CIL_QUALIFIERS; a_type: CIL_CLASS): CIL_FIELD
+			-- Create a new field `a_name' in class `a_type'.
+		do
+			create Result.make (a_name, a_field_type, a_flags)
+			a_type.add (Result)
+		end
+
+
+	define_local_from_basic_type (a_name: STRING_32; a_type: CIL_BASIC_TYPE): CIL_LOCAL
+			-- Create a new local varaible `a_name' from a basic type `a_type'.
+		do
+			create Result.make (a_name, create {CIL_TYPE}.make (a_type))
+		end
+
+	define_local_from_container (a_name: STRING_32; a_container: CIL_DATA_CONTAINER): CIL_LOCAL
+			-- -- Create a new local varaible `a_name' from a container `a_container'.
+		do
+			create Result.make (a_name, create {CIL_TYPE}.make_with_container (a_container))
+		end
+
+	define_label (a_name: STRING_32): CIL_OPERAND
+			-- Create a new label `a_name'
+		do
+			Result := {CIL_OPERAND_FACTORY}.label_operand (a_name)
 		end
 
 
@@ -142,6 +169,16 @@ feature -- Settings
 			debug ("il_emitter")
 				to_implement ("Add implementation, MODULE is not supported")
 			end
+		end
+
+
+feature -- Save
+
+	dump_output_file (a_file_name: STRING_32; a_mode: CIL_OUTPUT_MODE; a_gui: BOOLEAN)
+			-- write an output file, possibilities are a .il file, an EXE or a DLL
+			-- the file can also be tagged as either console or win32
+		do
+			pe_lib.dump_output_file (a_file_name, a_mode, a_gui)
 		end
 
 end
