@@ -123,13 +123,9 @@ feature -- Definition: creation
 			pe_lib.working_assembly.add (Result)
 		end
 
-	define_method (a_name: STRING_32; a_flags: CIL_QUALIFIERS; a_type: CIL_CLASS; a_entry: BOOLEAN): CIL_METHOD
-		local
-			l_method_sig: CIL_METHOD_SIGNATURE
+	define_method (a_signature: CIL_METHOD_SIGNATURE; a_flags: CIL_QUALIFIERS; a_type: CIL_CLASS; a_entry: BOOLEAN): CIL_METHOD
 		do
-			create l_method_sig.make (a_name, {CIL_METHOD_SIGNATURE_ATTRIBUTES}.managed, Void)
-			l_method_sig.set_return_type (create {CIL_TYPE}.make ({CIL_BASIC_TYPE}.Void_))
-			create Result.make (l_method_sig, a_flags, a_entry)
+			create Result.make (a_signature, a_flags, a_entry)
 			a_type.add (Result)
 			Result.optimize
 		end
