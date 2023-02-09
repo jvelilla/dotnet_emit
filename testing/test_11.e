@@ -14,6 +14,7 @@ feature -- Test
 			l_dispenser: CIL_METADATA_DISPENSER
 			l_emit: CIL_METADATA_EMIT
 			l_assembly_info: CIL_ASSEMBLY_INFO
+			l_pub_key_token: CIL_PUBLIC_KEY_TOKEN
 
 			my_assembly, mscorlib_token, object_type_token, system_exception_token,
 			my_type: INTEGER
@@ -31,8 +32,10 @@ feature -- Test
 			l_assembly_info.set_major (1)
 			l_assembly_info.set_minor (0)
 			l_assembly_info.set_build (3300)
-			mscorlib_token := l_emit.define_assembly_ref ({STRING_32}"mscorlib",
-				l_assembly_info, {ARRAY [NATURAL_8]} <<0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89>>)
+			create l_pub_key_token.make_from_array (
+				{ARRAY [NATURAL_8]} <<0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89>>)
+
+			mscorlib_token := l_emit.define_assembly_ref ({STRING_32}"mscorlib", l_assembly_info, l_pub_key_token)
 
 			object_type_token := l_emit.define_type_ref ({STRING_32}"System.Object", mscorlib_token)
 

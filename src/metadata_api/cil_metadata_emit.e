@@ -1,8 +1,8 @@
 note
 	description: "[
-		CIL_METADATA_EMIT represent a set of in-memory metadata tables and creates a unique module version identifier (GUID) for the metadata. 
-		The class has the ability to add entries to the metadata tables and define the assembly information in the metadata.
-	]"
+			CIL_METADATA_EMIT represent a set of in-memory metadata tables and creates a unique module version identifier (GUID) for the metadata. 
+			The class has the ability to add entries to the metadata tables and define the assembly information in the metadata.
+		]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -89,7 +89,6 @@ feature {NONE} -- Change tables
 			--  and this class will self-report the table index to use
 		local
 			n: INTEGER
-			l_token: NATURAL_32
 		do
 			n := a_entry.table_index
 			tables [n].table.force (a_entry)
@@ -102,16 +101,16 @@ feature {NONE} -- Change tables
 feature -- Module Definition
 
 	set_module_name (a_name: STRING_32)
-				-- Set the module name for the compilation unit being emitted.
-			local
-				l_name_index: NATURAL_64
-				n: NATURAL_64
-				l_entry: PE_TABLE_ENTRY_BASE
-			do
-				l_name_index := pe_writer.hash_string (a_name)
-				create {PE_MODULE_TABLE_ENTRY} l_entry.make_with_data (l_name_index, guid_index)
-				n := add_table_entry (l_entry)
-			end
+			-- Set the module name for the compilation unit being emitted.
+		local
+			l_name_index: NATURAL_64
+			n: NATURAL_64
+			l_entry: PE_TABLE_ENTRY_BASE
+		do
+			l_name_index := pe_writer.hash_string (a_name)
+			create {PE_MODULE_TABLE_ENTRY} l_entry.make_with_data (l_name_index, guid_index)
+			n := add_table_entry (l_entry)
+		end
 
 feature -- Assembly Definition
 
@@ -119,6 +118,8 @@ feature -- Assembly Definition
 			assembly_info: CIL_ASSEMBLY_INFO; public_key: detachable CIL_PUBLIC_KEY): INTEGER
 			-- Add assembly metadata information to the metadata tables.
 			--| the public key could be null.
+		require
+			assembly_name_not_empty: not assembly_name.is_empty
 		local
 			l_name_index: NATURAL_64
 			l_entry: PE_TABLE_ENTRY_BASE
@@ -134,11 +135,15 @@ feature -- Assembly Definition
 			create {PE_ASSEMBLY_DEF_TABLE_ENTRY} l_entry.make_with_data (assembly_flags, assembly_info.major, assembly_info.minor, assembly_info.build, assembly_info.revision, l_name_index, l_public_key_index)
 			l_dis := add_table_entry (l_entry)
 			Result := last_token.to_integer_32
+		ensure
+			valid_result: Result & Md_mask = Md_assembly
 		end
 
 	define_assembly_ref (assembly_name: STRING_32; assembly_info: CIL_ASSEMBLY_INFO;
-			public_key_token: ARRAY [NATURAL_8]): INTEGER
+			public_key_token: CIL_PUBLIC_KEY_TOKEN): INTEGER
 			-- Add assembly reference information to the metadata tables.
+		require
+			assembly_name_not_empty: not assembly_name.is_empty
 		local
 			l_name_index: NATURAL_64
 			l_public_key_token_index: NATURAL_64
@@ -146,60 +151,60 @@ feature -- Assembly Definition
 			l_dis: NATURAL_64
 		do
 			l_name_index := pe_writer.hash_string (assembly_name)
-			l_public_key_token_index := pe_writer.hash_blob (public_key_token, public_key_token.count.to_natural_64)
+			to_implement ("TODO refactor pe_writer.hash_blob")
+			l_public_key_token_index := pe_writer.hash_blob (public_key_token.item.read_array (0, public_key_token.item.count), public_key_token.item.count.to_natural_64)
 			create {PE_ASSEMBLY_REF_TABLE_ENTRY} l_entry.make_with_data ({PE_ASSEMBLY_FLAGS}.PA_none, assembly_info.major, assembly_info.minor, assembly_info.build, assembly_info.revision, l_name_index, l_public_key_token_index)
 			l_dis := add_table_entry (l_entry)
 			Result := last_token.to_integer_32
+		ensure
+			valid_result: Result > 0
 		end
 
 	define_type_ref (type_name: STRING_32; resolution_scope: INTEGER): INTEGER
 			-- Adds type reference information to the metadata tables.
+		require
+			type_name_not_empty: not type_name.is_empty
+			resolution_scope_valid:
+				(resolution_scope = 0) or
+				(resolution_scope & Md_mask = Md_module_ref) or
+				(resolution_scope & Md_mask = Md_assembly_ref) or
+				(resolution_scope & Md_mask = Md_type_ref)
 		local
 			l_name_index: NATURAL_64
 			l_entry: PE_TABLE_ENTRY_BASE
 			l_dis: NATURAL_64
-			l_rs: PE_RESOLUTION_SCOPE
-			l_mask: INTEGER_32
-			l_token_type: INTEGER_32
-			l_table_row: INTEGER_32
-			l_table_type: INTEGER_32
-			l_res: INTEGER_32
 			l_scope: INTEGER
 			l_namespace_index: NATURAL_64
+			l_tuple: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
 		do
 
-				--2^8 -1 = 256 - 1 = 255
-				-- l_table_type := resolution_scope |>> 24
-			l_table_type := (resolution_scope |>> 24) & (255)
-
-				-- 2^ 24 -1 = 16777215
-			l_table_row := resolution_scope & (16777215)
+			l_tuple := extract_table_type_and_row (resolution_scope)
 
 				--| TODO checks
 				--| l_table_type is valid.  We need to add a is_valid_table
 				--| {PE_TABLES}.is_valid_table (l_table_type)
 				--|
 				--| l_table_row: exists.
-			check exist_table_row: attached tables[l_table_type].table[l_table_row] end
+			check exist_table_row: attached tables [l_tuple.table_type_index.to_integer_32].table [l_tuple.table_row_index.to_integer_32] end
 
 			if (resolution_scope & Md_mask = Md_module_ref)
 			then
-				l_scope:= {PE_RESOLUTION_SCOPE}.moduleref
-			elseif(resolution_scope & Md_mask = Md_assembly_ref)
- 			then
-				l_scope:= {PE_RESOLUTION_SCOPE}.assemblyref
-			elseif  (resolution_scope & Md_mask = Md_type_ref) then
-				l_scope:= {PE_RESOLUTION_SCOPE}.typeref
+				l_scope := {PE_RESOLUTION_SCOPE}.moduleref
+			elseif (resolution_scope & Md_mask = Md_assembly_ref)
+			then
+				l_scope := {PE_RESOLUTION_SCOPE}.assemblyref
+			elseif (resolution_scope & Md_mask = Md_type_ref) then
+				l_scope := {PE_RESOLUTION_SCOPE}.typeref
 			end
 
 				-- If the table type is TypeDef or TypeRef, WE can retrieve the
 				-- namespace index from the corresponding row in the TypeDef or TypeRef table.
-			if l_table_type =  {PE_TABLES}.tTypeRef and then
-				attached {PE_TYPE_REF_TABLE_ENTRY}tables[l_table_type].table[l_table_row] as l_type_ref
+			if l_tuple.table_type_index = {PE_TABLES}.tTypeRef.value and then
+				attached {PE_TYPE_REF_TABLE_ENTRY} tables [l_tuple.table_type_index.to_integer_32].table [l_tuple.table_row_index.to_integer_32] as l_type_ref
 			then
 				l_namespace_index := l_type_ref.type_name_space_index.index
-			elseif l_table_type = {PE_TABLES}.tTypeDef and then
-				attached {PE_TYPE_DEF_TABLE_ENTRY}tables[l_table_type].table[l_table_row] as l_type_def
+			elseif l_tuple.table_type_index = {PE_TABLES}.tTypeDef.value and then
+				attached {PE_TYPE_DEF_TABLE_ENTRY} tables [l_tuple.table_type_index.to_integer_32].table [l_tuple.table_row_index.to_integer_32] as l_type_def
 			then
 				l_namespace_index := l_type_def.type_name_space_index.index
 			else
@@ -207,75 +212,94 @@ feature -- Assembly Definition
 			end
 
 			l_name_index := pe_writer.hash_string (type_name)
-			create {PE_TYPE_REF_TABLE_ENTRY} l_entry.make_with_data (create {PE_RESOLUTION_SCOPE}.make_with_tag_and_index (l_scope, l_table_row.to_natural_64), l_name_index, l_namespace_index)
+			create {PE_TYPE_REF_TABLE_ENTRY} l_entry.make_with_data (create {PE_RESOLUTION_SCOPE}.make_with_tag_and_index (l_scope, l_tuple.table_row_index), l_name_index, l_namespace_index)
 			l_dis := add_table_entry (l_entry)
 			Result := last_token.to_integer_32
+		ensure
+			result_valid: Result & Md_mask = Md_type_ref
 		end
 
-
 	define_type (type_name: STRING_32; flags: INTEGER; extend_token: INTEGER; implements: detachable ARRAY [INTEGER]): INTEGER
-		-- Define a new type in the metadata.
+			-- Define a new type in the metadata.
+		require
+				type_name_not_empty: not type_name.is_empty
+				extend_token_valid:
+					(extend_token & Md_mask = Md_type_def) or
+					(extend_token & Md_mask = Md_type_ref) or
+					(extend_token & Md_mask = Md_type_spec) or
+					extend_token = 0
 		local
-			l_type_def_token: INTEGER
 			l_name_index: NATURAL_64
 			l_namespace_index: NATURAL_64
-			l_extends_index: NATURAL_64
-			implements_index: INTEGER
 			l_entry: PE_TABLE_ENTRY_BASE
-			i: INTEGER
+				--i: INTEGER
 			l_type_def_index: NATURAL_64
-			l_tag: INTEGER
 			l_extends: PE_TYPEDEF_OR_REF
+			l_tuple: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			l_dis: NATURAL_64
 		do
 			l_name_index := pe_writer.hash_string (type_name)
 				-- TODO double check if we need to compute the namespace_index, since we are creating a new type
 				-- we could assume the namespace_index is 0.
 			l_namespace_index := 0
 
+			l_tuple := extract_table_type_and_row (extend_token)
 
-			to_implement ("TODO create a feature to retrieve a tuple with the [table_index and table_row] for  a given token")
-				--2^8 -1 = 256 - 1 = 255
-				-- l_table_type := resolution_scope |>> 24
-			l_extends_index := ((extend_token |>> 24) & (255)).to_natural_64
-
-					-- 2^ 24 -1 = 16777215
-			--l_extends_index_row := extend_token & (16777215)
-
-
-			to_implement ("TODO implemente a helper feature that given a token return a PE_TYPEDEF_OR_REF instance")
-			if (extend_token & Md_mask = Md_type_def)
-			then
-				l_tag := {PE_TYPEDEF_OR_REF}.typedef
-			elseif(extend_token & Md_mask = Md_type_ref)
-		 	then
-				l_tag := {PE_TYPEDEF_OR_REF}.typeref
-			elseif  (extend_token & Md_mask = Md_type_spec) then
-				l_tag := {PE_TYPEDEF_OR_REF}.typespec
-			else
-				l_tag := 0
-			end
-
-			create l_extends.make_with_tag_and_index (l_tag, l_extends_index)
-
+			l_extends := create_type_def_or_ref (extend_token, l_tuple.table_type_index)
 
 			create {PE_TYPE_DEF_TABLE_ENTRY} l_entry.make_with_data (flags, l_name_index, l_namespace_index, l_extends, 0, 0)
 			l_type_def_index := add_table_entry (l_entry)
 			Result := last_token.to_integer_32
 
-
+				-- Adds entries in the PE_INTERFACE_IMPL_TABLE_ENTRY table for each implemented interface, if any.
 			if attached implements then
-				to_implement ("Add entries to the PE_INTERFACE_IMPL_TABLE_ENTRY looping through the implementations ARRAY")
-				--across implements as i loop
-					--l_implements_index := i
-					--the array is a list of tokens
-					--create {PE_INTERFACE_IMPL_TABLE_ENTRY} l_entry.make_with_data (l_type_def_index; a_interface: PE_TYPEDEF_OR_REF)
-				--end
+				across implements as i loop
+					to_implement ("TODO double check and test this code!!!")
+					l_extends := create_type_def_or_ref (i, l_tuple.table_type_index)
+					create {PE_INTERFACE_IMPL_TABLE_ENTRY} l_entry.make_with_data (l_type_def_index, l_extends)
+						--note: l_dis is not used.
+					l_dis := add_table_entry (l_entry)
+				end
 			end
-
+		ensure
+			result_valid: Result & Md_mask = Md_type_def
 		end
 
+feature {NONE} -- Helper
 
+	extract_table_type_and_row (a_token: INTEGER): TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			-- Given a token `a_token' return a TUPLE with the table_type_index and the
+			-- table_row_index.
+		local
+			l_table_type_index: NATURAL_64
+			l_table_row_index: NATURAL_64
+		do
+				-- 2^8 -1 = 255
+			l_table_type_index := ((a_token |>> 24) & 255).to_natural_64
+				-- 2^ 24 -1 = 16777215
+			l_table_row_index := (a_token & 16777215).to_natural_64
+			Result := [l_table_type_index, l_table_row_index]
+		end
 
+	create_type_def_or_ref (a_token: INTEGER; a_index: NATURAL_64): PE_TYPEDEF_OR_REF
+		local
+			l_tag: INTEGER
+		do
+			if (a_token & Md_mask = Md_type_def)
+			then
+				l_tag := {PE_TYPEDEF_OR_REF}.typedef
+			elseif (a_token & Md_mask = Md_type_ref)
+			then
+				l_tag := {PE_TYPEDEF_OR_REF}.typeref
+			elseif (a_token & Md_mask = Md_type_spec) then
+				l_tag := {PE_TYPEDEF_OR_REF}.typespec
+			else
+				l_tag := 0
+			end
+
+			create Result.make_with_tag_and_index (l_tag, a_index)
+
+		end
 
 feature {NONE} -- Metadata Tables
 
