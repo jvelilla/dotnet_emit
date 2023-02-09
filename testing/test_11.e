@@ -36,26 +36,33 @@ feature -- Test
 			create l_pub_key_token.make_from_array (
 				{ARRAY [NATURAL_8]} <<0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89>>)
 
-			mscorlib_token := l_emit.define_assembly_ref ({STRING_32}"mscorlib", l_assembly_info, l_pub_key_token)
+			mscorlib_token := l_emit.define_assembly_ref ({STRING_32} "mscorlib", l_assembly_info, l_pub_key_token)
 
-			object_type_token := l_emit.define_type_ref ({STRING_32}"System.Object", mscorlib_token)
+			object_type_token := l_emit.define_type_ref ({STRING_32} "System.Object", mscorlib_token)
 
-			system_exception_token := l_emit.define_type_ref ({STRING_32}"System.Exception", mscorlib_token)
+			system_exception_token := l_emit.define_type_ref ({STRING_32} "System.Exception", mscorlib_token)
 
-			my_type :=l_emit.define_type ({STRING_32}"TEST",
-						{CIL_MD_TYPE_ATTRIBUTES}.Ansi_class | {CIL_MD_TYPE_ATTRIBUTES}.Auto_layout |
-						{CIL_MD_TYPE_ATTRIBUTES}.Public,
-						object_type_token, Void)
+			my_type := l_emit.define_type ({STRING_32} "TEST",
+					{CIL_MD_TYPE_ATTRIBUTES}.Ansi_class | {CIL_MD_TYPE_ATTRIBUTES}.Auto_layout |
+					{CIL_MD_TYPE_ATTRIBUTES}.Public,
+					object_type_token, Void)
 
 			create sig.make
 			sig.set_method_type ({CIL_MD_SIGNATURE_CONSTANTS}.Has_current)
 			sig.set_parameter_count (0)
 			sig.set_return_type ({CIL_MD_SIGNATURE_CONSTANTS}.Element_type_void, 0)
 
-			object_ctor := l_emit.define_member_ref ({STRING_32}".ctor", object_type_token, sig)
+			object_ctor := l_emit.define_member_ref ({STRING_32} ".ctor", object_type_token, sig)
+
+
+			my_ctor := l_emit.define_method ({STRING_32}".ctor",
+					my_type,
+					{CIL_MD_METHOD_ATTRIBUTES}.Public |
+					{CIL_MD_METHOD_ATTRIBUTES}.Special_name |
+					{CIL_MD_METHOD_ATTRIBUTES}.Rt_special_name,
+					sig, {CIL_MD_METHOD_ATTRIBUTES}.Managed)
 
 
 		end
-
 
 end

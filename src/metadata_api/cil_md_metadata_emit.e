@@ -302,6 +302,45 @@ feature -- Assembly Definition
 			result_valid: Result & Md_mask = Md_member_ref
 		end
 
+	define_method (method_name: STRING_32; in_class_token: INTEGER; method_flags: INTEGER;
+			a_signature: CIL_MD_METHOD_SIGNATURE; impl_flags: INTEGER): INTEGER
+			-- Create reference to method in class `in_class_token`.
+		require
+			method_name_not_empty: not method_name.is_empty
+			in_class_token_valid: in_class_token & Md_mask = Md_type_ref or
+				in_class_token & Md_mask = Md_type_def or
+				in_class_token & md_mask = md_type_spec
+		local
+			l_table_type, l_table_row: NATURAL_64
+			l_method_def_index: NATURAL_64
+			l_method_def_entry: PE_METHOD_DEF_TABLE_ENTRY
+			l_tuple: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			l_method_signature: NATURAL_64
+			l_name_index: NATURAL_64
+			l_param_index: NATURAL_64
+		do
+				-- Extract table type and row from the in_class_token
+			l_tuple := extract_table_type_and_row (in_class_token)
+
+				-- Param index is the number of parameters.
+				--| TODO double check.
+			l_param_index := a_signature.parameter_count.to_natural_64
+
+			l_method_signature := pe_writer.hash_blob (a_signature.as_array, a_signature.count.to_natural_64)
+			l_name_index := pe_writer.hash_string (method_name)
+
+				-- Create a new PE_METHOD_DEF_TABLE_ENTRY instance with the given data
+			create l_method_def_entry.make (method_flags, impl_flags, l_name_index, l_method_signature, l_param_index)
+
+				-- Add the new PE_METHOD_DEF_TABLE_ENTRY instance to the metadata tables.
+			l_method_def_index := add_table_entry (l_method_def_entry)
+
+				-- Return the generated token.
+			Result := last_token.to_integer_32
+		ensure
+			result_valid: Result & Md_mask = Md_method_def
+		end
+
 feature {NONE} -- Helper
 
 	extract_table_type_and_row (a_token: INTEGER): TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
