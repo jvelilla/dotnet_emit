@@ -3,6 +3,7 @@ note
 	date: "$Date$"
 	revision: "$Revision$"
 
+
 class
 	CIL_ENUM
 
