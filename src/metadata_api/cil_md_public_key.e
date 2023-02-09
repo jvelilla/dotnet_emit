@@ -4,7 +4,7 @@ note
 	revision: "$Revision$"
 
 class
-	CIL_PUBLIC_KEY
+	CIL_MD_PUBLIC_KEY
 
 inherit
 
@@ -17,7 +17,7 @@ create
 
 feature {NONE} -- Initialization
 
-	make_from_file (a_file_name: PATH; a_signing: CIL_STRONG_NAME)
+	make_from_file (a_file_name: PATH; a_signing: CIL_MD_STRONG_NAME)
 			-- Create a public key from private key stored in `a_file_name'.
 		require
 			a_file_name_not_void: a_file_name /= Void

@@ -7,11 +7,11 @@ note
 	revision: "$Revision$"
 
 class
-	CIL_METADATA_EMIT
+	CIL_MD_METADATA_EMIT
 
 inherit
 
-	CIL_TOKEN_TYPES
+	CIL_MD_TOKEN_TYPES
 
 	REFACTORING_HELPER
 		export {NONE} all end
@@ -41,7 +41,7 @@ feature {NONE}
 		do
 			create tables.make_empty ({PE_TABLE_CONSTANTS}.max_tables)
 			across 0 |..| ({PE_TABLE_CONSTANTS}.max_tables - 1) as i loop
-				tables.force ((create {CIL_METADATA_TABLES}.make), i)
+				tables.force ((create {CIL_MD_METADATA_TABLES}.make), i)
 			end
 		end
 
@@ -115,7 +115,7 @@ feature -- Module Definition
 feature -- Assembly Definition
 
 	define_assembly (assembly_name: STRING_32; assembly_flags: INTEGER;
-			assembly_info: CIL_ASSEMBLY_INFO; public_key: detachable CIL_PUBLIC_KEY): INTEGER
+			assembly_info: CIL_MD_ASSEMBLY_INFO; public_key: detachable CIL_MD_PUBLIC_KEY): INTEGER
 			-- Add assembly metadata information to the metadata tables.
 			--| the public key could be null.
 		require
@@ -139,8 +139,8 @@ feature -- Assembly Definition
 			valid_result: Result & Md_mask = Md_assembly
 		end
 
-	define_assembly_ref (assembly_name: STRING_32; assembly_info: CIL_ASSEMBLY_INFO;
-			public_key_token: CIL_PUBLIC_KEY_TOKEN): INTEGER
+	define_assembly_ref (assembly_name: STRING_32; assembly_info: CIL_MD_ASSEMBLY_INFO;
+			public_key_token: CIL_MD_PUBLIC_KEY_TOKEN): INTEGER
 			-- Add assembly reference information to the metadata tables.
 		require
 			assembly_name_not_empty: not assembly_name.is_empty
@@ -222,12 +222,12 @@ feature -- Assembly Definition
 	define_type (type_name: STRING_32; flags: INTEGER; extend_token: INTEGER; implements: detachable ARRAY [INTEGER]): INTEGER
 			-- Define a new type in the metadata.
 		require
-				type_name_not_empty: not type_name.is_empty
-				extend_token_valid:
-					(extend_token & Md_mask = Md_type_def) or
-					(extend_token & Md_mask = Md_type_ref) or
-					(extend_token & Md_mask = Md_type_spec) or
-					extend_token = 0
+			type_name_not_empty: not type_name.is_empty
+			extend_token_valid:
+				(extend_token & Md_mask = Md_type_def) or
+				(extend_token & Md_mask = Md_type_ref) or
+				(extend_token & Md_mask = Md_type_spec) or
+				extend_token = 0
 		local
 			l_name_index: NATURAL_64
 			l_namespace_index: NATURAL_64
@@ -265,6 +265,43 @@ feature -- Assembly Definition
 			result_valid: Result & Md_mask = Md_type_def
 		end
 
+	define_member_ref (method_name: STRING_32; in_class_token: INTEGER; a_signature: CIL_MD_SIGNATURE): INTEGER
+			-- Create reference to member in class `in_class_token'.
+		require
+			method_name_not_empty: not method_name.is_empty
+			in_class_token_valid: in_class_token & Md_mask = Md_type_ref or
+				in_class_token & Md_mask = Md_type_def or
+				in_class_token & md_mask = md_type_spec
+		local
+			l_table_type, l_table_row: NATURAL_64
+			l_member_ref_index: NATURAL_64
+			l_member_ref: PE_MEMBER_REF_PARENT
+			l_member_ref_entry: PE_MEMBER_REF_TABLE_ENTRY
+			l_tuple: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			l_method_signature: NATURAL_64
+			l_name_index: NATURAL_64
+		do
+				-- Extract table type and row from the in_class_token
+			l_tuple := extract_table_type_and_row (in_class_token)
+
+				-- Create a new PE_MEMBER_REF_PARENT instance with the extracted table type index and the in_class_tokebn
+			l_member_ref := create_member_ref (in_class_token, l_tuple.table_type_index)
+
+			l_method_signature := pe_writer.hash_blob (a_signature.as_array, a_signature.count.to_natural_64)
+			l_name_index := pe_writer.hash_string (method_name)
+
+				-- Create a new PE_MEMBER_REF_TABLE_ENTRY instance with the given data
+			create l_member_ref_entry.make_with_data (l_member_ref, l_name_index, l_method_signature)
+
+				-- Add the new PE_MEMBER_REF_TABLE_ENTRY instance to the metadata tables.
+			l_member_ref_index := add_table_entry (l_member_ref_entry)
+
+				-- Return the generated token.
+			Result := last_token.to_integer_32
+		ensure
+			result_valid: Result & Md_mask = Md_member_ref
+		end
+
 feature {NONE} -- Helper
 
 	extract_table_type_and_row (a_token: INTEGER): TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
@@ -296,14 +333,34 @@ feature {NONE} -- Helper
 			else
 				l_tag := 0
 			end
-
 			create Result.make_with_tag_and_index (l_tag, a_index)
+		end
 
+	create_member_ref (a_token: INTEGER; a_index: NATURAL_64): PE_MEMBER_REF_PARENT
+		local
+			l_tag: INTEGER
+		do
+			if (a_token & Md_mask = Md_type_def)
+			then
+				l_tag := {PE_MEMBER_REF_PARENT}.typedef
+			elseif (a_token & Md_mask = Md_type_ref)
+			then
+				l_tag := {PE_MEMBER_REF_PARENT}.typeref
+			elseif (a_token & Md_mask = Md_type_spec) then
+				l_tag := {PE_MEMBER_REF_PARENT}.typespec
+			elseif (a_token & Md_mask = Md_module_ref) then
+				l_tag := {PE_MEMBER_REF_PARENT}.moduleref
+			elseif (a_token & Md_mask = Md_method_def) then
+				l_tag := {PE_MEMBER_REF_PARENT}.methoddef
+			else
+				l_tag := 0
+			end
+			create Result.make_with_tag_and_index (l_tag, a_index)
 		end
 
 feature {NONE} -- Metadata Tables
 
-	tables: SPECIAL [CIL_METADATA_TABLES]
+	tables: SPECIAL [CIL_MD_METADATA_TABLES]
 			--  in-memory metadata tables
 
 	pe_writer: PE_WRITER

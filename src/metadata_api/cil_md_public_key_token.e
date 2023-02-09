@@ -4,7 +4,7 @@
 	revision: "$Revision$"
 
 class
-	CIL_PUBLIC_KEY_TOKEN
+	CIL_MD_PUBLIC_KEY_TOKEN
 
 create
 	make_from_array,
