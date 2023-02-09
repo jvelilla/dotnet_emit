@@ -15,7 +15,8 @@ feature -- Test
 			l_emit: CIL_METADATA_EMIT
 			l_assembly_info: CIL_ASSEMBLY_INFO
 
-			my_assembly, mscorlib_token, object_type_token: INTEGER
+			my_assembly, mscorlib_token, object_type_token, system_exception_token,
+			my_type: INTEGER
 
 		do
 			create l_dispenser.make
@@ -35,6 +36,12 @@ feature -- Test
 
 			object_type_token := l_emit.define_type_ref ({STRING_32}"System.Object", mscorlib_token)
 
+			system_exception_token := l_emit.define_type_ref ({STRING_32}"System.Exception", mscorlib_token)
+
+			my_type :=l_emit.define_type ({STRING_32}"TEST",
+						{CIL_TYPE_ATTRIBUTES}.Ansi_class | {CIL_TYPE_ATTRIBUTES}.Auto_layout |
+						{CIL_TYPE_ATTRIBUTES}.Public,
+						object_type_token, Void)
 		end
 
 end
