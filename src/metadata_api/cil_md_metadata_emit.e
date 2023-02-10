@@ -341,6 +341,37 @@ feature -- Assembly Definition
 			result_valid: Result & Md_mask = Md_method_def
 		end
 
+	define_field (field_name: STRING_32; in_class_token: INTEGER; field_flags: INTEGER; a_signature: CIL_MD_FIELD_SIGNATURE): INTEGER
+			-- Create a new field in class `in_class_token'.
+		require
+			field_name_not_empty: not field_name.is_empty
+			in_class_token_valid: in_class_token & Md_mask = Md_type_def
+		local
+			l_table_type, l_table_row: NATURAL_64
+			l_field_def_index: NATURAL_64
+			l_field_def_entry: PE_FIELD_TABLE_ENTRY
+			l_tuple: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			l_field_signature: NATURAL_64
+			l_name_index: NATURAL_64
+		do
+				-- Extract table type and row from the in_class_token
+			l_tuple := extract_table_type_and_row (in_class_token)
+
+			l_field_signature := pe_writer.hash_blob (a_signature.as_array, a_signature.count.to_natural_64)
+			l_name_index := pe_writer.hash_string (field_name)
+
+				-- Create a new PE_FIELD_TABLE_ENTRY instance with the given data
+			create l_field_def_entry.make_with_data (field_flags, l_name_index, l_field_signature)
+
+				-- Add the new PE_FIELD_TABLE_ENTRY instance to the metadata tables.
+			l_field_def_index := add_table_entry (l_field_def_entry)
+
+				-- Return the generated token.
+			Result := last_token.to_integer_32
+		ensure
+			result_valid: Result & Md_mask = Md_field_def
+		end
+
 feature {NONE} -- Helper
 
 	extract_table_type_and_row (a_token: INTEGER): TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
