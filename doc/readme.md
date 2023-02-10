@@ -51,7 +51,7 @@ The class `CIL_TYPE` represent the type of a field or value
 		- CIL_BOXED_TYPE
 ```	
 
-## Intruction
+## Instruction
 The class `CIL_INSTRUCTION` represent a cil instruction.
 
 
