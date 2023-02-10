@@ -63,6 +63,17 @@ The class `CIL_PROPERTY` represent classic properties, extensions are not suppor
 The class `CIL_CUSTOM_ATTRIBUTE_CONTAINER` hold custom attributes. Used to retrive
 attributes from .Net assemblyes. Generation is not supported.
 
+## Metadata
+
+The class `DNL_TABLE` tepresent tables that can appear in a PE file.
+
+The cluster `table` holds the tables and indexes used to register the metadata about the assembly.
+
+The class `PE_INDEX_BASE` is the base class for indexing, it defines the tag type 	
+tag type (which indicates which table the index belongs with) and an index value.
+
+The class `PE_TABLE_ENTRY_BASE` represent the base class for the metadata tables.
+
 
 ## PE_LIB
 This is the main to instantiate
