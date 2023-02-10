@@ -87,6 +87,22 @@ This library does not support by default to retrieve the metadata about the asse
 
 
 
+## Metadata API
+The Metadata API Provides methods to create, modify, and save metadata about the assembly in the currently defined scope.
+
+The main class `CIL_METADATA_EMIT` represent a set of in-memory metadata tables and creates a unique module version identifier (GUID) for the metadata. The class has the ability to add entries to the metadata tables and define the assembly information in the metadata.
+
+This API is work in progress.
+
+
+
+### Process to add a new feature is:
+Look at the MD_EMIT class and copy the signature of the feature we want to write,
+since we can use the same MD_ classes (I'm just adding a prefix CIL_MD) because in I think one class requires a very specific implementation for windows, so, for now, I've decided to duplicate them. At the moment the new CD_MD_METADATA_EMIT has at the moment the same interface as the MD_EMIT.
+2.  Check PE_LIB (PE_WRITER class and the related classes used to populate the related classes)
+3.  Check ECMA metadata tables and use the provided token to get the required data. (ECMA standard section II.22 Metadata logical format : tables)
+
+
 
 
 
