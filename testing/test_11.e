@@ -33,6 +33,7 @@ feature -- Test
 			md_pub_key_token: CIL_MD_PUBLIC_KEY_TOKEN
 
 			l_pe_file: CIL_PE_FILE
+
 		do
 			create l_dispenser.make
 			l_emit := l_dispenser.emit
