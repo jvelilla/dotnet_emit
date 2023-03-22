@@ -1,3 +1,7 @@
 EIFGENs/ 
 *.il
 *.exe
+*.lib
+*.bak
+*.dll
+*.log
