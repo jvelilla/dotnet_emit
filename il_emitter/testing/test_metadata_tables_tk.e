@@ -12,8 +12,8 @@ feature -- Test
 			-- New test routine
 		local
 			l_pe_file: CIL_PE_FILE
-			md_dispenser: MD_METADATA_DISPENSER
-			md_emit: MD_METADATA_EMIT
+			md_dispenser: MD_DISPENSER
+			md_emit: MD_EMIT
 
 		do
 			create md_dispenser.make
@@ -26,8 +26,8 @@ feature -- Test
 			-- New test routine
 		local
 			l_pe_file: CIL_PE_FILE
-			md_dispenser: MD_METADATA_DISPENSER
-			md_emit: MD_METADATA_EMIT
+			md_dispenser: MD_DISPENSER
+			md_emit: MD_EMIT
 			md_assembly_info: MD_ASSEMBLY_INFO
 			my_assembly: INTEGER
 		do
@@ -38,7 +38,7 @@ feature -- Test
 			create md_assembly_info.make
 			md_assembly_info.set_major (5)
 			md_assembly_info.set_minor (2)
-			my_assembly := md_emit.define_assembly ({STRING_32}"define_assembly",
+			my_assembly := md_emit.define_assembly (create {NATIVE_STRING}.make ("manus_assembly"),
 						0, md_assembly_info, Void)
 
 			create l_pe_file.make ({STRING_32}"test_define_assembly_tk.dll", True, True, False, md_emit)

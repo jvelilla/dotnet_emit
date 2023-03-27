@@ -45,7 +45,7 @@ feature -- Access
 			-- write for rva.
 
 	rva: INTEGER
-			-- read only.
+			-- rva
 
 	impl_flags: INTEGER
 
@@ -117,6 +117,18 @@ feature -- Enum: flags
 
 	HasSecurity: INTEGER = 0x4000
 	RequireSecObject: INTEGER = 0x8000
+
+feature -- Set Rva
+
+	set_rva(a_value: like rva)
+			-- Set rva with a_value.
+		require
+			valid_value: a_value > 0
+		do
+			rva := a_value
+		ensure
+			rva_set: rva = a_value
+		end
 
 feature -- Operations
 

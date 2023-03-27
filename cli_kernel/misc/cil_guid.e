@@ -1,7 +1,7 @@
 note
 	description: "Abstraction of a GUID data structure."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2023-03-24 09:51:00 -0300 (Fri, 24 Mar 2023) $"
+	revision: "$Revision: 106709 $"
 
 class
 	CIL_GUID

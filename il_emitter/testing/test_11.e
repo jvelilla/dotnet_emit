@@ -157,7 +157,7 @@ feature -- Test
 			body.put_opcode ({MD_OPCODES}.Ret)
 			method_writer.write_current_body
 
-			create l_pe_file.make ("test.dll", True, True, False, L_emit)
+			create l_pe_file.make ("test_11.dll", True, True, False, l_emit)
 			l_pe_file.set_method_writer (method_writer)
 			l_pe_file.save
 

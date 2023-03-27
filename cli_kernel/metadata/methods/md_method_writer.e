@@ -1,7 +1,9 @@
 note
 	description: "Factory that create a memory stream holding IL instruction stream."
-	date: "$Date: 2023-03-21 07:56:39 -0300 (Tue, 21 Mar 2023) $"
-	revision: "$Revision: 106694 $"
+	legal: "See notice at end of class."
+	status: "See notice at end of class."
+	date: "$Date: 2023-03-24 08:26:50 -0300 (Fri, 24 Mar 2023) $"
+	revision: "$Revision: 106705 $"
 
 class
 	MD_METHOD_WRITER
@@ -75,7 +77,7 @@ feature -- Status Report
 
 feature -- Update
 
-	update_rvas (md_emit: MD_METADATA_EMIT; top_rva: INTEGER)
+	update_rvas (md_emit: MD_EMIT; top_rva: INTEGER)
 			-- Now that all bodys have been emitted, update each
 			-- method token with its corresponding rva knowing
 			-- that current memory stream starts at `top_rva'.
@@ -86,7 +88,7 @@ feature -- Update
 			across
 				method_locations as l
 			loop
-				md_emit.set_method_rva (@l.key, top_rva + l)
+				md_emit.set_method_rva (@ l.key, top_rva + l)
 			end
 		ensure
 			is_closed: is_closed
@@ -302,7 +304,7 @@ invariant
 	method_locations_not_void: method_locations /= Void
 
 note
-	copyright:	"Copyright (c) 1984-2021, Eiffel Software"
+	copyright:	"Copyright (c) 1984-2023, Eiffel Software"
 	license:	"GPL version 2 (see http://www.eiffel.com/licensing/gpl.txt)"
 	licensing_options:	"http://www.eiffel.com/licensing"
 	copying: "[

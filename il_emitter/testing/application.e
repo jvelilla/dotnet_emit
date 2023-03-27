@@ -12,9 +12,13 @@ create
 feature -- Initialization
 
 	make
+		local
+			l_pe: CLI_PE_FILE2
 		do
-			test_metadata_tables_token_interface
-			test_metadata_tables_object_model
+
+--			test_metadata_tables_token_interface
+--			test_metadata_tables_object_model
+--			(create {TEST_11}).test;
 		end
 
 	test_metadata_tables_token_interface

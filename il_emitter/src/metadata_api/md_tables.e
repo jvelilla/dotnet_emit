@@ -1,10 +1,10 @@
 note
 	description: "Object representing in Memory Database tables"
-	date: "$Date: 2023-03-21 07:56:39 -0300 (Tue, 21 Mar 2023) $"
-	revision: "$Revision: 106694 $"
+	date: "$Date: 2023-03-24 08:26:50 -0300 (Fri, 24 Mar 2023) $"
+	revision: "$Revision: 106705 $"
 
 class
-	MD_METADATA_TABLES
+	MD_TABLES
 
 create
 	make

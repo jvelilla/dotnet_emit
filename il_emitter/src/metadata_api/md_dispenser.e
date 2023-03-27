@@ -1,12 +1,17 @@
 note
 	description: "Summary description for {CIL_METADATA_DISPENSER}."
-	date: "$Date: 2023-03-21 07:56:39 -0300 (Tue, 21 Mar 2023) $"
-	revision: "$Revision: 106694 $"
+	date: "$Date: 2023-03-24 08:26:50 -0300 (Fri, 24 Mar 2023) $"
+	revision: "$Revision: 106705 $"
 
 class
-	MD_METADATA_DISPENSER
+	MD_DISPENSER
 
-
+inherit
+	MD_DISPENSER_I
+		rename
+			emitter as emit
+		end
+		
 create
 	make
 
@@ -18,8 +23,6 @@ feature -- Scope Definition
 			create emit.make
 		end
 
-
-
-	emit: MD_METADATA_EMIT
+	emit: MD_EMIT
 		-- Emit metadata
 end

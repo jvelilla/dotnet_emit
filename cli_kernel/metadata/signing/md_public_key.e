@@ -1,16 +1,12 @@
-note
+﻿note
 	description: "Representation of a public key"
-	date: "$Date: 2023-03-21 07:56:39 -0300 (Tue, 21 Mar 2023) $"
-	revision: "$Revision: 106694 $"
+	legal: "See notice at end of class."
+	status: "See notice at end of class."
+	date: "$Date: 2023-03-24 08:26:50 -0300 (Fri, 24 Mar 2023) $"
+	revision: "$Revision: 106705 $"
 
 class
 	MD_PUBLIC_KEY
-
-inherit
-
-	REFACTORING_HELPER
-		export {NONE} all end
-
 
 create
 	make_from_file
@@ -23,27 +19,22 @@ feature {NONE} -- Initialization
 			a_file_name_not_void: a_file_name /= Void
 			a_file_name_not_empty: not a_file_name.is_empty
 			a_signing_not_void: a_signing /= Void
---			a_signing_exists: a_signing.exists
+			a_signing_exists: a_signing.exists
 		do
 				-- Read key pair data from `a_file_name'
 			key_pair := read_key_pair_from_file (a_file_name)
 
-			to_implement ("TODO implement CIL_STRONG_NAME is still a mock class.")
-
---				-- Read public key from `l_orig_key' key pair.
---			if is_valid and then attached a_signing.public_key (key_pair) as k then
---				item := k
---					-- Get public key token.
---				public_key_token := a_signing.public_key_token (k)
---			else
---					-- Indicate that the key is invalid.
---				is_valid := False
---					-- Dummy empty key.
---				create item.make (0)
---			end
-			-- Dummy empty key.
-			create item.make (0)
-
+				-- Read public key from `l_orig_key' key pair.
+			if is_valid and then attached a_signing.public_key (key_pair) as k then
+				item := k
+					-- Get public key token.
+				public_key_token := a_signing.public_key_token (k)
+			else
+					-- Indicate that the key is invalid.
+				is_valid := False
+					-- Dummy empty key.
+				create item.make (0)
+			end
 		end
 
 feature -- Access
@@ -157,4 +148,3 @@ note
 		]"
 
 end
-
