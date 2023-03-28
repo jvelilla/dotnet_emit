@@ -61,7 +61,7 @@ feature {NONE} -- Initialization
 			create text_section_header.make (".text")
 			create reloc_section_header.make (".reloc")
 
---			create iat.make
+			create iat.make
 
 --			create import_table.make (is_dll)
 
@@ -113,10 +113,10 @@ feature -- Access
 
 	text_section_header: CLI_SECTION_HEADER
 	reloc_section_header: CLI_SECTION_HEADER
---	iat: CLI_IMPORT_ADDRESS_TABLE
+	iat: CLI_IMPORT_ADDRESS_TABLE
 
---	code: detachable MANAGED_POINTER
---			-- CLI code instruction stream.
+	code: detachable MANAGED_POINTER
+			-- CLI code instruction stream.
 
 --	debug_directory: detachable CLI_DEBUG_DIRECTORY
 --	debug_info: detachable MANAGED_POINTER
