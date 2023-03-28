@@ -8,52 +8,9 @@ note
 class
 	CLI_UTILITIES
 
-feature -- Access
+inherit
+	MD_UTILITIES
 
-	padding (i, chunk_size: INTEGER): INTEGER
-			-- Compute needed padding from position `i' to reach a multiple of `chunk_size'.
-		require
-			valid_i: i >= 0
-			valid_chunk_size: chunk_size >= 0
-		do
-			if i /= 0 then
-				Result := (((i - 1) // chunk_size) + 1) * chunk_size - i
-			end
-		ensure
-			valid_result: Result >= 0
-		end
-
-	pad_up (i, chunk_size: INTEGER): INTEGER
-			-- Padded position of `i' to reach a multiple of `chunk_size'.
-		require
-			valid_i: i >= 0
-			valid_chunk_size: chunk_size >= 0
-		do
-			if i /= 0 then
-				Result := (((i - 1) // chunk_size) + 1) * chunk_size
-			end
-		ensure
-			valid_result: Result >= 0
-		end
-
-	file_alignment: INTEGER
-			-- Current chosen file alignment.
-		once
-			Result := small_file_alignment
-		ensure
-			valid_result: Result > 0
-		end
-
-feature -- Constants
-
-	section_alignment: INTEGER = 0x2000
-			-- Default section alignment.
-
-	small_file_alignment: INTEGER = 0x0200
-			-- Small file alignment.
-
-	large_file_alignment: INTEGER = 0x1000;
-			-- Large file alignment.
 
 note
 	copyright:	"Copyright (c) 1984-2006, Eiffel Software"
