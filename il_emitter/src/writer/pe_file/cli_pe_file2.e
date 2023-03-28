@@ -122,13 +122,13 @@ feature -- Access
 --	debug_info: detachable MANAGED_POINTER
 --			-- Data for storing debug information in PE files.
 
---	strong_name_directory: detachable CLI_DIRECTORY
---	strong_name_info: detachable MANAGED_POINTER
---	public_key: detachable MD_PUBLIC_KEY
---	signing: detachable MD_STRONG_NAME
+	strong_name_directory: detachable CLI_DIRECTORY
+	strong_name_info: detachable MANAGED_POINTER
+	public_key: detachable MD_PUBLIC_KEY
+	signing: detachable MD_STRONG_NAME
 --			-- Hold data for strong name signature.
 
---	resources: detachable CLI_RESOURCES
+	resources: detachable CLI_RESOURCES
 --			-- Hold data for resources.
 
 --	cli_header: CLI_HEADER
