@@ -509,6 +509,7 @@ feature -- Managed Pointer
 feature -- Size
 
 	size_of: INTEGER_32
+			-- Size of the structure.
 		do
 				-- magic
 			Result := {PLATFORM}.integer_16_bytes

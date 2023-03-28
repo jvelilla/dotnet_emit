@@ -63,10 +63,10 @@ feature {NONE} -- Initialization
 					{CLI_PE_FILE_CONSTANTS}.Image_subsystem_windows_gui)
 			end
 
---			create text_section_header.make (".text")
---			create reloc_section_header.make (".reloc")
+			create text_section_header.make (".text")
+			create reloc_section_header.make (".reloc")
 
---			create iat.make
+			create iat.make
 
 --			create import_table.make (is_dll)
 
@@ -131,6 +131,13 @@ feature -- Access
 		do
 			to_implement ("Not yet implemented")
 		end
+
+  text_section_header: CLI_SECTION_HEADER
+	reloc_section_header: CLI_SECTION_HEADER
+	iat: CLI_IMPORT_ADDRESS_TABLE
+
+	code: detachable MANAGED_POINTER
+			-- CLI code instruction stream.
 
 	resources: detachable CLI_RESOURCES
 			-- Hold data for resources.
