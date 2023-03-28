@@ -138,28 +138,21 @@ feature -- Managed pointer
 feature -- Measurement
 
 	size_of: INTEGER
-		local
-			l_internal: INTERNAL
-			n: INTEGER
-			l_obj: CLI_PE_FILE_HEADER
 		do
-			create l_obj
-			create l_internal
-			n := l_internal.field_count (l_obj)
-			across 1 |..| n as ic loop
-				if attached l_internal.field (ic, l_obj) as l_field then
-					debug
-						print ("%NField_name: " + l_internal.field_name (ic, l_obj))
-						print (" -  value: " + l_field.out)
-						print (" -  offset:" + l_internal.field_offset (ic, l_obj).out)
-					end
-					if attached {INTEGER_32} l_field then
-						Result := Result + {PLATFORM}.integer_32_bytes
-					elseif attached {INTEGER_16} l_field then
-						Result := Result + {PLATFORM}.integer_16_bytes
-					end
-				end
-			end
+				-- machine
+			Result := {PLATFORM}.integer_16_bytes
+				-- number of sections
+			Result := Result + {PLATFORM}.integer_16_bytes
+				-- time_date_stamp
+			Result := Result + {PLATFORM}.integer_32_bytes
+				-- pointer_to_symbol_table
+			Result := Result + {PLATFORM}.integer_32_bytes
+				-- number_of_symbols
+			Result := Result + {PLATFORM}.integer_32_bytes
+				-- size_of_optional_header
+			Result := Result + {PLATFORM}.integer_16_bytes
+				-- characteristics
+			Result := Result + {PLATFORM}.integer_16_bytes
 		ensure
 			instance_free: class
 		end

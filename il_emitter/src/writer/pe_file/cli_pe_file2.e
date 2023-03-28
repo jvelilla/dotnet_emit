@@ -50,13 +50,13 @@ feature {NONE} -- Initialization
 
 				-- PE optional header basic initialization.
 			create optional_header.make
---			if is_console then
---				optional_header.set_subsystem (
---					{CLI_PE_FILE_CONSTANTS}.Image_subsystem_windows_console)
---			else
---				optional_header.set_subsystem (
---					{CLI_PE_FILE_CONSTANTS}.Image_subsystem_windows_gui)
---			end
+			if is_console then
+				optional_header.set_subsystem (
+					{CLI_PE_FILE_CONSTANTS}.Image_subsystem_windows_console)
+			else
+				optional_header.set_subsystem (
+					{CLI_PE_FILE_CONSTANTS}.Image_subsystem_windows_gui)
+			end
 
 --			create text_section_header.make (".text")
 --			create reloc_section_header.make (".reloc")
