@@ -1,7 +1,7 @@
 note
 	description: "In memory representation of a PE file for CLI."
-	date: "$Date$"
-	revision: "$Revision$"
+	date: "$Date: 2023-03-28 13:06:47 +0200 (Tue, 28 Mar 2023) $"
+	revision: "$Revision: 106721 $"
 
 class
 	CIL_PE_FILE
@@ -34,7 +34,7 @@ feature {NONE} -- Initialization
 			is_console := console_app
 			is_32bits := is_32bits_app
 			emitter := e
-			create output_file.make_binary (file_name)
+			create output_file.make (file_name)
 
 			file_align := 0x200
 			object_align := 0x2000
@@ -63,6 +63,7 @@ feature {NONE} -- Initialization
 			is_dll_set: is_dll = dll_app
 		end
 
+
 feature -- Status
 
 	is_valid: BOOLEAN
@@ -87,7 +88,7 @@ feature -- Status
 
 feature -- Access
 
-	emitter: MD_EMIT
+	emitter: MD_EMIT_I
 			-- Meta data emitter, needed for RVA update.
 
 feature -- Constant
@@ -229,7 +230,9 @@ feature -- Access
 		--tables: LIST [DNL_TABLE]
 	tables: SPECIAL [MD_TABLES]
 		do
-			Result := emitter.tables
+			check attached {MD_EMIT} emitter as e then
+				Result := e.tables
+			end
 		end
 			-- tables that can appear in a PE file.
 
@@ -710,9 +713,53 @@ feature -- Operations
 
 			l_last_rva := l_current_rva
 
---			if attached md_method_writer as l_method_writer then
---				l_method_writer.update_rvas (emitter, l_last_rva.to_integer_32)
---				l_current_rva := l_method_writer.last_rva.to_natural_64
+
+			to_implement ("Add method code to compute rva's")
+--			across methods as method loop
+--				if method.flags & {PE_METHOD_CONSTANTS}.cil /= 0 then
+--					if (method.flags & 3) = {PE_METHOD_CONSTANTS}.tinyformat then
+--						method.set_rva (l_current_rva)
+--						l_last_rva := l_current_rva
+--						l_current_rva := l_current_rva + 1
+--					else
+--						if (l_current_rva \\ 4) /= 0 then
+--							l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
+--						end
+--						method.set_rva (l_current_rva)
+--						l_last_rva := l_current_rva
+--						l_current_rva := l_current_rva + 12
+--					end
+--					l_current_rva := l_current_rva + method.code_size
+--					if not method.seh_data.is_empty then
+--						if (l_current_rva \\ 4) /= 0 then
+--							l_current_rva := l_current_rva + 4 - (l_current_rva \\ 4)
+--						end
+--						l_end := 1
+--						l_data := method.seh_data [l_end]
+--						from
+--						until
+--							l_end > method.seh_data.count or else L_exit
+--						loop
+--							l_edata := method.seh_data [l_end]
+
+--							l_etiny := l_edata.try_offset < 65536 and then l_edata.try_length < 256 and then
+--								l_edata.handler_offset < 65536 and then l_edata.handler_length < 256
+
+--							if not l_etiny then
+--								l_exit := true
+--							else
+--								l_end := l_end + 1
+--							end
+--						end
+--						if l_end > method.seh_data.count and then method.seh_data.count < 21 then
+--							l_current_rva := l_current_rva + 4 + (method.seh_data.count * 12).to_natural_32
+--						else
+--							l_current_rva := l_current_rva + 4 + (method.seh_data.count * 24).to_natural_32
+--						end
+--					end
+--				else
+--					method.set_rva (0)
+--				end
 --			end
 
 			if (l_current_rva \\ 4) /= 0 then
@@ -909,33 +956,14 @@ feature -- Operations
 			tables_header := l_tables_header
 		end
 
+
 feature -- Save
 
 	save
 			-- Save PE file.
-		local
-			l_table: PE_TABLE_ENTRY_BASE
-			l_name_index: NATURAL_64
-			l_guid_index: NATURAL_64
-			l_n: NATURAL_64
-			l_pos: INTEGER
-			l_path: PATH
-			l_file_name: STRING_32
 		do
-			create l_file_name.make_empty
-			create l_path.make_from_string (file_name)
-			if attached l_path.entry as ll_path then
-				l_file_name:= ll_path.name.to_string_32
-			end
-
-			check l_file_name_not_empty: not l_file_name.is_empty end
-
-			l_name_index := hash_string (l_file_name)
-			l_guid_index := hash_guid (emitter.pe_writer.create_guid)
-
-			create {PE_MODULE_TABLE_ENTRY} l_table.make_with_data (l_name_index, l_guid_index)
-			--l_n := emitter.add_table_entry (l_table)
-			write_file (1)
+			to_implement ("TODO double check the implementation of write_file")
+			write_file (0)
 		end
 
 	write_file (a_corFlags: INTEGER)
@@ -958,18 +986,21 @@ feature -- Save
 			l_output_file: FILE_STREAM
 		do
 
+--			if not is_entry_point and not dll then
+--				{EXCEPTIONS}.raise (generator + " Missing Entry Point ")
+--			end
 			calculate_objects (a_corflags)
 
-				--l_rv := write_blob
-				--debug
-				-- check write_tables
+			--l_rv := write_blob
+			--debug
+					-- check write_tables
 			l_rv := write_mz_data and then write_pe_header
-				and then write_pe_objects and then write_iat and then write_core_header and then
-				write_static_data and then write_methods and then write_metadata_headers and then write_tables and then write_strings and then
-				write_us and then write_guid and then write_blob and then write_imports and then write_entry_point and then write_hash_data and then
-					--write_version_info (a_file_name: STRING_32)
-				write_relocs
-				--end
+					and then write_pe_objects and then write_iat and then write_core_header and then
+					write_static_data and then write_methods and then write_metadata_headers and then write_tables and then write_strings and then
+					write_us and then write_guid and then write_blob and then write_imports and then write_entry_point and then write_hash_data and then
+						--write_version_info (a_file_name: STRING_32)
+					write_relocs
+			--end
 
 			if l_rv and then snk_len /= 0 then
 				create l_context.make
@@ -1114,19 +1145,27 @@ feature -- Write operations
 			l_counts: ARRAY [NATURAL_64]
 			l_dis: NATURAL_64
 		do
-			if attached output_file as l_stream and then
-				attached md_method_writer as l_method_writer then
-----				create l_counts.make_filled (0, 1, max_tables + extra_indexes)
-----				l_counts [t_string + 1] := strings.size
-----				l_counts [t_us + 1] := us.size
-----				l_counts [t_guid + 1] := guid.size
-----				l_counts [t_blob + 1] := blob.size
+			to_implement ("Add implementation")
+--			if attached output_file as l_stream then
+--				create l_counts.make_filled (0, 1, max_tables + extra_indexes)
+--				l_counts [t_string + 1] := strings.size
+--				l_counts [t_us + 1] := us.size
+--				l_counts [t_guid + 1] := guid.size
+--				l_counts [t_blob + 1] := blob.size
 
-----				across 0 |..| (max_tables - 1) as i loop
-----					l_counts [i + 1] := tables [i].size.to_natural_64
-----				end
-				l_stream.put_managed_pointer (l_method_writer.item)
-			end
+--				across 0 |..| (max_tables - 1) as i loop
+--					l_counts [i + 1] := tables [i].size.to_natural_64
+--				end
+
+--				across methods as m loop
+--					if m.flags & {PE_METHOD}.cil /= 0 then
+--						if m.flags & 3 = {PE_METHOD}.fatformat then
+--							align (4)
+--						end
+--						l_dis := m.write (l_counts, l_stream)
+--					end
+--				end
+--			end
 			Result := True
 		end
 
