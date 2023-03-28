@@ -58,8 +58,8 @@ feature {NONE} -- Initialization
 					{CLI_PE_FILE_CONSTANTS}.Image_subsystem_windows_gui)
 			end
 
---			create text_section_header.make (".text")
---			create reloc_section_header.make (".reloc")
+			create text_section_header.make (".text")
+			create reloc_section_header.make (".reloc")
 
 --			create iat.make
 
@@ -111,8 +111,8 @@ feature -- Access
 	optional_header: CLI_OPTIONAL_HEADER
 			-- PE optional header.
 
---	text_section_header: CLI_SECTION_HEADER
---	reloc_section_header: CLI_SECTION_HEADER
+	text_section_header: CLI_SECTION_HEADER
+	reloc_section_header: CLI_SECTION_HEADER
 --	iat: CLI_IMPORT_ADDRESS_TABLE
 
 --	code: detachable MANAGED_POINTER

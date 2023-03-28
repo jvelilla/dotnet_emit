@@ -52,6 +52,7 @@ feature -- Managed Pointer
 feature -- Size
 
     size_of: INTEGER_32
+    		-- Size of the structure.
         do
         		-- virtual address
             Result := {PLATFORM}.integer_32_bytes
