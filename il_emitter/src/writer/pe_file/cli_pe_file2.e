@@ -74,12 +74,12 @@ feature {NONE} -- Initialization
 
 			create entry_data.make
 
---			create reloc_section.make
---		ensure
---			file_name_set: file_name = a_name
---			is_valid_set: is_valid
---			is_console_set: is_console = console_app
---			is_dll_set: is_dll = dll_app
+			create reloc_section.make
+		ensure
+			file_name_set: file_name = a_name
+			is_valid_set: is_valid
+			is_console_set: is_console = console_app
+			is_dll_set: is_dll = dll_app
 		end
 
 feature -- Status
@@ -155,7 +155,7 @@ feature -- Access
 	strong_name_info: detachable MANAGED_POINTER
 	public_key: detachable MD_PUBLIC_KEY
 	signing: detachable MD_STRONG_NAME
---			-- Hold data for strong name signature.
+			-- Hold data for strong name signature.
 
 	resources: detachable CLI_RESOURCES
 			-- Hold data for resources.
@@ -174,8 +174,8 @@ feature -- Access
 	entry_data: CLI_ENTRY
 			-- Data about entry point.
 
---	reloc_section: CLI_IMAGE_RELOCATION
---			-- Relocation section.
+	reloc_section: CLI_IMAGE_RELOCATION
+			-- Relocation section.
 
 
 feature -- Settings
