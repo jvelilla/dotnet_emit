@@ -16,15 +16,17 @@ feature -- Initialization
 			l_pe: CLI_PE_FILE2
 		do
 
---			test_metadata_tables_token_interface
+			test_metadata_tables_token_interface
 --			test_metadata_tables_object_model
 --			(create {TEST_11}).test;
 		end
 
 	test_metadata_tables_token_interface
 		do
-			(create {TEST_METADATA_TABLES_TK}).test_empty_assembly;
-			(create {TEST_METADATA_TABLES_TK}).test_define_assembly;
+			(create {TEST_METADATA_TABLES_TK}).test_cli_directory_size;
+			(create {TEST_METADATA_TABLES_TK}).test_cli_header_size;
+--			(create {TEST_METADATA_TABLES_TK}).test_empty_assembly;
+--			(create {TEST_METADATA_TABLES_TK}).test_define_assembly;
 		end
 
 	test_metadata_tables_object_model

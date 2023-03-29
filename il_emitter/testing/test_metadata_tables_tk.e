@@ -8,6 +8,36 @@ class
 	TEST_METADATA_TABLES_TK
 
 feature -- Test
+
+
+	test_cli_directory_size
+		local
+			l_dir: CLI_DIRECTORY
+		do
+			-- rva: 4 bytes
+			-- data_size: 4 bytes
+			check {CLI_DIRECTORY}.size_of = 8 end
+		end
+
+	test_cli_header_size
+		local
+			l_header: CLI_HEADER
+		do
+			--cb: 4 bytes
+			--MajorRuntimeVersion: 2 bytes
+			--MinorRuntimeVersion: 2 bytes
+			--MetaData: 8 bytes (2 x 4 bytes)
+			--Flags: 4 bytes
+			--EntryPointToken: 4 bytes
+			--Resources: 8 bytes (2 x 4 bytes)
+			--StrongNameSignature: 8 bytes (2 x 4 bytes)
+			--CodeManagerTable: 8 bytes (2 x 4 bytes)
+			--VTableFixups: 8 bytes (2 x 4 bytes)
+			--ExportAddressTableJumps: 8 bytes (2 x 4 bytes)
+			--ManagedNativeHeader: 8 bytes (2 x 4 bytes)
+			check {CLI_HEADER}.size_of = 72 end
+		end
+
 	test_empty_assembly
 			-- New test routine
 		local
@@ -44,4 +74,5 @@ feature -- Test
 			create l_pe_file.make ({STRING_32}"test_define_assembly_tk.dll", True, True, False, md_emit)
 			l_pe_file.save
 		end
+
 end

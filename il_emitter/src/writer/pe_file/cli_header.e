@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {CLI_HEADER}."
+	description: "CLI Header. See ECMA Partition II 24.3.2"
 	date: "$Date$"
 	revision: "$Revision$"
 	ECMA_section: "II.25.3.3 CLI header"
@@ -26,6 +26,7 @@ feature {NONE} -- Initialization
 				l_flags := l_flags | il_32bits
 			end
 			set_flags (l_flags)
+				-- Initialization.
 			set_managed_native_header (create {CLI_DIRECTORY})
 			set_export_address_table_jumps (create {CLI_DIRECTORY})
 			set_vtable_fixups (create {CLI_DIRECTORY})
@@ -38,47 +39,72 @@ feature {NONE} -- Initialization
 feature -- Access: Header versioning
 
 	cb: INTEGER_32
-			-- The size of the structure.
+			-- Size of the header in bytes
 
 	major_runtime_version: INTEGER_16
 			-- The major version number of the .NET runtime.
+			--| The minimum version of the runtime required to run
+			--| this program, currently 2.
 
 	minor_runtime_version: INTEGER_16
 			-- The minor version number of the .NET runtime.
+			--| The minor portion of the version, currently 0.
+
 
 feature -- Access: 	Symbol table and startup information
 
+	meta_data_directory: CLI_DIRECTORY
+			-- Directory for meta data.
+		do
+			Result := meta_data
+		end
+
 	meta_data: CLI_DIRECTORY
-			-- A data directory that points to the .NET metadata.
+			-- Directory for meta data.
+			-- RVA and size of the physical metadata (Section II.24).
 
 	flags: INTEGER_32
-			-- Flags that indicate how to load the .NET module.
+			--  Specified flags of header.
+			-- Flags describing this runtime image. (Section II.25.3.3.1)
 
 	entry_point_token: INTEGER_32
-			-- The token for the method that is the entry point for the .NET module.
+			-- Token for the MethodDef or File of the entry point for the image.
 
 feature -- Access: Binding information
 
-	resources: CLI_DIRECTORY
-			-- A data directory that points to the resources used by the .NET module.
+	resources_directory: CLI_DIRECTORY
+			-- Directory for resources.
+		do
+			Result := resources
+		end
 
+	resources: CLI_DIRECTORY
+			-- RVA and size of implementation-specific resources.
+
+	strong_name_directory: CLI_DIRECTORY
+			-- Directory for strong name signature.
+		do
+			Result := strong_name_signature
+		end
+		
 	strong_name_signature: CLI_DIRECTORY
-			-- A data directory that points to the strong name signature of the .NET module.
+			-- RVA of the hash data for this PE file used by the CLI loader for binding and versioning
 
 feature -- Access: Regular fixup and binding information
 
 	code_manager_table: CLI_DIRECTORY
-			-- A data directory that points to the code manager table of the .NET module.
+			-- Always 0 (Section II.24.1)
 
 	vtable_fixups: CLI_DIRECTORY
-			-- A data directory that points to the virtual table (VTable) fixups used by the .NET module.
+			-- RVA of an array of locations in the file that contain an array of function pointers (e.g., vtable slots)
 
 	export_address_table_jumps: CLI_DIRECTORY
-			-- A data directory that points to the export address table (EAT) jumps used by the .NET module.
+			-- Always 0 (Section II.24.1)
 
 feature --Access:  Precompiled image info (internal use only - set to zero)
+
 	managed_native_header: CLI_DIRECTORY
-			-- A data directory that contains precompiled image info used by the .NET module.
+			-- Always 0 (Section II.24.1)
 
 feature -- Constants
 
@@ -91,7 +117,22 @@ feature -- Constants
 	strong_name_signed: INTEGER = 0x00000008
 			-- Image has strong name signature.
 
+
+
 feature -- Element Change
+
+	add_flags (i: INTEGER)
+			-- Set `flags' to `i'.
+		require
+			flags_valid: (i & il_only = il_only) or
+				(i & strong_name_signed = strong_name_signed) or
+				(i & il_32bits = il_32bits)
+		do
+			set_flags (flags | i)
+		ensure
+			flags_added: (flags & i) = i
+		end
+
 
 	set_cb (a_cb: INTEGER_32)
 			-- Set `cb` with `a_cb`.
