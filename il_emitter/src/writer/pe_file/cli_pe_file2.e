@@ -72,7 +72,7 @@ feature {NONE} -- Initialization
 
 			create cli_header.make (is_32bits)
 
---			create entry_data.make
+			create entry_data.make
 
 --			create reloc_section.make
 --		ensure
@@ -170,6 +170,13 @@ feature -- Access
 		-- Meta data emitter, needed for RVA update.
 
 	import_table: CLI_IMPORT_TABLE
+
+	entry_data: CLI_ENTRY
+			-- Data about entry point.
+
+--	reloc_section: CLI_IMAGE_RELOCATION
+--			-- Relocation section.
+
 
 feature -- Settings
 
