@@ -70,7 +70,7 @@ feature {NONE} -- Initialization
 
 			create import_table.make (is_dll)
 
---			create cli_header.make (is_32bits)
+			create cli_header.make (is_32bits)
 
 --			create entry_data.make
 
@@ -160,8 +160,8 @@ feature -- Access
 	resources: detachable CLI_RESOURCES
 			-- Hold data for resources.
 
---	cli_header: CLI_HEADER
---			-- Header for `meta_data'.
+	cli_header: CLI_HEADER
+			-- Header for `meta_data'.
 
 --	method_writer: detachable MD_METHOD_WRITER
 --			-- To hold IL code.

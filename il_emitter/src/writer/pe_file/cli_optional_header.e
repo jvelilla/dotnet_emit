@@ -5,7 +5,7 @@ note
 	date: "$Date: 2008-12-29 21:00:50 -0200 (Mon, 29 Dec 2008) $"
 	revision: "$Revision: 76429 $"
 	EIS: "name=_IMAGE_OPTIONAL_HEADER ", "src=https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_optional_header32", "protocol=uri"
-
+	Ecma_section: "II.25.2.3 PE optional header"
 class
 	CLI_OPTIONAL_HEADER
 

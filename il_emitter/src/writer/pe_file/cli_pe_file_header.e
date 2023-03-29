@@ -9,6 +9,8 @@ note
 	date: "$Date: 2008-12-29 21:00:50 -0200 (Mon, 29 Dec 2008) $"
 	revision: "$Revision: 76429 $"
 	EIS: "name=IMAGE_FILE_HEADER", "src=https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_file_header", "protocol=uri"
+	Ecma_version: "https://www.ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf"
+	Ecma_section: "II.25.2.2 PE file header"
 
 class
 	CLI_PE_FILE_HEADER
