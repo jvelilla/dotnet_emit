@@ -1,8 +1,7 @@
 note
-	description: "Summary description for {CLI_PE_FILE}."
-	author: ""
-	date: "$Date: 2023-03-24 08:36:16 -0300 (Fri, 24 Mar 2023) $"
-	revision: "$Revision: 106707 $"
+	description: "In memory representation of a PE file for CLI."
+	date: "$Date: 2023-03-27 18:28:46 +0200 (Mon, 27 Mar 2023) $"
+	revision: "$Revision: 106718 $"
 
 deferred class
 	CLI_PE_FILE
