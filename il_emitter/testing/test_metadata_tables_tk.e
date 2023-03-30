@@ -75,4 +75,21 @@ feature -- Test
 			l_pe_file.save
 		end
 
+	test_user_string_heap
+		local
+			l_token1, l_token2: INTEGER_32
+			l_str: STRING_32
+			md_dispenser: MD_DISPENSER
+			md_emit: MD_EMIT
+		do
+			create md_dispenser.make
+			md_emit := md_dispenser.emit
+
+			--l_token1 := md_emit.define_string (create {NATIVE_STRING}.make ("Eiffel"))
+			l_token2 := md_emit.define_string (create {NATIVE_STRING}.make ("Eiffel"))
+
+			l_str := md_emit.retrieve_user_string (l_token2)
+			check same_string: l_str.same_string_general ("Eiffel") end
+		end
+
 end

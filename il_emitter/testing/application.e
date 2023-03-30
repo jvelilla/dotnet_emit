@@ -27,6 +27,7 @@ feature -- Initialization
 			(create {TEST_METADATA_TABLES_TK}).test_cli_header_size;
 --			(create {TEST_METADATA_TABLES_TK}).test_empty_assembly;
 --			(create {TEST_METADATA_TABLES_TK}).test_define_assembly;
+			(create {TEST_METADATA_TABLES_TK}).test_user_string_heap
 		end
 
 	test_metadata_tables_object_model

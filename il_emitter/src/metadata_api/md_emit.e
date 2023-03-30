@@ -72,9 +72,9 @@ feature {NONE}
 			-- Initialize the heap used to store
 			-- user defined strings
 		do
-				-- TODO double check. how many space we need to reserve?
-				-- TODO check alternatives implementations to improve efficiency.
-			create string_heap.make (10)
+				-- TODO double check if we need to change the default buffer
+				-- size.
+			create string_heap.make (4096)
 		end
 
 feature -- Access
@@ -90,13 +90,13 @@ feature -- Access
 			-- Index of the GUID
 			-- where it should be located in the metadata tables.
 
-	string_heap: HASH_TABLE [READABLE_STRING_GENERAL, INTEGER]
+	string_heap: STRING_32
 			--  metadata table used to store user-defined strings.
 
 feature -- Status report
 
 	is_successful: BOOLEAN
-			-- Was last call successful?	
+			-- Was last call successful?
 		do
 			to_implement ("TODO: for now, always return True")
 			Result := True
@@ -109,6 +109,23 @@ feature -- Access
 		do
 			to_implement ("TODO implement, double check if we really need it")
 		end
+
+	retrieve_user_string (a_token: INTEGER): STRING
+			-- Retrieve the user string for `token'.
+		local
+			l_table_type_index: NATURAL_64
+			l_index: NATURAL_64
+
+		do
+			l_table_type_index := ((a_token |>> 24) & 255).to_natural_64
+
+			check user_string: {NATURAL_64} 0x70 = l_table_type_index end
+				-- 2^ 24 -1 = 16777215
+			l_index := (a_token & 16777215).to_natural_64
+
+			Result := string_heap.substring (l_index.to_integer_32, string_heap.count - l_index.to_integer_32)
+		end
+
 
 feature -- Save
 
@@ -579,9 +596,9 @@ feature -- Definition: Creation
 			create l_str.make_from_string (str.string)
 			l_str.append_character ('%U')
 			l_us_index := pe_writer.hash_us (l_str, l_str.count)
+			string_heap.append (l_str)
 			l_result := l_us_index | ({NATURAL_64} 0x70 |<< 24)
 			Result := l_result.to_integer_32
-			string_heap.force (l_str, Result)
 		end
 
 	define_custom_attribute (owner, constructor: INTEGER; ca: MD_CUSTOM_ATTRIBUTE): INTEGER
@@ -603,6 +620,7 @@ feature -- Constants
 	accurate: INTEGER = 0x0000
 	quick: INTEGER = 0x0001
 			-- Value taken from CorSaveSize enumeration in `correg.h'.
+
 feature {NONE} -- Access
 
 	assembly_emitter: MD_ASSEMBLY_EMIT
