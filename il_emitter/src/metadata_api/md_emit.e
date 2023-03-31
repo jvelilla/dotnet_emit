@@ -327,11 +327,17 @@ feature -- Definition: Creation
 			l_extends: PE_TYPEDEF_OR_REF
 			l_tuple: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
 			l_dis: NATURAL_64
+			last_dot: INTEGER
 		do
-			l_name_index := pe_writer.hash_string (type_name.string)
-				-- TODO double check if we need to compute the namespace_index, since we are creating a new type
-				-- we could assume the namespace_index is 0.
-			l_namespace_index := 0
+				-- Double check how to compute namespace_index and name_index.
+			last_dot := type_name.string.last_index_of ('.', type_name.string.count)
+			if last_dot = 0 then
+				l_namespace_index := 0 -- empty namespace
+				l_name_index := pe_writer.hash_string (type_name.string)
+			else
+				l_namespace_index := pe_writer.hash_string (type_name.string.substring (1, last_dot - 1))
+				l_name_index := pe_writer.hash_string (type_name.string.substring (last_dot + 1, type_name.string.count))
+			end
 
 			l_tuple := extract_table_type_and_row (extend_token)
 

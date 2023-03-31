@@ -66,7 +66,7 @@ feature -- Access
 
 feature -- Definition
 
-	define_assembly (assembly_name: STRING_32; assembly_flags: INTEGER;
+	define_assembly (assembly_name: NATIVE_STRING; assembly_flags: INTEGER;
 			assembly_info: MD_ASSEMBLY_INFO; public_key: detachable MD_PUBLIC_KEY): INTEGER
 
 			-- Define a new assembly `assembly_name' with characteristics
@@ -85,7 +85,7 @@ feature -- Definition
 			l_table_index: NATURAL_64
 		do
 				-- Section II.22.2 Assembly : 0x20
-			l_name_index := pe_writer.hash_string (assembly_name)
+			l_name_index := pe_writer.hash_string (assembly_name.string)
 			if attached public_key as l_public_key then
 				l_public_key_or_token := pe_writer.
 					hash_blob (
@@ -111,7 +111,7 @@ feature -- Definition
 			valid_result: Result > 0
 		end
 
-	define_exported_type (type_name: STRING_32; implementation_token: INTEGER;
+	define_exported_type (type_name: NATIVE_STRING; implementation_token: INTEGER;
 			type_def_token: INTEGER; type_flags: INTEGER): INTEGER
 		require
 			type_name_not_void: type_name /= Void
@@ -124,7 +124,9 @@ feature -- Definition
 			l_dis: NATURAL_64
 			l_namespace_index: NATURAL_64
 			last_dot: INTEGER
+			l_type_name: STRING_32
 		do
+
 				-- Section II.22.14 ExportedType : 0x27
 				-- Extract table type and row from the implementation_token
 			l_tuple_type := extract_table_type_and_row (implementation_token)
@@ -135,19 +137,20 @@ feature -- Definition
 				-- Hash the type name and get the name index
 				-- First we check if we have a namespace (Double check if this is the correct way to
 				-- compute type_name and namespace.
-			last_dot := type_name.last_index_of ('.', type_name.count)
+			l_type_name := type_name.string
+			last_dot := l_type_name.last_index_of ('.', l_type_name.count)
 			if last_dot = 0 then
 				l_namespace_index := 0 -- empty namespace
-				l_name_index := pe_writer.hash_string (type_name)
+				l_name_index := pe_writer.hash_string (l_type_name)
 			else
-				l_namespace_index := pe_writer.hash_string (type_name.substring (1, last_dot - 1))
-				l_name_index := pe_writer.hash_string (type_name.substring (last_dot + 1, type_name.count))
+				l_namespace_index := pe_writer.hash_string (l_type_name.substring (1, last_dot - 1))
+				l_name_index := pe_writer.hash_string (l_type_name.substring (last_dot + 1, l_type_name.count))
 			end
 
 			l_implementation := create_implementation (implementation_token, l_tuple_type.table_type_index)
 
 				-- Create a new PE_EXPORTED_TYPE_TABLE_ENTRY instance with the given data
-			create l_exported_type_entry.make_with_data (type_flags.to_natural_64, l_tuple_type_def.table_type_index, l_name_index, 0, l_implementation)
+			create l_exported_type_entry.make_with_data (type_flags.to_natural_32, l_tuple_type_def.table_type_index, l_name_index, l_namespace_index, l_implementation)
 
 			l_dis := add_table_entry (l_exported_type_entry)
 
@@ -156,30 +159,72 @@ feature -- Definition
 			valid_result: Result > 0
 		end
 
-	define_file (file_name: STRING_32; hash_value: MANAGED_POINTER;
-			file_flags: INTEGER): INTEGER
-
+	define_file (file_name: NATIVE_STRING; hash_value: MANAGED_POINTER; file_flags: INTEGER): INTEGER
 			-- Define a new entry in file table.
 		require
 			file_name_not_void: file_name /= Void
 			file_name_not_empty: not file_name.is_empty
 			hash_value_not_void: hash_value /= Void
 			hash_value_not_empty: hash_value.count > 0
+		local
+			l_file_entry: PE_FILE_TABLE_ENTRY
+			l_name_index: NATURAL_64
+			l_hash_value_index: NATURAL_64
+			last_slash: INTEGER
+			file_name_len: INTEGER
+			l_flags: NATURAL_32
+			l_dis: NATURAL_64
+			l_file_name: STRING_32
 		do
-			to_implement ("TODO implement")
+				-- II.22.19 File : 0x26
+				-- Compute the name index
+			l_file_name := file_name.string
+			file_name_len := l_file_name.count
+			last_slash := l_file_name.last_index_of ({OPERATING_ENVIRONMENT}.directory_separator, file_name_len)
+			if last_slash > 0 then
+				file_name_len := l_file_name.count - last_slash
+			end
+			l_name_index := pe_writer.hash_string (l_file_name.substring (last_slash + 1, file_name_len))
+
+				-- Compute the hash value index
+			l_hash_value_index := pe_writer.hash_blob (hash_value.read_array (0, hash_value.count), hash_value.count.to_natural_64)
+
+				-- Create a new PE_FILE_TABLE_ENTRY instance with the given data
+			l_flags := file_flags.to_natural_32
+			create l_file_entry.make_with_data (l_flags, l_name_index, l_hash_value_index)
+
+			l_dis := add_table_entry (l_file_entry)
+			Result := last_token.to_integer_32
 		ensure
 			valid_result: Result > 0
 		end
 
 	define_manifest_resource (resource_name: NATIVE_STRING; implementation_token: INTEGER; offset, resource_flags: INTEGER): INTEGER
 			-- Define a new entry in manifest resource table.
-			-- `resource_name`: The name of the resource.
-			-- `implementation_token`: The metadata token for the implementation of the resource.
-			-- `offset`: The file offset to the beginning of the resource.
-			-- `resource_flags`: Flags associated with the resource.
+		require
+			resource_name_not_void: resource_name /= Void
 		local
+			l_manifest_resource_entry: PE_MANIFEST_RESOURCE_TABLE_ENTRY
+			l_tuple_type: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			l_implementation: PE_IMPLEMENTATION
+			l_dis: NATURAL_64
+			l_name_index: NATURAL_64
 		do
-			to_implement ("TODO implement")
+				-- II.22.24 ManifestResource : 0x28
+				-- Extract table type and row from the implementation_token
+			l_tuple_type := extract_table_type_and_row (implementation_token)
+
+				-- Hash the resource name and get the name index
+			l_name_index := pe_writer.hash_string (resource_name.string)
+
+			l_implementation := create_implementation (implementation_token, l_tuple_type.table_type_index)
+
+				-- Create a new PE_MANIFEST_RESOURCE_TABLE_ENTRY instance with the given data
+			create l_manifest_resource_entry.make_with_data (offset.to_natural_32, resource_flags.to_natural_32, l_name_index, l_implementation)
+
+			l_dis := add_table_entry (l_manifest_resource_entry)
+
+			Result := last_token.to_integer_32
 		ensure
 			valid_result: Result > 0
 		end
