@@ -179,12 +179,7 @@ feature -- Definition: Access
 			l_entry: PE_TABLE_ENTRY_BASE
 			l_dis: NATURAL_64
 		do
-			l_name_index := pe_writer.hash_string (assembly_name.string)
-			to_implement ("TODO refactor pe_writer.hash_blob")
-			l_public_key_token_index := pe_writer.hash_blob (public_key_token.item.read_array (0, public_key_token.item.count), public_key_token.item.count.to_natural_64)
-			create {PE_ASSEMBLY_REF_TABLE_ENTRY} l_entry.make_with_data ({PE_ASSEMBLY_FLAGS}.PA_none, assembly_info.major_version, assembly_info.minor_version, assembly_info.build_number, assembly_info.revision_number, l_name_index, l_public_key_token_index)
-			l_dis := add_table_entry (l_entry)
-			Result := last_token.to_integer_32
+			Result := assembly_emitter.define_assembly_ref (assembly_name, assembly_info, public_key_token)
 		end
 
 	define_type_ref (type_name: NATIVE_STRING; resolution_scope: INTEGER): INTEGER
@@ -197,7 +192,7 @@ feature -- Definition: Access
 			l_namespace_index: NATURAL_64
 			l_tuple: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
 		do
-
+				-- II.22.38 TypeRef : 0x01
 			l_tuple := extract_table_type_and_row (resolution_scope)
 
 				--| TODO checks
@@ -292,28 +287,15 @@ feature -- Definition: Creation
 			assembly_info: MD_ASSEMBLY_INFO; public_key: detachable MD_PUBLIC_KEY): INTEGER
 			-- Add assembly metadata information to the metadata tables.
 			--| the public key could be null.
-		local
-			l_name_index: NATURAL_64
-			l_entry: PE_TABLE_ENTRY_BASE
-			l_public_key_index: NATURAL_64
-			l_dis: NATURAL_64
 		do
-			l_name_index := pe_writer.hash_string (assembly_name.string)
-			if public_key /= Void then
-					--l_public_key_index := pe_writer.hash_blob (public_key)
-			else
-				l_public_key_index := 0
-			end
-			create {PE_ASSEMBLY_DEF_TABLE_ENTRY} l_entry.make_with_data (assembly_flags, assembly_info.major, assembly_info.minor, assembly_info.build, assembly_info.revision, l_name_index, l_public_key_index)
-			l_dis := add_table_entry (l_entry)
-			Result := last_token.to_integer_32
+			Result := assembly_emitter.define_assembly (assembly_name, assembly_flags, assembly_info, public_key)
 		end
 
 	define_manifest_resource (resource_name: NATIVE_STRING; implementation_token: INTEGER;
 			offset, resource_flags: INTEGER): INTEGER
 			-- Define a new assembly.
 		do
-			to_implement ("TODO add implementation")
+			Result := assembly_emitter.define_manifest_resource (resource_name, implementation_token, offset, resource_flags)
 		end
 
 	define_type (type_name: NATIVE_STRING; flags: INTEGER; extend_token: INTEGER; implements: detachable ARRAY [INTEGER]): INTEGER
@@ -384,13 +366,13 @@ feature -- Definition: Creation
 			type_def_token: INTEGER; type_flags: INTEGER): INTEGER
 			-- Create a row in ExportedType table.
 		do
-			to_implement ("TODO add implementation")
+			Result := assembly_emitter.define_exported_type (type_name, implementation_token, type_def_token, type_flags)
 		end
 
 	define_file (file_name: NATIVE_STRING; hash_value: MANAGED_POINTER; file_flags: INTEGER): INTEGER
 			-- Create a row in File table
 		do
-			to_implement ("TODO implement")
+			Result := assembly_emitter.define_file (file_name, hash_value, file_flags)
 		end
 
 	define_method (method_name: NATIVE_STRING; in_class_token: INTEGER; method_flags: INTEGER;
