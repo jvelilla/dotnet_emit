@@ -834,7 +834,7 @@ feature {NONE} -- Implementation
 						a_stream.module_ref.force (l_module_ref, l_module_name)
 					end
 					create l_method_index.make_with_tag_and_index ({PE_MEMBER_FORWARDED}.methoddef, prototype.pe_index)
-					create {PE_IMPL_MAP_TABLE_ENTRY} l_table.make_with_data (l_flags, l_method_index, l_import_name_index, l_module_ref)
+					create {PE_IMPL_MAP_TABLE_ENTRY} l_table.make_with_data (l_flags.to_integer_16, l_method_index, l_import_name_index, l_module_ref)
 
 					l_res := l_writer.add_table_entry (l_table).to_natural_8
 						-- TODO fix this, the returned value is not needed.

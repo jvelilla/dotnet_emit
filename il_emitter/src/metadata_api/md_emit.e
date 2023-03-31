@@ -147,7 +147,6 @@ feature -- Save
 			to_implement ("TODO implement, double check if we really ned it.")
 		end
 
-
 feature -- Settings
 
 	set_module_name (a_name: NATIVE_STRING)
@@ -485,9 +484,28 @@ feature -- Definition: Creation
 	define_pinvoke_map (method_token, mapping_flags: INTEGER;
 			import_name: NATIVE_STRING; module_ref: INTEGER)
 			-- Further specification of a pinvoke method location defined by `method_token'.
+		local
+			l_member_forwarded: PE_MEMBER_FORWARDED
+			l_name_index: NATURAL_64
+			l_impl_map_entry: PE_IMPL_MAP_TABLE_ENTRY
+			l_tuple_method: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			l_dis: NATURAL_64
 		do
-			to_implement ("TODO implement")
+			l_tuple_method := extract_table_type_and_row (method_token)
+
+			-- Get the name index of the imported function
+			l_name_index := pe_writer.hash_string (import_name.string)
+
+			-- Create a new PE_MEMBER_FORWARDED instance with the given data
+			create l_member_forwarded.make_with_tag_and_index ({PE_MEMBER_FORWARDED}.MethodDef, l_tuple_method.table_row_index)
+
+			-- Create a new PE_IMPL_MAP_TABLE_ENTRY instance with the given data
+			create l_impl_map_entry.make_with_data (mapping_flags.to_integer_16, l_member_forwarded, l_name_index, module_ref.to_natural_64)
+
+			-- Add the PE_IMPL_MAP_TABLE_ENTRY instance to the table
+			l_dis := add_table_entry (l_impl_map_entry)
 		end
+
 
 	define_parameter (in_method_token: INTEGER; param_name: NATIVE_STRING;
 			param_pos: INTEGER; param_flags: INTEGER): INTEGER
