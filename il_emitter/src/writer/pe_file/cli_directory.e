@@ -10,26 +10,38 @@ class
 
 feature -- Access
 
-    virtual_address: INTEGER_32
+    rva: INTEGER_32
             -- RVA of the directory.
+            --| Relative virtual address for current directory.
 
-    size: INTEGER_32
+    data_size: INTEGER_32
             -- Size of the directory in bytes.
 
 
 feature -- Setter
 
-    set_virtual_address (a_virtual_address: INTEGER_32)
-    		-- Set `virtual_address` to `a_virtual_address'.
+    set_rva (a_virtual_address: INTEGER_32)
+    		-- Set `rva` to `a_virtual_address'.
         do
-            virtual_address := a_virtual_address
+            rva := a_virtual_address
         end
 
-    set_size (a_size: INTEGER_32)
-    		-- Set `size` with `a_size'.
+    set_data_size (a_size: INTEGER_32)
+    		-- Set `data_size` with `a_size'.
         do
-            size := a_size
+            data_size := a_size
         end
+
+
+    set_rva_and_size (a_rva, a_size: INTEGER)
+			-- Set `rva' and `data_size' to `a_rva' and `a_size'.
+		do
+			set_rva (a_rva)
+			set_data_size (a_size)
+		ensure
+			rva_set: rva = a_rva
+			data_size_set: data_size = a_size
+		end
 
 feature -- Managed Pointer
 
@@ -41,12 +53,12 @@ feature -- Managed Pointer
 			create Result.make(size_of)
 			l_pos := 0
 
-				-- virtual_address
-			Result.put_integer_32_le(virtual_address, l_pos)
+				-- rva
+			Result.put_integer_32_le(rva, l_pos)
 			l_pos := l_pos + {PLATFORM}.integer_32_bytes
 
-				-- size
-			Result.put_integer_32_le(size, l_pos)
+				-- data_size
+			Result.put_integer_32_le(data_size, l_pos)
 		end
 
 feature -- Size
@@ -54,9 +66,9 @@ feature -- Size
     size_of: INTEGER_32
     		-- Size of the structure.
         do
-        		-- virtual address
+        		-- rva
             Result := {PLATFORM}.integer_32_bytes
-            	-- size
+            	-- data_size
             Result := Result + {PLATFORM}.integer_32_bytes
         ensure
         	is_class: class

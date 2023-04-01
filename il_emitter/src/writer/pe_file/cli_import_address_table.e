@@ -24,6 +24,13 @@ feature -- Access
     padding: ARRAY [NATURAL_8]
     	-- Padding to make structure 8 bytes.
 
+feature -- Status Report
+
+	count: INTEGER
+			--  Number of elements that Current can hold.
+		do
+			Result := size_of
+		end
 
 feature -- Element Change
 

@@ -37,6 +37,14 @@ feature -- Access
 	padding_field: ARRAY [NATURAL_8]
 			-- two bytes
 
+feature -- Status Report
+
+	count: INTEGER
+			--  Number of elements that Current can hold.
+		do
+			Result := size_of
+		end
+
 feature -- Element Change
 
 	set_block_rva (a_block_rva: INTEGER_32)

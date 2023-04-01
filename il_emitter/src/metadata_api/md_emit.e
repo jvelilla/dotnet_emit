@@ -163,8 +163,24 @@ feature -- Settings
 
 	set_method_rva (method_token, rva: INTEGER)
 			-- Set RVA of `method_token' to `rva'.
+		local
+			l_tuple_method: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			l_dis: NATURAL_64
 		do
-			to_implement ("TODO implement")
+				-- Extract table type and row index from method token
+			l_tuple_method := extract_table_type_and_row (method_token)
+
+				-- Retrieve method definition table entry using row index
+			if attached {PE_METHOD_DEF_TABLE_ENTRY} tables[l_tuple_method.table_type_index.to_integer_32].table[l_tuple_method.table_row_index.to_integer_32] as l_method_def then
+
+					-- Set RVA value in method definition table entry
+				l_method_def.set_rva (rva)
+
+					-- Update method definition table entry in metadata tables
+				tables [l_tuple_method.table_type_index.to_integer_32].replace (l_method_def, l_tuple_method.table_row_index.to_integer_32)
+			else
+				-- TODO
+			end
 		end
 
 feature -- Definition: Access
@@ -397,7 +413,7 @@ feature -- Definition: Creation
 			l_name_index := pe_writer.hash_string (method_name.string)
 
 				-- Create a new PE_METHOD_DEF_TABLE_ENTRY instance with the given data
-			create l_method_def_entry.make (method_flags, impl_flags, l_name_index, l_method_signature, l_param_index)
+			create l_method_def_entry.make (method_flags.to_integer_16, impl_flags.to_integer_16, l_name_index, l_method_signature, l_param_index)
 
 				-- Add the new PE_METHOD_DEF_TABLE_ENTRY instance to the metadata tables.
 			l_method_def_index := add_table_entry (l_method_def_entry)
@@ -493,19 +509,18 @@ feature -- Definition: Creation
 		do
 			l_tuple_method := extract_table_type_and_row (method_token)
 
-			-- Get the name index of the imported function
+				-- Get the name index of the imported function
 			l_name_index := pe_writer.hash_string (import_name.string)
 
-			-- Create a new PE_MEMBER_FORWARDED instance with the given data
+				-- Create a new PE_MEMBER_FORWARDED instance with the given data
 			create l_member_forwarded.make_with_tag_and_index ({PE_MEMBER_FORWARDED}.MethodDef, l_tuple_method.table_row_index)
 
-			-- Create a new PE_IMPL_MAP_TABLE_ENTRY instance with the given data
+				-- Create a new PE_IMPL_MAP_TABLE_ENTRY instance with the given data
 			create l_impl_map_entry.make_with_data (mapping_flags.to_integer_16, l_member_forwarded, l_name_index, module_ref.to_natural_64)
 
-			-- Add the PE_IMPL_MAP_TABLE_ENTRY instance to the table
+				-- Add the PE_IMPL_MAP_TABLE_ENTRY instance to the table
 			l_dis := add_table_entry (l_impl_map_entry)
 		end
-
 
 	define_parameter (in_method_token: INTEGER; param_name: NATIVE_STRING;
 			param_pos: INTEGER; param_flags: INTEGER): INTEGER

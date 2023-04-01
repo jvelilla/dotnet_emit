@@ -98,6 +98,14 @@ feature -- Settings
 			characteristics := c
 		end
 
+feature -- Status Report
+
+	count: INTEGER
+			--  Number of elements that Current can hold.
+		do
+			Result := size_of
+		end
+
 feature -- Managed pointer
 
 	item: MANAGED_POINTER

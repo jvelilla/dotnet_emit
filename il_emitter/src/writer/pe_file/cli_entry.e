@@ -28,6 +28,14 @@ feature -- Access
 
 	iat_rva: INTEGER_32
 
+feature -- Status Report
+
+	count: INTEGER
+			--  Number of elements that Current can hold.
+		do
+			Result := size_of
+		end
+
 feature -- Element Change
 
    set_jump_inst_high (a_jump_inst_h: INTEGER_8)

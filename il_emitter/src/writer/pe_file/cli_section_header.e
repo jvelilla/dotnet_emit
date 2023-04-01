@@ -71,6 +71,14 @@ feature -- Access
     characteristics: INTEGER_32
             -- The flags that describe the characteristics of the section.
 
+feature -- Status Report
+
+	count: INTEGER
+			--  Number of elements that Current can hold.
+		do
+			Result := size_of
+		end
+
 feature -- Element Change
 
 	set_name (a_name: STRING)
@@ -116,7 +124,7 @@ feature -- Element Change
             virtual_address := a_virtual_address
         end
 
-    set_size_of_raw_data (a_size_of_raw_data: INTEGER_32)
+    set_raw_data_size (a_size_of_raw_data: INTEGER_32)
             -- Set `size_of_raw_data` with `a_size_of_raw_data'.
         do
             size_of_raw_data := a_size_of_raw_data

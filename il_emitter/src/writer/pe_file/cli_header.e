@@ -86,7 +86,7 @@ feature -- Access: Binding information
 		do
 			Result := strong_name_signature
 		end
-		
+
 	strong_name_signature: CLI_DIRECTORY
 			-- RVA of the hash data for this PE file used by the CLI loader for binding and versioning
 
@@ -105,6 +105,14 @@ feature --Access:  Precompiled image info (internal use only - set to zero)
 
 	managed_native_header: CLI_DIRECTORY
 			-- Always 0 (Section II.24.1)
+
+feature -- Status Report
+
+	count: INTEGER
+			--  Number of elements that Current can hold.
+		do
+			Result := size_of
+		end
 
 feature -- Constants
 

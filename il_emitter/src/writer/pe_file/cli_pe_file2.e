@@ -121,13 +121,11 @@ feature -- Access
 			to_implement ("Not yet implemented")
 		end
 
-
 	text_section_header: CLI_SECTION_HEADER
 	reloc_section_header: CLI_SECTION_HEADER
 	iat: CLI_IMPORT_ADDRESS_TABLE
 
-
-		cli_header_has_flag_strong_name_signed: BOOLEAN
+	cli_header_has_flag_strong_name_signed: BOOLEAN
 			-- Has CLI Header flag "strong_name_signed" ?
 		do
 			to_implement ("Not yet implemented")
@@ -140,9 +138,6 @@ feature -- Access
 
 	optional_header: CLI_OPTIONAL_HEADER
 			-- PE optional header.
-
-	method_writer: detachable MD_METHOD_WRITER
-			-- To hold IL code.
 
 	code: detachable MANAGED_POINTER
 			-- CLI code instruction stream.
@@ -163,11 +158,11 @@ feature -- Access
 	cli_header: CLI_HEADER
 			-- Header for `meta_data'.
 
---	method_writer: detachable MD_METHOD_WRITER
---			-- To hold IL code.
+	method_writer: detachable MD_METHOD_WRITER
+			-- To hold IL code.
 
 	emitter: MD_EMIT
-		-- Meta data emitter, needed for RVA update.
+			-- Meta data emitter, needed for RVA update.
 
 	import_table: CLI_IMPORT_TABLE
 
@@ -177,19 +172,18 @@ feature -- Access
 	reloc_section: CLI_IMAGE_RELOCATION
 			-- Relocation section.
 
-
 feature -- Settings
 
 	set_method_writer (m: like method_writer)
 			-- Set `method_writer' to `m'.
 		do
-			to_implement ("Not yet implemented")
+			method_writer := m
 		end
 
 	set_entry_point_token (token: INTEGER)
 			-- Set `token' as entry point of current CLI image.
 		do
-			to_implement ("Not yet implemented")
+			cli_header.set_entry_point_token (token)
 		end
 
 	set_debug_information (a_cli_debug_directory: CLI_DEBUG_DIRECTORY_I;
@@ -203,20 +197,331 @@ feature -- Settings
 	set_public_key (a_key: like public_key; a_signing: like signing)
 			-- Set `public_key' to `a_key'.
 		do
-			to_implement ("Not yet implemented")
+			public_key := a_key
+			has_strong_name := True
+			cli_header.add_flags ({CLI_HEADER}.strong_name_signed)
+			signing := a_signing
 		end
 
 	set_resources (r: like resources)
 			-- Set `resources' with `r'
 		do
-			to_implement ("Not yet implemented")
+			resources := r
 		end
 
 feature -- Saving
 
+feature -- Saving
+
 	save
+			--
+		local
+			l_pe_file, l_meta_data_file: RAW_FILE
+			l_padding, l_signature: MANAGED_POINTER
+			l_strong_name_location, l_size: INTEGER
+			l_uni_string: NATIVE_STRING
+			l_meta_data_file_name: like file_name
 		do
-			to_implement ("Not yet implemented")
+				-- First compute size of PE file headers and sections.
+			compute_sizes
+
+				-- Let's update PE data structures with proper RVAs
+			update_rvas
+
+				-- Write to file now.
+			create l_pe_file.make_with_name (file_name)
+			l_pe_file.open_write
+
+				-- First the headers
+			l_pe_file.put_managed_pointer (dos_header, 0, dos_header.count)
+			l_pe_file.put_managed_pointer (pe_header.item, 0, pe_header.count)
+			l_pe_file.put_managed_pointer (optional_header.item, 0, optional_header.count)
+			l_pe_file.put_managed_pointer (text_section_header.item, 0, text_section_header.count)
+			l_pe_file.put_managed_pointer (reloc_section_header.item, 0, reloc_section_header.count)
+
+				-- Add padding to .text section
+			create l_padding.make (padding (headers_size, file_alignment))
+			l_pe_file.put_managed_pointer (l_padding, 0, l_padding.count)
+
+				-- Store .text section
+			l_pe_file.put_managed_pointer (iat.item, 0, iat.count)
+			l_pe_file.put_managed_pointer (cli_header.item, 0, cli_header.count)
+			if attached method_writer as l_method_writer then
+					-- No need for padding as it is correctly aligned of 4 bytes
+				check
+					correctly_aligned: (iat.count + cli_header.count) \\ 4 = 0
+				end
+				l_pe_file.put_managed_pointer (l_method_writer.item, 0, code_size)
+			end
+
+-- No debug
+--			if
+--				attached debug_directory as d and then
+--				attached debug_info as i
+--			then
+--				l_pe_file.put_managed_pointer (d, 0, d.count)
+--				l_pe_file.put_managed_pointer (i, 0, i.count)
+--				l_size := padding (d.count + i.count, 16)
+--				if l_size > 0 then
+--					create l_padding.make (l_size)
+--					l_pe_file.put_managed_pointer (l_padding, 0, l_padding.count)
+--				end
+--			end
+
+			if has_strong_name then
+				l_strong_name_location := l_pe_file.count
+				create l_padding.make (strong_name_size)
+				l_pe_file.put_managed_pointer (l_padding, 0, l_padding.count)
+			end
+
+			if attached resources as r and then attached r.item as p then
+					-- Store `resources.item' since otherwise no one will be referencing
+					-- it and thus ready for GC.
+				l_pe_file.put_managed_pointer (p, 0, resources_size)
+			end
+
+				-- Save the metadata to `l_pe_file'. We cannot use `MD_EMIT.assembly_memory'
+				-- because on some platforms the amount of required memory cannot be allocated
+				-- in one chunk.
+				-- Instead we save it to disk and then copy it over. This is not efficient
+				-- but we cannot use the stream version of the API since we do not have a way
+				-- to make an IStream from an Eiffel FILE.
+			l_meta_data_file_name := file_name + ".pe"
+			emitter.save (create {NATIVE_STRING}.make (l_meta_data_file_name))
+			create l_meta_data_file.make_with_name (l_meta_data_file_name)
+			l_meta_data_file.open_read
+			check valid_size: l_meta_data_file.count = meta_data_size end
+			l_meta_data_file.copy_to (l_pe_file)
+			l_meta_data_file.close
+			l_meta_data_file.delete
+
+			if import_table_padding > 0 then
+				create l_padding.make (import_table_padding)
+				l_pe_file.put_managed_pointer (l_padding, 0, l_padding.count)
+			end
+			l_pe_file.put_managed_pointer (import_table.item, 0, import_table.count)
+			l_pe_file.put_managed_pointer (entry_data.item, 0, entry_data.count)
+
+				-- Add padding to .text section
+			create l_padding.make (padding (text_size, file_alignment))
+			l_pe_file.put_managed_pointer (l_padding, 0, l_padding.count)
+
+				-- Store .reloc section
+			l_pe_file.put_managed_pointer (reloc_section.item, 0, reloc_section.count)
+
+				-- Add padding to end of file
+			create l_padding.make (padding (reloc_size, file_alignment))
+			l_pe_file.put_managed_pointer (l_padding, 0, l_padding.count)
+
+			l_pe_file.close
+			is_valid := False
+
+			if
+				has_strong_name and
+				attached signing as l_signing and
+				attached public_key as l_public_key
+			then
+				create l_pe_file.make_with_name (file_name)
+				l_pe_file.open_read
+				create l_padding.make (l_pe_file.count)
+				l_pe_file.read_to_managed_pointer (l_padding, 0, l_padding.count)
+				l_pe_file.close
+
+				create l_uni_string.make (file_name)
+--				l_signature := l_signing.assembly_signature (l_uni_string, l_public_key.key_pair)
+--				(l_padding.item + l_strong_name_location).memory_copy (l_signature.item,
+--					l_signature.count)
+
+				create l_pe_file.make_with_name (file_name)
+				l_pe_file.open_write
+				l_pe_file.put_managed_pointer (l_padding, 0, l_padding.count)
+				l_pe_file.close
+			end
+		end
+
+feature {NONE} -- Saving
+
+	compute_sizes
+			-- Compute sizes and basic locations of headers and sections,
+			-- both real, on disk and in memory.
+		do
+				-- Size of meta data and code.
+			meta_data_size := emitter.save_size
+
+			if attached method_writer as l_method_writer then
+				code_size := l_method_writer.count
+			else
+				code_size := 0
+			end
+
+-- No debug support for now
+--			if
+--				attached debug_directory as d and then
+--				attached debug_info as i
+--			then
+--				debug_size := pad_up (d.count + i.count, 16)
+--			else
+--				debug_size := 0
+--			end
+
+-- No signing for now
+--			if
+--				has_strong_name and
+--				attached signing as l_signing and then
+--				attached public_key as l_public_key
+--			then
+--				strong_name_size := l_signing.assembly_signature_size (l_public_key.item)
+--			else
+--				strong_name_size := 0
+--			end
+
+			if has_resources and attached resources as l_resources then
+				resources_size := l_resources.count
+			else
+				resources_size := 0
+			end
+
+				-- Real size of all components
+			headers_size := dos_header.count + pe_header.count +
+				optional_header.count + text_section_header.count +
+				reloc_section_header.count
+
+			import_table_padding := pad_up (iat.count + cli_header.count + code_size +
+					debug_size + strong_name_size + resources_size + meta_data_size, 16) -
+				(iat.count + cli_header.count + code_size + debug_size +
+					strong_name_size + resources_size + meta_data_size)
+
+			text_size := iat.count + cli_header.count + code_size + debug_size +
+				strong_name_size + resources_size + meta_data_size +
+				import_table_padding + import_table.count + entry_data.count
+
+			reloc_size := reloc_section.count
+
+				-- Size of `.text' and `.reloc' section on disk.
+			headers_size_on_disk := pad_up (headers_size, file_alignment)
+			text_size_on_disk := pad_up (text_size, file_alignment)
+			reloc_size_on_disk := pad_up (reloc_size, file_alignment)
+
+				-- RVA of `.text' and `.reloc'.
+			text_rva := pad_up (headers_size, Section_alignment)
+			reloc_rva := pad_up (text_rva + text_size_on_disk, Section_alignment)
+			code_rva := text_rva + iat.count + cli_header.count
+
+			import_directory_rva := text_rva + iat.count + cli_header.count + code_size +
+				debug_size + strong_name_size + resources_size + meta_data_size +
+				import_table_padding
+		end
+
+	update_rvas
+			-- Update all PE files data structures with correct RVAs.
+		local
+			import_directory, reloc_directory,
+			iat_directory, cli_directory, l_debug_directory: CLI_DIRECTORY
+		do
+				-- Update optional header section.
+			optional_header.set_code_size (text_size_on_disk)
+			optional_header.set_reloc_size (reloc_size_on_disk)
+			optional_header.set_entry_point_rva (text_rva + iat.count +
+				cli_header.count + code_size + debug_size + strong_name_size + resources_size +
+				meta_data_size + import_table_padding +
+				import_table.count + entry_data.start_position)
+			optional_header.set_base_of_code (text_rva)
+			optional_header.set_base_of_reloc (reloc_rva)
+			optional_header.set_image_size (reloc_rva + pad_up (reloc_size, Section_alignment))
+			optional_header.set_headers_size (pad_up (headers_size, file_alignment))
+
+			import_directory := optional_header.directory (
+					{CLI_DIRECTORY_CONSTANTS}.Image_directory_entry_import)
+			import_directory.set_rva (import_directory_rva)
+			import_directory.set_data_size (import_table.count - 1)
+
+			reloc_directory := optional_header.directory (
+					{CLI_DIRECTORY_CONSTANTS}.Image_directory_entry_basereloc)
+			reloc_directory.set_rva (reloc_rva)
+			reloc_directory.set_data_size (reloc_size)
+
+-- No debug directory
+--			if
+--				attached debug_directory as d and then
+--				attached debug_info as i
+--			then
+--				l_debug_directory := optional_header.directory (
+--					{CLI_DIRECTORY_CONSTANTS}.Image_directory_entry_debug)
+--				l_debug_directory.set_rva (text_rva + iat.count + cli_header.count + code_size)
+--				l_debug_directory.set_data_size (d.count)
+
+--				d.set_address_of_data (text_rva + iat.count + cli_header.count +
+--					code_size + d.count)
+--				d.set_pointer_to_data (headers_size_on_disk + iat.count +
+--					cli_header.count + code_size + d.count)
+--				d.set_size (i.count)
+--			end
+
+			iat_directory := optional_header.directory (
+					{CLI_DIRECTORY_CONSTANTS}.Image_directory_entry_iat)
+			iat_directory.set_rva (text_rva)
+			iat_directory.set_data_size (iat.count)
+
+			cli_directory := optional_header.directory (
+					{CLI_DIRECTORY_CONSTANTS}.Image_directory_entry_cli_descriptor)
+			cli_directory.set_rva (text_rva + iat.count)
+			cli_directory.set_data_size (cli_header.count)
+
+				-- Update section headers
+			text_section_header.set_virtual_size (pad_up (text_size, 4))
+			text_section_header.set_virtual_address (text_rva)
+			text_section_header.set_raw_data_size (text_size_on_disk)
+			text_section_header.set_pointer_to_raw_data (headers_size_on_disk)
+			text_section_header.set_characteristics (
+				{CLI_SECTION_CONSTANTS}.code |
+				{CLI_SECTION_CONSTANTS}.execute |
+				{CLI_SECTION_CONSTANTS}.read)
+
+			reloc_section_header.set_virtual_size (pad_up (reloc_size, 4))
+			reloc_section_header.set_virtual_address (reloc_rva)
+			reloc_section_header.set_raw_data_size (reloc_size_on_disk)
+			reloc_section_header.set_pointer_to_raw_data (headers_size_on_disk + text_size_on_disk)
+			reloc_section_header.set_characteristics (
+				{CLI_SECTION_CONSTANTS}.initialized_data |
+				{CLI_SECTION_CONSTANTS}.discardable |
+				{CLI_SECTION_CONSTANTS}.read)
+
+				-- CLI header.
+			if has_strong_name then
+				cli_header.strong_name_directory.set_rva_and_size (text_rva + iat.count +
+					cli_header.count + code_size + debug_size, strong_name_size)
+			end
+
+			if has_resources then
+				cli_header.resources_directory.set_rva_and_size (text_rva + iat.count +
+					cli_header.count + code_size + debug_size + strong_name_size, resources_size)
+			end
+
+			cli_header.meta_data_directory.set_rva_and_size (text_rva + iat.count +
+				cli_header.count + code_size + debug_size + strong_name_size + resources_size,
+				meta_data_size)
+
+				-- Setting of import table.
+			iat.set_import_by_name_rva (text_rva + iat.count + cli_header.count + code_size +
+				+ debug_size + strong_name_size + resources_size + meta_data_size +
+				import_table_padding + import_table.Size_to_import_by_name)
+			import_table.set_rvas (text_rva, text_rva + iat.count + cli_header.count +
+				code_size + debug_size + strong_name_size + resources_size + meta_data_size +
+				import_table_padding)
+
+				-- Entry point setting
+			entry_data.set_iat_rva (text_rva)
+
+				-- Reloc section
+			reloc_section.set_data (text_rva + iat.count + cli_header.count + code_size +
+				debug_size + strong_name_size + resources_size + meta_data_size +
+				import_table_padding + import_table.count +
+				entry_data.jump_size)
+
+				-- Set method RVAs now.
+			if attached method_writer as l_method_writer then
+				l_method_writer.update_rvas (emitter, code_rva)
+			end
 		end
 
 feature {NONE} -- Implementation
@@ -225,24 +530,24 @@ feature {NONE} -- Implementation
 			-- DOS header.
 		once
 			create Result.make_from_array ({ARRAY [NATURAL_8]} <<
-				0x4D, 0x5A, 0x90, 0x0, 0x3, 0x0, 0x0, 0x0,
-				0x4, 0x0, 0x0, 0x0, 0xFF, 0xFF, 0x0, 0x0,
-				0xB8, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x0, 0x0, 0x0, 0x0, 0x80, 0x0, 0x0, 0x0,
-				0xE, 0x1F, 0xBA, 0xE, 0x0, 0xB4, 0x9, 0xCD,
-				0x21, 0xB8, 0x1, 0x4C, 0xCD, 0x21, 0x54, 0x68,
-				0x69, 0x73, 0x20, 0x70, 0x72, 0x6F, 0x67, 0x72,
-				0x61, 0x6D, 0x20, 0x63, 0x61, 0x6E, 0x6E, 0x6F,
-				0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6E,
-				0x20, 0x69, 0x6E, 0x20, 0x44, 0x4F, 0x53, 0x20,
-				0x6D, 0x6F, 0x64, 0x65, 0x2E, 0xD, 0xD, 0xA,
-				0x24, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x50, 0x45, 0x0, 0x0
-			>>)
+					0x4D, 0x5A, 0x90, 0x0, 0x3, 0x0, 0x0, 0x0,
+					0x4, 0x0, 0x0, 0x0, 0xFF, 0xFF, 0x0, 0x0,
+					0xB8, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+					0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+					0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+					0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+					0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+					0x0, 0x0, 0x0, 0x0, 0x80, 0x0, 0x0, 0x0,
+					0xE, 0x1F, 0xBA, 0xE, 0x0, 0xB4, 0x9, 0xCD,
+					0x21, 0xB8, 0x1, 0x4C, 0xCD, 0x21, 0x54, 0x68,
+					0x69, 0x73, 0x20, 0x70, 0x72, 0x6F, 0x67, 0x72,
+					0x61, 0x6D, 0x20, 0x63, 0x61, 0x6E, 0x6E, 0x6F,
+					0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6E,
+					0x20, 0x69, 0x6E, 0x20, 0x44, 0x4F, 0x53, 0x20,
+					0x6D, 0x6F, 0x64, 0x65, 0x2E, 0xD, 0xD, 0xA,
+					0x24, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+					0x50, 0x45, 0x0, 0x0
+				>>)
 		ensure
 			valid_size: dos_header.count = 132
 		end
@@ -267,9 +572,9 @@ invariant
 	dos_header_not_void: is_valid implies dos_header /= Void
 
 note
-	copyright:	"Copyright (c) 1984-2020, Eiffel Software"
-	license:	"GPL version 2 (see http://www.eiffel.com/licensing/gpl.txt)"
-	licensing_options:	"http://www.eiffel.com/licensing"
+	copyright: "Copyright (c) 1984-2020, Eiffel Software"
+	license: "GPL version 2 (see http://www.eiffel.com/licensing/gpl.txt)"
+	licensing_options: "http://www.eiffel.com/licensing"
 	copying: "[
 			This file is part of Eiffel Software's Eiffel Development Environment.
 			

@@ -69,6 +69,14 @@ feature -- Access
 			-- count = 12
 
 
+feature -- Status Report
+
+	count: INTEGER
+			--  Number of elements that Current can hold.
+		do
+			Result := size_of
+		end
+
 feature -- Settings
 
 	set_rvas (section_rva, current_location: INTEGER)
