@@ -171,15 +171,19 @@ feature -- Settings
 			l_tuple_method := extract_table_type_and_row (method_token)
 
 				-- Retrieve method definition table entry using row index
-			if attached {PE_METHOD_DEF_TABLE_ENTRY} tables[l_tuple_method.table_type_index.to_integer_32].table[l_tuple_method.table_row_index.to_integer_32] as l_method_def then
+				-- TODO create a helper features
+				-- 		retrieve_table_entry (from the metadata tables),
+				--  	retrieve_table_row (from specific table entry)
+			if attached {PE_METHOD_DEF_TABLE_ENTRY} tables [l_tuple_method.table_type_index.to_integer_32].table [l_tuple_method.table_row_index.to_integer_32] as l_method_def then
 
 					-- Set RVA value in method definition table entry
 				l_method_def.set_rva (rva)
 
 					-- Update method definition table entry in metadata tables
+					-- Create a helper feature to update an entry in a table row.
 				tables [l_tuple_method.table_type_index.to_integer_32].replace (l_method_def, l_tuple_method.table_row_index.to_integer_32)
 			else
-				-- TODO
+					-- TODO
 			end
 		end
 
