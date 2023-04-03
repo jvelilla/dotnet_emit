@@ -859,7 +859,7 @@ feature {NONE} -- Implementation
 						l_attribute_data := l_writer.param_attribute_data
 
 						create l_attribute.make_with_tag_and_index ({PE_CUSTOM_ATTRIBUTE}.ParamDef, l_last_param_index)
-						create l_type.make_with_tag_and_index ({PE_CUSTOM_ATTRIBUTE_TYPE}.methodref, l_attribute_type)
+						create l_type.make_with_tag_and_index ({PE_CUSTOM_ATTRIBUTE_TYPE}.Memberref, l_attribute_type)
 						create {PE_CUSTOM_ATTRIBUTE_TABLE_ENTRY} l_table.make_with_data (l_attribute, l_type, l_attribute_data)
 						l_res := l_writer.add_table_entry (l_table).to_natural_8
 					end

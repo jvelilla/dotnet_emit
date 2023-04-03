@@ -136,4 +136,67 @@ feature {NONE} -- Helper
 			create Result.make_with_tag_and_index (l_tag, a_index)
 		end
 
+
+	create_pe_custom_attribute (a_token: INTEGER; a_index: NATURAL_64): PE_CUSTOM_ATTRIBUTE
+		local
+			l_tag: INTEGER
+		do
+			if a_token & Md_mask = Md_method_def then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.MethodDef
+			elseif a_token & Md_mask = Md_field_def then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.FieldDef
+			elseif a_token & Md_mask = Md_type_ref then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.TypeRef
+			elseif a_token & Md_mask = Md_type_def then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.TypeDef
+			elseif a_token & Md_mask = Md_param_def then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.ParamDef
+			elseif a_token & Md_mask = Md_interface_impl then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.InterfaceImpl
+			elseif a_token & Md_mask = Md_member_ref then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.MemberRef
+			elseif a_token & Md_mask = Md_module then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.Module
+			elseif a_token & Md_mask = Md_permission then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.Permission
+			elseif a_token & Md_mask = Md_property then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.Property
+			elseif a_token & Md_mask = Md_event then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.Event
+			elseif a_token & Md_mask = Md_signature then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.StandaloneSig
+			elseif a_token & Md_mask = Md_module_ref then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.ModuleRef
+			elseif a_token & Md_mask = Md_type_spec then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.TypeSpec
+			elseif a_token & Md_mask = Md_assembly then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.Assembly
+			elseif a_token & Md_mask = Md_assembly_ref then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.AssemblyRef
+			elseif a_token & Md_mask = Md_file then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.File
+			elseif a_token & Md_mask = Md_exported_type then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.ExportedType
+			elseif a_token & Md_mask = Md_manifest_resource then
+				l_tag := {PE_CUSTOM_ATTRIBUTE}.ManifestResource
+			else
+				l_tag := 0
+			end
+			create Result.make_with_tag_and_index (l_tag, a_index)
+		end
+
+	create_pe_custom_attribute_type (a_token: INTEGER; a_index: NATURAL_64): PE_CUSTOM_ATTRIBUTE_TYPE
+		local
+			l_tag: INTEGER
+		do
+			if a_token & Md_mask = Md_method_def then
+				l_tag := {PE_CUSTOM_ATTRIBUTE_TYPE}.MethodDef
+			elseif a_token & Md_mask = md_member_ref then
+				l_tag := {PE_CUSTOM_ATTRIBUTE_TYPE}.MemberRef
+			else
+				l_tag := 0
+			end
+			create Result.make_with_tag_and_index (l_tag, a_index)
+
+		end
 end
