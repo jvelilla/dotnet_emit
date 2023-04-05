@@ -98,6 +98,7 @@ feature -- Access
 			-- Size of Current emitted assembly in memory if we were to emit it now.
 		do
 			to_implement ("TODO implement, double check if we really need it")
+				-- Work in progress.
 		end
 
 	retrieve_user_string (a_token: INTEGER): STRING_32
@@ -113,8 +114,13 @@ feature -- Access
 			j: INTEGER_32
 			l_us_heap: ARRAY [NATURAL_8]
 		do
+				-- <<0, 1, 58, 0, 36, 0, ..... >>
+				--      ^   - -
 				-- Copy the Userstring heap,
 				-- the underlying String needs to be retrieved as UTF-16
+				-- TODO check if we have an efficient algorithm to
+				-- convert an array of bytes to utf-16.	
+
 			l_us_heap := pe_writer.us.base.to_array
 
 				-- Compute the index.
@@ -151,6 +157,7 @@ feature -- Access
 		end
 
 	is_user_string_token (a_token: INTEGER_32): BOOLEAN
+			-- Checks if the given integer value `a_token` corresponds to a valid user string token.
 		do
 			Result := (a_token >= 0x70000000) and (a_token < (0x70000000 + pe_writer.us.size.to_integer_32))
 		end
@@ -183,6 +190,7 @@ feature -- Save
 			l_file: FILE
 		do
 			create {RAW_FILE} l_file.make_with_name (f_name.string)
+			to_implement ("TODO implement, double check if we really need it")
 		end
 
 feature -- Settings

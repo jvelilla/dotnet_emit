@@ -20,6 +20,33 @@ feature -- Access
 			--| using as a helper class to access needed features.
 			--| TODO, we don't need the full class we need to extract the needed features.
 
+feature -- Status report
+
+	us_heap_size: NATURAL_64
+			-- User string heap size.
+		do
+			Result := pe_writer.us.size
+		end
+
+	guid_heap_size: NATURAL_64
+			-- Guid heap size
+		do
+			Result := pe_writer.guid.size
+		end
+
+	blog_heap_size: NATURAL_64
+			-- Blob heap size
+		do
+			Result :=  pe_writer.blob.size
+		end
+
+	strings_heap_size: NATURAL_64
+			-- String heap size
+		do
+			Result := pe_writer.strings.size
+		end
+
+
 feature {NONE} -- Change tables
 
 	add_table_entry (a_entry: PE_TABLE_ENTRY_BASE): NATURAL_64
@@ -194,6 +221,18 @@ feature {NONE} -- Helper
 				l_tag := 0
 			end
 			create Result.make_with_tag_and_index (l_tag, a_index)
+		end
 
+feature -- Metadata Table Sizes
+
+	module_table_entry_size: INTEGER
+		note
+			EIS:"name={PE_MODULE_TABLE_ENTRY}.name_index", "src=eiffel:?class=PE_MODULE_TABLE_ENTRY&feature=name_index","protocol=uri"
+			EIS: "name={PE_MODULE_TABLE_ENTRY}.guid_index", "protocol=uri", "src=eiffel:?class=PE_MODULE_TABLE_ENTRY&feature=guid_index"
+		do
+				-- Size of the name column.
+			Result :=  if us_heap_size < 65536 then 2 else 4 end
+				-- Size of guid column
+			Result :=  Result + if guid_heap_size < 65536 then 2 else 4 end
 		end
 end

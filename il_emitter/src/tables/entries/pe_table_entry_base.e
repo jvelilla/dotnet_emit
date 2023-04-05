@@ -16,10 +16,6 @@ feature -- Access
 		deferred
 		end
 
-	table_size: INTEGER
-		do
-		end
-
 feature -- Operations
 
 	render (a_sizes: ARRAY [NATURAL_64]; a_dest: ARRAY [NATURAL_8]): NATURAL_64

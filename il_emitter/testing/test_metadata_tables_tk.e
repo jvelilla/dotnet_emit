@@ -98,8 +98,6 @@ feature -- Test
 			check same_string: l_str.same_string_general ("Java") end
 			l_str := md_emit.retrieve_user_string (l_token3.to_integer_32)
 			check same_string: l_str.same_string_general ("TEST_METADATA_TABLES_TK") end
-
-
 		end
 
 end
