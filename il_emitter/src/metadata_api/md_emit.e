@@ -116,14 +116,17 @@ feature -- Access
 				-- Copy the Userstring heap,
 				-- the underlying String needs to be retrieved as UTF-16
 			l_us_heap := pe_writer.us.base.to_array
+
 				-- Compute the index.
-			l_index := a_token - 0x70000000
+			l_index := a_token - 0x70000000 -- 0x70 table type: UserString heap
 
 				-- Get the length of the string, reading the next byte.
 				-- Per character we use two bytes and it ends with a null character.
 			l_length := array_item (l_us_heap, l_index + 1)
+
 				-- The length of the target string is
 			l_str_length := (l_length // 2) - 1
+
 			create l_bytes.make_filled (' ', 1, l_str_length)
 			from
 				i := l_index + 2
@@ -131,11 +134,10 @@ feature -- Access
 			until
 				j > l_str_length
 			loop
-				l_bytes [j] := (array_item (pe_writer.us.base.to_array, i) + array_item (pe_writer.us.base.to_array, i + 1) * 256).to_character_32
+				l_bytes [j] := (array_item (l_us_heap, i) + array_item (l_us_heap, i + 1) * 256).to_character_32
 				i := i + 2
 				j := j + 1
 			end
-
 				-- Convert the bytes array to String_32
 			create Result.make_filled (' ', l_str_length)
 			from
@@ -146,7 +148,6 @@ feature -- Access
 				Result [i] := (l_bytes [i])
 				i := i + 1
 			end
-
 		end
 
 	is_user_string_token (a_token: INTEGER_32): BOOLEAN
