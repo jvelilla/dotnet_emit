@@ -13,9 +13,10 @@ feature -- Initialization
 
 	make
 		local
-			l_pe: CLI_PE_FILE2
+			l_pe: CLI_PE_FILE
+			l_name: STRING_32
+			l_namespace: STRING_32
 		do
-
 			test_metadata_tables_token_interface
 --			test_metadata_tables_object_model
 --			(create {TEST_11}).test;
@@ -25,9 +26,9 @@ feature -- Initialization
 		do
 			(create {TEST_METADATA_TABLES_TK}).test_cli_directory_size;
 			(create {TEST_METADATA_TABLES_TK}).test_cli_header_size;
---			(create {TEST_METADATA_TABLES_TK}).test_empty_assembly;
---			(create {TEST_METADATA_TABLES_TK}).test_define_assembly;
-			(create {TEST_METADATA_TABLES_TK}).test_user_string_heap
+			(create {TEST_METADATA_TABLES_TK}).test_user_string_heap;
+			(create {TEST_METADATA_TABLES_TK}).test_empty_assembly;
+			(create {TEST_METADATA_TABLES_TK}).test_define_assembly;
 		end
 
 	test_metadata_tables_object_model
@@ -818,33 +819,6 @@ feature -- GUID
 			print (l_guid.to_array_natural_8)
 		end
 
---	c_create_guid (a_guid: POINTER)
---		external "C++ inline use <random>, <random>, <array>, <algorithm>, <functional>"
---		alias
---			"{
---			std::array<unsigned char, 128 / 8> rnd;
-
---		    std::uniform_int_distribution<int> distribution(0, 0xff);
---		    // note that this whole thing will fall apart if the C++ lib uses
---		    // a prng with constant seed for the random_device implementation.
---		    // that shouldn't be a problem on OS we are interested in.
---		    std::random_device dev;
---		    std::mt19937 engine(dev());
---		    auto generator = std::bind(distribution, engine);
-
---		    std::generate(rnd.begin(), rnd.end(), generator);
-
---		    // make it a valid version 4 (random) GUID
---		    // remember that on windows GUIDs are native endianness so this may need
---		    // work if you port it
---		    rnd[7 /*6*/] &= 0xf;
---		    rnd[7 /*6*/] |= 0x40;
---		    rnd[9 /*8*/] &= 0x3f;
---		    rnd[9 /*8*/] |= 0x80;
-
---		    memcpy($a_guid, rnd.data(), rnd.size());
---			}"
---		end
 
 note
 	copyright: "Copyright (c) 1984-2019, Eiffel Software and others"

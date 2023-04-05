@@ -12,9 +12,6 @@ inherit
 
 feature -- Access
 
-	string_heap: STRING_32
-			--  metadata table used to store user-defined strings.
-
 	tables: SPECIAL [MD_TABLES]
 			--  in-memory metadata tables
 

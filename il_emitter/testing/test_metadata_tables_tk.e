@@ -41,7 +41,7 @@ feature -- Test
 	test_empty_assembly
 			-- New test routine
 		local
-			l_pe_file: CIL_PE_FILE
+			l_pe_file: CLI_PE_FILE
 			md_dispenser: MD_DISPENSER
 			md_emit: MD_EMIT
 
@@ -55,7 +55,7 @@ feature -- Test
 	test_define_assembly
 			-- New test routine
 		local
-			l_pe_file: CIL_PE_FILE
+			l_pe_file: CLI_PE_FILE
 			md_dispenser: MD_DISPENSER
 			md_emit: MD_EMIT
 			md_assembly_info: MD_ASSEMBLY_INFO
@@ -77,19 +77,29 @@ feature -- Test
 
 	test_user_string_heap
 		local
-			l_token1, l_token2: INTEGER_32
+			l_token1, l_token2, l_token3: NATURAL_64
 			l_str: STRING_32
 			md_dispenser: MD_DISPENSER
 			md_emit: MD_EMIT
+			l_result: NATURAL_64
+			l_table_type_index: NATURAL_64
+			l_index: NATURAL_64
 		do
 			create md_dispenser.make
 			md_emit := md_dispenser.emit
 
-			--l_token1 := md_emit.define_string (create {NATIVE_STRING}.make ("Eiffel"))
-			l_token2 := md_emit.define_string (create {NATIVE_STRING}.make ("Eiffel"))
-
-			l_str := md_emit.retrieve_user_string (l_token2)
+			l_token1 := md_emit.define_string (create {NATIVE_STRING}.make ("Eiffel")).to_natural_64
+			l_token2 := md_emit.define_string (create {NATIVE_STRING}.make ("Java")).to_natural_64
+			l_token3 := md_emit.define_string (create {NATIVE_STRING}.make ("TEST_METADATA_TABLES_TK")).to_natural_64
+			l_str := md_emit.retrieve_user_string (l_token1.to_integer_32)
 			check same_string: l_str.same_string_general ("Eiffel") end
+
+			l_str := md_emit.retrieve_user_string (l_token2.to_integer_32)
+			check same_string: l_str.same_string_general ("Java") end
+			l_str := md_emit.retrieve_user_string (l_token3.to_integer_32)
+			check same_string: l_str.same_string_general ("TEST_METADATA_TABLES_TK") end
+
+
 		end
 
 end

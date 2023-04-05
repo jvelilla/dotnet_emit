@@ -67,7 +67,7 @@ feature -- Size
        			--import_by_name_rva
             Result := {PLATFORM}.integer_32_bytes
             	-- padding 4 bytes
-            Result := 4 * {PLATFORM}.natural_8_bytes
+            Result := Result + 4 * {PLATFORM}.natural_8_bytes
 
         end
 

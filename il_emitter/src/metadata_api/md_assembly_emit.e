@@ -17,9 +17,8 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_string_heap: STRING_32; a_tables: SPECIAL [MD_TABLES]; a_writer: PE_WRITER)
+	make (a_tables: SPECIAL [MD_TABLES]; a_writer: PE_WRITER)
 		do
-			string_heap := a_string_heap
 			tables := a_tables
 			pe_writer := a_writer
 		end

@@ -33,8 +33,7 @@ feature {NONE}
 			initialize_metadata_tables
 			initialize_module
 			initialize_guid
-			initialize_string_heap
-			create assembly_emitter.make (string_heap, tables, pe_writer)
+			create assembly_emitter.make (tables, pe_writer)
 				-- we don't initialize the compilation unit since we don't provide the name of it (similar to the COM interface)
 		ensure
 			module_guid_set: module_guid.count = 16
@@ -71,15 +70,6 @@ feature {NONE}
 			guid_index := pe_writer.hash_guid (module_guid)
 		end
 
-	initialize_string_heap
-			-- Initialize the heap used to store
-			-- user defined strings
-		do
-				-- TODO double check if we need to change the default buffer
-				-- size.
-			create string_heap.make (4096)
-		end
-
 feature -- Access
 
 	module_GUID: ARRAY [NATURAL_8]
@@ -110,20 +100,65 @@ feature -- Access
 			to_implement ("TODO implement, double check if we really need it")
 		end
 
-	retrieve_user_string (a_token: INTEGER): STRING
+	retrieve_user_string (a_token: INTEGER): STRING_32
 			-- Retrieve the user string for `token'.
+		require
+			valid_user_string_token: is_user_string_token (a_token)
 		local
-			l_table_type_index: NATURAL_64
-			l_index: NATURAL_64
-
+			l_index: INTEGER_32
+			l_length: INTEGER_32
+			l_bytes: ARRAY [CHARACTER_32]
+			l_str_length: INTEGER_32
+			i: INTEGER_32
+			j: INTEGER_32
+			l_us_heap: ARRAY [NATURAL_8]
 		do
-			l_table_type_index := ((a_token |>> 24) & 255).to_natural_64
+				-- Copy the Userstring heap,
+				-- the underlying String needs to be retrieved as UTF-16
+			l_us_heap := pe_writer.us.base.to_array
+				-- Compute the index.
+			l_index := a_token - 0x70000000
 
-			check user_string: {NATURAL_64} 0x70 = l_table_type_index end
-				-- 2^ 24 -1 = 16777215
-			l_index := (a_token & 16777215).to_natural_64
+				-- Get the length of the string, reading the next byte.
+				-- Per character we use two bytes and it ends with a null character.
+			l_length := array_item (l_us_heap, l_index + 1)
+				-- The length of the target string is
+			l_str_length := (l_length // 2) - 1
+			create l_bytes.make_filled (' ', 1, l_str_length)
+			from
+				i := l_index + 2
+				j := 1
+			until
+				j > l_str_length
+			loop
+				l_bytes [j] := (array_item (pe_writer.us.base.to_array, i) + array_item (pe_writer.us.base.to_array, i + 1) * 256).to_character_32
+				i := i + 2
+				j := j + 1
+			end
 
-			Result := string_heap.substring (l_index.to_integer_32, string_heap.count - l_index.to_integer_32)
+				-- Convert the bytes array to String_32
+			create Result.make_filled (' ', l_str_length)
+			from
+				i := 1
+			until
+				i > l_bytes.count
+			loop
+				Result [i] := (l_bytes [i])
+				i := i + 1
+			end
+
+		end
+
+	is_user_string_token (a_token: INTEGER_32): BOOLEAN
+		do
+			Result := (a_token >= 0x70000000) and (a_token < (0x70000000 + pe_writer.us.size.to_integer_32))
+		end
+
+feature {NONE} -- Implementation
+
+	array_item (a_heap: ARRAY [NATURAL_8]; a_offset: INTEGER_32): INTEGER_32
+		do
+			Result := (a_heap [a_offset])
 		end
 
 feature -- Save
@@ -143,8 +178,10 @@ feature -- Save
 
 	save (f_name: NATIVE_STRING)
 			-- Save current assembly to file `f_name'.
+		local
+			l_file: FILE
 		do
-			to_implement ("TODO implement, double check if we really ned it.")
+			create {RAW_FILE} l_file.make_with_name (f_name.string)
 		end
 
 feature -- Settings
@@ -406,6 +443,7 @@ feature -- Definition: Creation
 			l_name_index: NATURAL_64
 			l_param_index: NATURAL_64
 		do
+				-- See II.22.26 MethodDef : 0x06
 				-- Extract table type and row from the in_class_token
 			l_tuple := extract_table_type_and_row (in_class_token)
 
@@ -529,8 +567,35 @@ feature -- Definition: Creation
 	define_parameter (in_method_token: INTEGER; param_name: NATIVE_STRING;
 			param_pos: INTEGER; param_flags: INTEGER): INTEGER
 			-- Create a new parameter specification token for method `in_method_token'.
+		local
+			l_table_type, l_table_row: NATURAL_64
+			l_param_blob: NATURAL_64
+			l_param_index, l_method_index: NATURAL_64
+			l_param_entry: PE_PARAM_TABLE_ENTRY
+			l_method_tuple: TUPLE [table_type_index: NATURAL_64; table_row_index: NATURAL_64]
+			l_dis: NATURAL_64
+			l_param_name_index: INTEGER_32
+			l_param_flags: INTEGER_16
 		do
-			to_implement ("TODO add implementation")
+			to_implement ("Review need ensure every row in the Param table is owned by one, and only one, row in the MethodDef table")
+
+				-- Extract table type and row from the method token
+			l_method_tuple := extract_table_type_and_row (in_method_token)
+
+				-- Convert the parameter name to UTF-16 and add it to the string heap
+			l_param_name_index := define_string (param_name)
+
+			l_param_flags := param_flags.to_integer_16
+
+				-- Create a new PE_PARAM_TABLE_ENTRY instance with the given data
+			l_method_index := l_method_tuple.table_row_index
+			create l_param_entry.make_with_data (l_param_flags, param_pos.to_natural_16, l_param_name_index.to_natural_64)
+
+				-- Add the new PE_PARAM_TABLE_ENTRY instance to the metadata tables.
+			l_param_index := add_table_entry (l_param_entry)
+
+				-- Return the generated token.
+			Result := last_token.to_integer_32
 		end
 
 	set_field_marshal (a_token: INTEGER; a_native_type_sig: MD_NATIVE_TYPE_SIGNATURE)
@@ -587,10 +652,13 @@ feature -- Definition: Creation
 			-- Create a new field in class `in_class_token'.
 		local
 			l_field_signature: MD_FIELD_SIGNATURE
-			l_uni_str: STRING_32
+			l_uni_str: NATIVE_STRING
 		do
-			create l_field_signature.make
-			to_implement ("TODO implement")
+			to_implement ("TODO add implementation")
+--			create l_field_signature.make
+--			create l_uni_str.make (a_string)
+--			l_field_signature.set_type ({MD_SIGNATURE_CONSTANTS}.element_type_string, 0)
+--			define_field (field_name, in_class_token, field_flags, a_signature: MD_FIELD_SIGNATURE)
 		end
 
 	define_string (str: NATIVE_STRING): INTEGER
@@ -604,7 +672,6 @@ feature -- Definition: Creation
 			create l_str.make_from_string (str.string)
 			l_str.append_character ('%U')
 			l_us_index := pe_writer.hash_us (l_str, l_str.count)
-			string_heap.append (l_str)
 			l_result := l_us_index | ({NATURAL_64} 0x70 |<< 24)
 			Result := l_result.to_integer_32
 		end

@@ -6,7 +6,7 @@ note
 	revision: "$Revision: 104503 $"
 
 class
-	CLI_PE_FILE2
+	CLI_PE_FILE
 
 inherit
 	CLI_PE_FILE_I
@@ -286,6 +286,7 @@ feature -- Saving
 				-- Instead we save it to disk and then copy it over. This is not efficient
 				-- but we cannot use the stream version of the API since we do not have a way
 				-- to make an IStream from an Eiffel FILE.
+-- Todo save metadata				
 			l_meta_data_file_name := file_name + ".pe"
 			emitter.save (create {NATIVE_STRING}.make (l_meta_data_file_name))
 			create l_meta_data_file.make_with_name (l_meta_data_file_name)

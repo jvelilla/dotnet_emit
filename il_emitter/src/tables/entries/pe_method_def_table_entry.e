@@ -49,7 +49,7 @@ feature -- Access
 
 	impl_flags: INTEGER_16
 
-	flags: INTEGER
+	flags: INTEGER_16
 
 	name_index: PE_STRING
 

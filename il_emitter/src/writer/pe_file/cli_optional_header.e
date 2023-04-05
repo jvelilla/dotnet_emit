@@ -46,7 +46,7 @@ feature {NONE} -- Initialization
 			set_size_of_heap_commit (0x1000)
 			set_loader_flags (0)
 			set_number_of_rva_and_sizes ({CLI_DIRECTORY_CONSTANTS}.Image_number_of_directory_entries)
-			create data_directory.make ({CLI_DIRECTORY_CONSTANTS}.Image_number_of_directory_entries)
+			initialize_directories
 		end
 
 feature -- Access
@@ -375,6 +375,16 @@ feature {NONE} -- Settings: NT additional fields
 			-- Set `number_of_rva_and_sizes' to `i'.
 		do
 			number_of_rva_and_sizes := i
+		end
+
+feature {NONE} -- Initialize Directory
+
+	initialize_directories
+		do
+			create data_directory.make ({CLI_DIRECTORY_CONSTANTS}.Image_number_of_directory_entries)
+			across 1 |..| {CLI_DIRECTORY_CONSTANTS}.Image_number_of_directory_entries as i loop
+				data_directory.force (create {CLI_DIRECTORY})
+			end
 		end
 
 feature -- Managed Pointer
