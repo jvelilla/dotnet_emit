@@ -2,8 +2,8 @@ note
 	description: "In memory representation of a PE file for CLI."
 	legal: "See notice at end of class."
 	status: "See notice at end of class."
-	date: "$Date: 2020-06-23 17:29:42 -0300 (Tue, 23 Jun 2020) $"
-	revision: "$Revision: 104503 $"
+	date: "$Date: 2023-04-05 14:49:17 -0300 (Wed, 05 Apr 2023) $"
+	revision: "$Revision: 106730 $"
 
 class
 	CLI_PE_FILE
@@ -161,7 +161,7 @@ feature -- Access
 	method_writer: detachable MD_METHOD_WRITER
 			-- To hold IL code.
 
-	emitter: MD_EMIT
+	emitter: MD_EMIT_I
 			-- Meta data emitter, needed for RVA update.
 
 	import_table: CLI_IMPORT_TABLE
