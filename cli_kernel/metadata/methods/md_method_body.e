@@ -2,8 +2,8 @@
 	description: "Body of an Eiffel method."
 	legal: "See notice at end of class."
 	status: "See notice at end of class."
-	date: "$Date: 2020-01-09 11:33:13 -0300 (Thu, 09 Jan 2020) $"
-	revision: "$Revision: 103844 $"
+	date: "$Date: 2023-05-24 15:05:31 -0300 (Wed, 24 May 2023) $"
+	revision: "$Revision: 106872 $"
 
 class
 	MD_METHOD_BODY
@@ -708,7 +708,7 @@ feature {NONE} -- Opcode insertion helpers
 		do
 			l_pos := current_position
 			allocate (l_pos + 4)
-			item.put_real_32 (val, l_pos)
+			item.put_real_32_le (val, l_pos)
 			current_position := l_pos + 4
 		end
 
@@ -721,7 +721,7 @@ feature {NONE} -- Opcode insertion helpers
 		do
 			l_pos := current_position
 			allocate (l_pos + 8)
-			item.put_real_64 (val, l_pos)
+			item.put_real_64_le (val, l_pos)
 			current_position := l_pos + 8
 		end
 
@@ -732,7 +732,7 @@ feature {NONE} -- Opcode insertion helpers
 			valid_pos: pos >= 0
 		do
 			allocate (pos + 1)
-			item.put_integer_8 (val, pos)
+			item.put_integer_8_le (val, pos)
 		end
 
 feature {NONE} -- Stack depth management

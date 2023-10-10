@@ -5,8 +5,8 @@ note
 		]"
 	legal: "See notice at end of class."
 	status: "See notice at end of class."
-	date: "$Date: 2008-12-29 21:00:50 -0200 (Mon, 29 Dec 2008) $"
-	revision: "$Revision: 76429 $"
+	date: "$Date: 2023-10-04 06:40:42 -0300 (Wed, 04 Oct 2023) $"
+	revision: "$Revision: 107334 $"
 
 class
 	MD_METHOD_SIGNATURE
@@ -14,8 +14,11 @@ class
 inherit
 	MD_SIGNATURE
 		redefine
-			make
+			make,
+			debug_output
 		end
+
+	DEBUG_OUTPUT
 
 create
 	make
@@ -51,6 +54,14 @@ feature -- Access
 
 	parameter_count: INTEGER
 			-- Number of parameters
+
+feature -- Status report
+
+	debug_output: STRING
+		do
+			Result := parameter_count.out + " params"
+					+ " (type:" + method_type.to_hex_string + "): " + Precursor
+		end
 
 feature -- Settings
 

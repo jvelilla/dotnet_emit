@@ -2,11 +2,14 @@ note
 	description: "Representation of a signature"
 	legal: "See notice at end of class."
 	status: "See notice at end of class."
-	date: "$Date: 2023-03-21 08:23:25 -0300 (Tue, 21 Mar 2023) $"
-	revision: "$Revision: 106696 $"
+	date: "$Date: 2023-10-04 06:40:42 -0300 (Wed, 04 Oct 2023) $"
+	revision: "$Revision: 107334 $"
 
 deferred class
 	MD_SIGNATURE
+
+inherit
+	DEBUG_OUTPUT
 
 feature {NONE} -- Initialization
 
@@ -90,6 +93,25 @@ feature -- Copy
 			create Result.make_from_special (as_special)
 		end
 
+feature -- Status report
+
+	debug_output: STRING
+		local
+			n: INTEGER
+			n8: NATURAL_8
+		do
+			n := count * 2
+			create Result.make (n)
+			across
+				as_array as ic
+			loop
+				n8 := ic.item
+				Result.append_string (n8.to_hex_string)
+				Result.append_character('-')
+			end
+			Result.remove_tail (1)
+		end
+
 feature {NONE} -- Implementation
 
 	compress_data (i: INTEGER)
@@ -147,7 +169,7 @@ feature {NONE} -- Implementation
 				l_encoding := 2
 			else
 				check
-					error: False
+					known_type_token_header: False
 				end
 			end
 
@@ -162,7 +184,7 @@ feature {NONE} -- Implementation
 			valid_pos: pos >= 0
 		do
 			allocate (pos + 1)
-			item.put_integer_8 (val, pos)
+			item.put_integer_8_le (val, pos)
 		end
 
 feature {NONE} -- Internal signature

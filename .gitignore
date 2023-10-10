@@ -5,3 +5,5 @@ EIFGENs/
 *.bak
 *.dll
 *.log
+*.bin
+*.rc

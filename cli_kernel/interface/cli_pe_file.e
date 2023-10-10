@@ -1,6 +1,6 @@
 note
 	description: "In memory representation of a PE file for CLI."
-	date: "$Date: 2023-03-27 18:28:46 +0200 (Mon, 27 Mar 2023) $"
+	date: "$Date: 2023-03-27 13:28:46 -0300 (Mon, 27 Mar 2023) $"
 	revision: "$Revision: 106718 $"
 
 deferred class

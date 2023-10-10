@@ -2,8 +2,10 @@ note
 	description: "Representation of a custom attribute blob as specified in Partition II 22.3."
 	legal: "See notice at end of class."
 	status: "See notice at end of class."
-	date: "$Date: 2012-10-18 15:20:20 -0300 (Thu, 18 Oct 2012) $"
-	revision: "$Revision: 89616 $"
+	date: "$Date: 2023-07-21 14:09:26 -0300 (Fri, 21 Jul 2023) $"
+	revision: "$Revision: 107170 $"
+	EIS:"name=Custom Attribute Table", "src=https://www.ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf#page=242&zoom=100,116,794", "protocol=uri"
+	EIS:"name=Custom Attribute definition", "src=https://www.ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf#page=293&zoom=100", "protocol=uri"
 
 class
 	MD_CUSTOM_ATTRIBUTE
@@ -25,7 +27,7 @@ feature {NONE} -- Initialization
 			-- Initialize current.
 		do
 			Precursor {MD_SIGNATURE}
-			item.put_integer_16 ({MD_SIGNATURE_CONSTANTS}.Ca_prolog, 0)
+			item.put_integer_16_le ({MD_SIGNATURE_CONSTANTS}.Ca_prolog, 0)
 			current_position := 2
 		ensure then
 			current_position_set: current_position = 2
@@ -56,7 +58,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 4)
-			item.put_real_32 (r, l_pos)
+			item.put_real_32_le (r, l_pos)
 			current_position := l_pos + 4
 		end
 
@@ -67,7 +69,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 8)
-			item.put_real_64 (d, l_pos)
+			item.put_real_64_le (d, l_pos)
 			current_position := l_pos + 8
 		end
 
@@ -78,7 +80,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 1)
-			item.put_integer_8 (i, l_pos)
+			item.put_integer_8_le (i, l_pos)
 			current_position := l_pos + 1
 		end
 
@@ -89,7 +91,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 2)
-			item.put_integer_16 (i, l_pos)
+			item.put_integer_16_le (i, l_pos)
 			current_position := l_pos + 2
 		end
 
@@ -100,7 +102,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 4)
-			item.put_integer_32 (i, l_pos)
+			item.put_integer_32_le (i, l_pos)
 			current_position := l_pos + 4
 		end
 
@@ -111,7 +113,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 8)
-			item.put_integer_64 (i, l_pos)
+			item.put_integer_64_le (i, l_pos)
 			current_position := l_pos + 8
 		end
 
@@ -122,7 +124,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 1)
-			item.put_natural_8 (n, l_pos)
+			item.put_natural_8_le (n, l_pos)
 			current_position := l_pos + 1
 		end
 
@@ -133,7 +135,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 2)
-			item.put_natural_16 (n, l_pos)
+			item.put_natural_16_le (n, l_pos)
 			current_position := l_pos + 2
 		end
 
@@ -144,7 +146,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 4)
-			item.put_natural_32 (n, l_pos)
+			item.put_natural_32_le (n, l_pos)
 			current_position := l_pos + 4
 		end
 
@@ -155,7 +157,7 @@ feature -- Settings
 		do
 			l_pos := current_position
 			allocate (l_pos + 8)
-			item.put_natural_64 (n, l_pos)
+			item.put_natural_64_le (n, l_pos)
 			current_position := l_pos + 8
 		end
 
@@ -165,16 +167,16 @@ feature -- Settings
 		local
 			l_count: INTEGER
 			i: INTEGER
-			l_s: STRING
+			utf8: STRING
 			u: UTF_CONVERTER
 		do
-			if s = Void then
+			if s = Void or else s.is_empty then
 				put_integer_8 (0xFF)
 			else
 					-- Convert our strings to UTF-8
-				l_s := u.utf_32_string_to_utf_8_string_8 (s)
+				utf8 := u.utf_32_string_to_utf_8_string_8 (s)
 					-- Store count.
-				l_count := l_s.count
+				l_count := utf8.count
 				compress_data (l_count)
 
 				from
@@ -182,11 +184,17 @@ feature -- Settings
 				until
 					i > l_count
 				loop
-					put_integer_8 (l_s.code (i).to_integer_8)
+					put_integer_8 (utf8.code (i).to_integer_8)
 					i := i + 1
 				end
 			end
 		end
+
+	--Note
+	--| Review the specification and see if we need to create different features like
+	--| put_string_named_arg (arg: READABLE_STRING_GENERAL, value: READABLE_STRING_GENERAL)
+	--| See section 23.3 (EIS)
+
 
 note
 	copyright:	"Copyright (c) 1984-2012, Eiffel Software"

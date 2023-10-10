@@ -1,7 +1,7 @@
 note
 	description: "Summary description for {MD_ASSEMBLY_INFO}."
-	date: "$Date: 2023-03-24 08:36:16 -0300 (Fri, 24 Mar 2023) $"
-	revision: "$Revision: 106707 $"
+	date: "$Date: 2023-08-08 10:57:20 -0300 (Tue, 08 Aug 2023) $"
+	revision: "$Revision: 107183 $"
 
 class
 	MD_ASSEMBLY_INFO
@@ -13,6 +13,7 @@ feature {NONE} -- Initialization
 
 	make
 		do
+			major_version := 1 -- Default version is: 1.0.0.0
 		end
 
 feature -- Access
@@ -23,34 +24,24 @@ feature -- Access
 	minor_version: NATURAL_16 assign set_minor_version
 			-- Minor version
 
-	revision_number: NATURAL_16 assign set_revision_number
-			-- Revision number
-
 	build_number: NATURAL_16 assign set_build_number
 			-- Build number	
 
-	major: like major_version
-		obsolete "Use major_version"
-		do
-			Result := major_version
-		end
+	revision_number: NATURAL_16 assign set_revision_number
+			-- Revision number
 
-	minor: like minor_version
-		obsolete "Use minor_version"
-		do
-			Result := minor_version
-		end
+feature -- Conversion
 
-	revision: like revision_number
-		obsolete "Use revision_number"
+	string: STRING_8
 		do
-			Result := revision_number
-		end
-
-	build: like build_number
-		obsolete "Use build_number"
-		do
-			Result := build_number
+			create Result.make (10)
+			Result.append (major_version.out)
+			Result.append_character ('.')
+			Result.append (minor_version.out)
+			Result.append_character ('.')
+			Result.append (build_number.out)
+			Result.append_character ('.')
+			Result.append (revision_number.out)
 		end
 
 feature -- Element change
@@ -85,30 +76,6 @@ feature -- Element change
 			build_number := b
 		ensure
 			build_number_set: build_number = b
-		end
-
-	set_major (m: like major)
-		obsolete "Use set_major_version"
-		do
-			set_major_version (m)
-		end
-
-	set_minor (m: like minor)
-		obsolete "Use set_minor_version"
-		do
-			set_minor_version (m)
-		end
-
-	set_revision (r: like revision)
-		obsolete "Use set_revision_number"
-		do
-			set_revision_number (r)
-		end
-
-	set_build (b: like build_number)
-		obsolete "Use set_build_number"
-		do
-			set_build_number (b)
 		end
 
 end

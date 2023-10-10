@@ -1,0 +1,56 @@
+note
+	description: "Define a type of possible index type that occur in the tables we are interested in."
+	date: "$Date: 2023-07-10 11:24:14 -0300 (Mon, 10 Jul 2023) $"
+	revision: "$Revision: 107116 $"
+
+class
+	PE_SEMANTICS
+
+inherit
+	PE_CODED_INDEX_BASE
+		redefine
+			get_index_shift,
+			has_index_overflow,
+			tag_for_table
+		end
+
+create
+	make_with_tag_and_index
+
+feature -- Enum: tags
+
+	TagBits: INTEGER = 1
+			-- HasSemantic
+			-- 1 bit to encode.
+			-- https://www.ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf#page=301
+
+	Event: INTEGER = 0
+	Property: INTEGER = 1
+
+feature -- Access
+
+	tag_for_table (tb_id: NATURAL_32): INTEGER_32
+			-- <Precursor/>
+		do
+			inspect tb_id
+			when {PE_TABLES}.tevent then Result := event
+			when {PE_TABLES}.tproperty then Result := property
+			else
+				Result := Precursor (tb_id)
+			end
+		end
+
+feature -- Operations
+
+	get_index_shift: INTEGER
+		do
+			Result := tagbits
+		end
+
+	has_index_overflow (a_sizes: ARRAY [NATURAL_32]): BOOLEAN
+		do
+			Result := large(a_sizes[{PE_TABLES}.tEvent.to_integer_32 + 1])
+				or else large(a_sizes[{PE_TABLES}.tProperty.to_integer_32 + 1])
+		end
+
+end
