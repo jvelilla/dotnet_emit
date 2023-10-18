@@ -13,22 +13,22 @@
 		</option>
 		<setting name="console_application" value="true"/>
 		<setting name="dead_code_removal" value="feature"/>
-		<external_include location="$(EIFFEL_SRC)\framework\dotnet\il_emitter\Clib">
+		<external_include location="$(ECF_CONFIG_PATH)\Clib">
 			<condition>
 				<platform value="windows"/>
 			</condition>
 		</external_include>
-		<external_include location="$(EIFFEL_SRC)/framework/dotnet/il_emitter/Clib">
+		<external_include location="$(ECF_CONFIG_PATH)/Clib">
 			<condition>
 				<platform excluded_value="windows"/>
 			</condition>
 		</external_include>
-		<external_object location="$(EIFFEL_SRC)\framework\dotnet\il_emitter\Clib\C\spec\$ISE_C_COMPILER\$ISE_PLATFORM\lib\eif_bigdigits.lib">
+		<external_object location="$(ECF_CONFIG_PATH)\Clib\C\spec\$ISE_C_COMPILER\$ISE_PLATFORM\lib\eif_bigdigits.lib">
 			<condition>
 				<platform value="windows"/>
 			</condition>
 		</external_object>
-		<external_object location="$(EIFFEL_SRC)/framework/dotnet/il_emitter/Clib/C/spec/$(ISE_PLATFORM)/lib/eif_bigdigits.a">
+		<external_object location="$(ECF_CONFIG_PATH)/Clib/C/spec/$(ISE_PLATFORM)/lib/eif_bigdigits.a">
 			<condition>
 				<platform excluded_value="windows"/>
 			</condition>
@@ -37,7 +37,7 @@
 		<library name="base_extension" location="$ISE_LIBRARY\library\base_extension\base_extension.ecf"/>
 		<library name="crypto" location="$ISE_LIBRARY\unstable\library\text\encryption\crypto\crypto.ecf"/>
 		<library name="time" location="$ISE_LIBRARY\library\time\time.ecf"/>
-		<library name="cli_kernel" location="$EIFFEL_SRC\framework\dotnet\cli_kernel\cli_kernel.ecf">
+		<library name="cli_kernel" location=".\cli_kernel\cli_kernel.ecf">
 			<renaming old_name="MD_STRONG_NAME" new_name="MD_STRONG_NAME_I"/>
 			<renaming old_name="MD_EMIT" new_name="MD_EMIT_I"/>
 			<renaming old_name="MD_DISPENSER" new_name="MD_DISPENSER_I"/>

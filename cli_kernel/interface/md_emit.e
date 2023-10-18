@@ -13,7 +13,7 @@ inherit
 feature -- Status report
 
 	is_successful: BOOLEAN
-			-- Was last call successful?	
+			-- Was last call successful?
 		deferred
 		end
 
@@ -36,7 +36,7 @@ feature -- Save
 	prepare_to_save (fn: READABLE_STRING_GENERAL)
 			-- Prepare data to be save
 		do
-			-- To redefine if needed
+				-- To redefine if needed
 		end
 
 	save (f_name: CLI_STRING)
@@ -355,6 +355,29 @@ feature -- Definition: Creation
 		ensure
 			is_successful
 			result_valid: Result & Md_mask = Md_custom_attribute
+		end
+
+	define_generic_param (a_name: CLI_STRING; token: INTEGER; index: INTEGER; param_flags: INTEGER; type_constratins: ARRAY [INTEGER]): INTEGER
+			--  Define a formal type parameter for the given TypeDef or MethodDef `token'.
+			--| token: TypeDef or MethodDef
+			--| type_constratins : Array of type constraints (TypeDef,TypeRef,TypeSpec)
+			--| index:  Index of the type parameter
+			--| param_flags: Flags, for future use (e.g. variance)
+			--| a_name: Name
+		require
+			valid_token: (token & Md_mask = Md_type_def) or
+				(token & Md_mask = Md_method_def)
+			valid_type_constraints: type_constratins.for_all (
+						agent (item: INTEGER): BOOLEAN
+							do
+								Result := (item & Md_mask = Md_type_def) or
+									(item & Md_mask = Md_type_def) or
+									(item & Md_mask = Md_type_ref)
+							end
+					)
+		deferred
+		ensure
+			is_successful
 		end
 
 feature -- Settings
