@@ -8,3 +8,6 @@ EIFGENs/
 *.bin
 *.rc
 *.pe
+.vs
+bin/
+obj/
