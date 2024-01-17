@@ -1,7 +1,7 @@
 note
 	description: "Manage SNK file & perform RSA signature"
-	date: "$Date: 2023-06-08 13:48:21 -0300 (Thu, 08 Jun 2023) $"
-	revision: "$Revision: 106947 $"
+	date: "$Date: 2023-11-20 18:54:44 -0300 (Mon, 20 Nov 2023) $"
+	revision: "$Revision: 107406 $"
 
 class
 	CIL_RSA_ENCODER
@@ -45,7 +45,9 @@ feature -- Status Report
 				-- defined Byte buf[0x14]
 			l_target: INTEGER
 		do
-			fixme ("TODO double check this code correspond to C++ RSAEncoder::LoadStrongNameKeys")
+			debug ("cil_fixme")
+				fixme ("TODO double check this code correspond to C++ RSAEncoder::LoadStrongNameKeys")
+			end
 			l_rv := 0
 			create l_file.make_open_read (a_file)
 			if l_file.exists then
@@ -112,7 +114,7 @@ feature -- C/C++ wrapper
 
 	c_get_public_key_data (a_key: POINTER; a_key_size: TYPED_POINTER [NATURAL_32]; a_key_pair: POINTER; a_modulus_bits: NATURAL_32)
 		external
-			"C inline "
+			"C inline use bigdigits.h"
 		alias
 			"[
 				typedef uint32_t DIGIT_T;

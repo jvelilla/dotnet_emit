@@ -5,8 +5,8 @@ note
 		]"
 	legal: "See notice at end of class."
 	status: "See notice at end of class."
-	date: "$Date: 2023-10-04 06:40:42 -0300 (Wed, 04 Oct 2023) $"
-	revision: "$Revision: 107334 $"
+	date: "$Date: 2023-11-20 18:54:44 -0300 (Mon, 20 Nov 2023) $"
+	revision: "$Revision: 107406 $"
 
 class
 	MD_METHOD_SIGNATURE
@@ -52,6 +52,9 @@ feature -- Access
 	method_type: INTEGER_8
 			-- Type of method
 
+	generic_parameter_count: INTEGER
+			-- Number of generic parameters
+
 	parameter_count: INTEGER
 			-- Number of parameters
 
@@ -73,11 +76,29 @@ feature -- Settings
 		do
 			internal_put (t, current_position)
 			current_position := current_position + 1
-			state := Parameter_count_state
 			method_type := t
+			if t & {MD_SIGNATURE_CONSTANTS}.generic_sig = {MD_SIGNATURE_CONSTANTS}.generic_sig then
+				state := Generic_parameter_count_state
+			else
+				state := Parameter_count_state
+			end
 		ensure
 			state_set: state = Parameter_count_state
 			method_type_set: method_type = t
+		end
+
+	set_generic_parameter_count (n: like generic_parameter_count)
+			-- Set number of method generic parameters.
+			-- To be compressed.
+		require
+			valid_state: state = Generic_parameter_count_state
+		do
+			generic_parameter_count := n
+			state := Parameter_count_state
+			compress_data (n)
+		ensure
+			state_set: state = Parameter_count_state
+			generic_parameter_count_set: generic_parameter_count = n
 		end
 
 	set_parameter_count (n: like parameter_count)
@@ -114,9 +135,10 @@ feature -- State
 			-- Current state of signature settings.
 
 	method_type_setting_state: INTEGER = 1
-	parameter_count_state: INTEGER = 2
-	return_type_state: INTEGER = 3
-	parameters_state: INTEGER = 4;
+	generic_parameter_count_state: INTEGER = 2
+	parameter_count_state: INTEGER = 3
+	return_type_state: INTEGER = 4
+	parameters_state: INTEGER = 5;
 
 note
 	copyright:	"Copyright (c) 1984-2006, Eiffel Software"

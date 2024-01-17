@@ -3,14 +3,13 @@
 			MD_EMIT represents a set of in-memory metadata tables and creates a unique module version identifier (GUID) for the metadata.
 			The class has the ability to add entries to the metadata tables and define the assembly information in the metadata.
 		]"
-	date: "$Date: 2023-07-21 13:49:34 -0300 (Fri, 21 Jul 2023) $"
-	revision: "$Revision: 107169 $"
+	date: "$Date: 2023-11-20 19:09:29 -0300 (Mon, 20 Nov 2023) $"
+	revision: "$Revision: 107411 $"
 
 class
 	MD_EMIT
 
 inherit
-
 	MD_EMIT_I
 		redefine
 			prepare_to_save
@@ -747,6 +746,8 @@ feature {NONE} -- Implementation
 
 feature -- Settings
 
+	module_name: detachable IMMUTABLE_STRING_32
+
 	set_module_name (a_name: CLI_STRING)
 			-- Set the module name for the compilation unit being emitted.
 		local
@@ -754,6 +755,7 @@ feature -- Settings
 			l_entry: PE_TABLE_ENTRY_BASE
 			l_unused_token: NATURAL_32
 		do
+			module_name := a_name.string_32
 			l_name_index := pe_writer.hash_string (a_name.string_32)
 			create {PE_MODULE_TABLE_ENTRY} l_entry.make_with_data (l_name_index, guid_index)
 			l_unused_token := add_table_entry (l_entry)
@@ -1098,6 +1100,35 @@ feature -- Definition: Creation
 			end
 		end
 
+	define_method_spec (method_token: INTEGER; a_signature: MD_METHOD_SIGNATURE): INTEGER
+			-- Token for new method spec from `method_token` and `a_signature`.
+		local
+			l_method_spec_entry: PE_METHOD_SPEC_TABLE_ENTRY
+			l_method: PE_METHOD_DEF_OR_REF
+			l_method_signature: NATURAL_32
+			l_method_spec_index: NATURAL_32
+		do
+			debug ("il_emitter_table")
+				print ({STRING_32} "MethodSpec: method="+ method_token.to_hex_string + " signature=" + a_signature.debug_output)
+			end
+
+				-- Get the method body and method declaration from their tokens
+			l_method := create_method_def_or_ref (method_token, extract_table_type_and_row (method_token).table_row_index)
+
+				-- Get Method signature data
+			l_method_signature := hash_blob (a_signature.as_array, a_signature.count.to_natural_32)
+
+				-- Create a new PE_METHOD_IMPL_TABLE_ENTRY instance with the given data
+			create l_method_spec_entry.make_with_data (l_method, l_method_signature)
+
+				-- Add the new PE_METHOD_IMPL_TABLE_ENTRY instance to the metadata tables.
+			l_method_spec_index := next_table_index (l_method_spec_entry.table_index)
+			Result := add_table_entry (l_method_spec_entry).to_integer_32
+			debug ("il_emitter_table")
+				print ({STRING_32} " -> #"+ l_method_spec_index.out +" token=" + Result.to_hex_string +"%N")
+			end
+		end
+
 	define_property (type_token: INTEGER; name: CLI_STRING; flags: NATURAL_32;
 			signature: MD_PROPERTY_SIGNATURE; setter_token: INTEGER; getter_token: INTEGER): INTEGER
 			-- Define property `name' for a type `type_token'.
@@ -1370,6 +1401,9 @@ feature -- Definition: Creation
 			l_ca_type := create_pe_custom_attribute_type (constructor, l_constructor_tuple.table_row_index)
 
 			debug ("il_emitter_table")
+				if attached module_name as modn then
+					print ({STRING_32} "<<"+modn+">> ")
+				end
 				print ({STRING_32} "CustomAttribute: "
 						+ " owner="+ owner.to_hex_string +" [" + l_owner_tuple.table_row_index.to_natural_32.to_hex_string + "]"
 						+ " ctor="+ constructor.to_hex_string +" [" + l_constructor_tuple.table_row_index.to_natural_32.to_hex_string + "]"

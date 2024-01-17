@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {TEST_REMAP_TABLES}."
 	author: ""
-	date: "$Date: 2023-07-12 08:20:51 -0300 (Wed, 12 Jul 2023) $"
-	revision: "$Revision: 107129 $"
+	date: "$Date: 2024-01-17 06:12:30 -0300 (Wed, 17 Jan 2024) $"
+	revision: "$Revision: 107488 $"
 
 class
 	TEST_REMAP_TABLES
@@ -45,7 +45,7 @@ feature -- Tests
 			md.tables.put (l_field,   {PE_TABLES}.tfield.to_integer_32)
 
 			create mdu.make (md, Void)
-			mdu.ensure_field_list_column_is_ordered
+			mdu.ensure_field_list_column_is_ordered (False)
 			mdu.update_index_list_in_tables
 
 
@@ -81,7 +81,7 @@ feature -- Tests
 			md.tables.put (l_field,   {PE_TABLES}.tfield.to_integer_32)
 
 			create mdu.make (md, Void)
-			mdu.ensure_field_list_column_is_ordered
+			mdu.ensure_field_list_column_is_ordered (False)
 			mdu.update_index_list_in_tables
 
 			l_mock.print_type_def_table (md.md_table ({PE_TABLES}.ttypedef))
@@ -119,7 +119,7 @@ feature -- Tests
 
 
 			create mdu.make (md, Void)
-			mdu.ensure_field_list_column_is_ordered
+			mdu.ensure_field_list_column_is_ordered (False)
 			mdu.update_index_list_in_tables
 
 			l_mock.print_type_def_table (md.md_table ({PE_TABLES}.ttypedef))
@@ -144,7 +144,7 @@ feature -- Tests
 			md.tables.put (l_field,   {PE_TABLES}.tfield.to_integer_32)
 
 			create mdu.make (md, Void)
-			mdu.ensure_field_list_column_is_ordered
+			mdu.ensure_field_list_column_is_ordered (False)
 			mdu.update_index_list_in_tables
 
 			l_mock.print_type_def_table (md.md_table ({PE_TABLES}.ttypedef))
@@ -170,7 +170,7 @@ feature -- Tests
 			md.tables.put (l_field,   {PE_TABLES}.tfield.to_integer_32)
 
 			create mdu.make (md, Void)
-			mdu.ensure_field_list_column_is_ordered
+			mdu.ensure_field_list_column_is_ordered (False)
 			mdu.update_index_list_in_tables
 
 			l_mock.print_type_def_table (md.md_table ({PE_TABLES}.ttypedef))

@@ -2,8 +2,8 @@ note
 	description: "Representation of a signature"
 	legal: "See notice at end of class."
 	status: "See notice at end of class."
-	date: "$Date: 2023-10-04 06:40:42 -0300 (Wed, 04 Oct 2023) $"
-	revision: "$Revision: 107334 $"
+	date: "$Date: 2023-11-20 18:54:44 -0300 (Mon, 20 Nov 2023) $"
+	revision: "$Revision: 107406 $"
 
 deferred class
 	MD_SIGNATURE
@@ -61,6 +61,24 @@ feature -- Settings
 				{MD_SIGNATURE_CONSTANTS}.Element_type_valuetype
 			then
 				compress_type_token (token)
+			else
+			end
+		end
+
+	set_generic_parameter_type (element_type: INTEGER_8; a_param_index: INTEGER)
+			-- note: `a_param_index` is 0-based.
+		require
+			expected_data: (element_type = {MD_SIGNATURE_CONSTANTS}.Element_type_mvar) implies
+				a_param_index >= 0
+		do
+			internal_put (element_type, current_position)
+			current_position := current_position + 1
+			inspect
+				element_type
+			when
+				{MD_SIGNATURE_CONSTANTS}.Element_type_mvar
+			then
+				compress_data (a_param_index)
 			else
 			end
 		end

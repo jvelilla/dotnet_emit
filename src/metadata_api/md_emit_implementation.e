@@ -1,7 +1,7 @@
 ﻿note
 	description: "Summary description for {MD_EMIT_IMPLEMENTATION}."
-	date: "$Date: 2023-06-22 10:09:54 -0300 (Thu, 22 Jun 2023) $"
-	revision: "$Revision: 107006 $"
+	date: "$Date: 2023-11-20 18:54:44 -0300 (Mon, 20 Nov 2023) $"
+	revision: "$Revision: 107406 $"
 
 deferred class
 	MD_EMIT_IMPLEMENTATION
@@ -81,7 +81,6 @@ feature {MD_EMIT_BRIDGE} -- Change tables
 				{PE_TABLES}.tGenericParam, -- Not used.
 				{PE_TABLES}.tImplMap,
 				{PE_TABLES}.tMethodSemantics,
-				{PE_TABLES}.tMethodSpec, -- Not used
 				{PE_TABLES}.tNestedClass, -- Not used
 				{PE_TABLES}.tStandaloneSig
 			then
